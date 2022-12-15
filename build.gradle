@@ -1,0 +1,213 @@
+import org.apache.tools.ant.taskdefs.condition.Os
+
+// Uses run -Dspring.devtools.restart.enabled=true when developing...
+// For commands to run, add -Dspring.devtools.restart.enabled=false
+// For gradle to run, gradle -Dgrails.run.active=true bootRun
+// OR  ~/dev/grails/grails-5.0.0/bin/grails run-app -verbose
+buildscript {
+    repositories {
+        mavenLocal()
+        maven { url "https://repo.grails.org/grails/core" }
+    }
+
+    dependencies {
+        classpath "org.grails:grails-gradle-plugin:$grailsGradlePluginVersion"
+        classpath "org.grails.plugins:hibernate5:${grailsHibernate5}"
+        classpath 'org.openjdk.nashorn:nashorn-core:15.4'
+        classpath "com.bertramlabs.plugins:asset-pipeline-gradle:${assetPipeline}"
+    }
+}
+
+group = 'org.taack'
+version = '1.1'
+
+ext {
+    grailsApps = ['server']
+    notGrails = ['app', 'codenarc-rule', 'intranet', 'protobuf-source',
+                 'infra', 'taack-common',
+                 'taack-jdbc-common'
+    ]
+    grailsWithAssets = ['server', 'taack-ui']
+}
+
+subprojects {
+    boolean isGrailsApp = grailsApps.contains(project.name)
+    boolean isGrailsProject = !notGrails.contains(project.name)
+    boolean isGrailsWithGsp = grailsWithAssets.contains(project.name)
+    boolean isGrailsPlugin = !isGrailsApp && isGrailsProject
+
+    println "name: ${project.name}, path: ${project.path}, dir: ${project.projectDir}, isGrailsApp: ${isGrailsApp}, isGrailsProject: ${isGrailsProject}, isGrailsPlugin: ${isGrailsPlugin}"
+
+    if (isGrailsProject) {
+        repositories {
+            mavenLocal()
+            mavenCentral()
+            maven { url "https://repo.grails.org/grails/core" }
+            maven { url "https://repo1.maven.org/maven2" }
+        }
+
+        apply plugin: 'codenarc'
+        apply plugin: "java-library"
+        apply plugin: "idea"
+        if (isGrailsApp) apply plugin: "war"
+
+        if (isGrailsWithGsp) {
+            apply plugin: "org.grails.grails-web"
+        }
+
+        if (isGrailsPlugin) {
+            apply plugin: "org.grails.grails-plugin"
+        }
+
+        apply plugin: "org.grails.grails-gsp"
+
+        codenarc {
+            toolVersion = '3.0.0'
+            configFile = file("${rootProject.projectDir}/config/codenarc/rules.groovy")
+            reportFormat = 'html'
+            ignoreFailures = true
+        }
+        codenarcMain {
+            compilationClasspath = sourceSets.main.compileClasspath + sourceSets.main.output
+            dependsOn ':codenarc-rule:jar'
+        }
+        tasks.withType(CodeNarc) {
+            codenarcClasspath += files("${rootProject.projectDir}/codenarc-rule/build/libs/codenarc-rule.jar")
+        }
+
+        if (isGrailsApp) {
+            configurations {
+                developmentOnly
+                runtimeClasspath {
+                    extendsFrom developmentOnly
+                }
+            }
+        }
+
+        if (isGrailsWithGsp) {
+            apply plugin: "com.bertramlabs.asset-pipeline"
+        }
+
+        dependencies {
+            if (Os.isFamily(Os.FAMILY_MAC)) {
+                runtimeOnly "net.java.dev.jna:jna:5.9.0"
+                implementation "io.methvin:directory-watcher:0.15.0"
+            }
+            if (isGrailsApp) developmentOnly("org.springframework.boot:spring-boot-devtools")
+            compileOnly "io.micronaut:micronaut-inject-groovy"
+//            console "org.grails:grails-console"
+            implementation "org.springframework.boot:spring-boot-starter-logging"
+            implementation "org.springframework.boot:spring-boot-starter-validation"
+//            implementation "org.springframework.boot:spring-boot-autoconfigure"
+            implementation "org.grails:grails-core"
+            implementation "org.grails.plugins:spring-security-core:${grailsSpringSecurity}"
+            implementation "org.springframework.boot:spring-boot-starter-actuator"
+            implementation "org.springframework.boot:spring-boot-starter-tomcat"
+            implementation "org.grails:grails-web-boot"
+            implementation "org.grails:grails-logging"
+            implementation "org.grails:grails-plugin-rest"
+            implementation "org.grails:grails-plugin-databinding"
+            implementation "org.grails:grails-plugin-i18n"
+            implementation "org.grails:grails-plugin-services"
+            implementation "org.grails:grails-plugin-url-mappings"
+            implementation "org.grails:grails-plugin-interceptors"
+            implementation "org.grails.plugins:async"
+
+            api "org.grails.plugins:hibernate5"
+            api "org.hibernate:hibernate-core:${hibernateCore}"
+            if (isGrailsApp || project.name == 'base') implementation "org.grails.plugins:events"
+            implementation "org.grails.plugins:gsp"
+            if (isGrailsApp) {
+                profile "org.grails.profiles:web"
+                runtimeOnly "org.glassfish.web:el-impl:2.2.1-b05"
+                runtimeOnly "org.apache.tomcat:tomcat-jdbc"
+                runtimeOnly "javax.xml.bind:jaxb-api:${jaxbApiVersion}"
+                runtimeOnly "org.apache.tomcat:tomcat-jdbc"
+                runtimeOnly "com.bertramlabs.plugins:asset-pipeline-grails:${assetPipeline}"
+            } else {
+                profile "org.grails.profiles:web-plugin"
+                runtimeOnly "com.bertramlabs.plugins:asset-pipeline-grails:${assetPipeline}"
+            }
+            if (isGrailsWithGsp) {
+                implementation "org.grails:grails-plugin-controllers"
+                implementation "org.grails:grails-web-gsp"
+            }
+
+            implementation 'org.codehaus.groovy:groovy-dateutil'
+
+            if (isEmbeddingInfra.equals('true')) {
+                if (!['taack-ui', 'server'].contains(project.name)) implementation project(':infra:taack-ui')
+            } else {
+                implementation 'org.taack:taack-ui:0.1'
+            }
+
+            implementation "org.apache.commons:commons-csv:1.9.0"
+            implementation "org.postgresql:postgresql:${postgresJdbc}"
+
+
+            if (isGrailsApp) implementation group: 'org.questdb', name: 'questdb', version: '6.2.1'
+            implementation "org.apache.solr:solr-solrj:${solrj}"
+
+        }
+
+//        configurations.implementation {
+//            exclude(group: 'com.h2database', module: 'h2')
+//        }
+
+        bootRun {
+            ignoreExitValue true
+            jvmArgs(
+                    '-Dspring.output.ansi.enabled=always',
+                    '-noverify',
+                    '-XX:TieredStopAtLevel=1',
+                    '-Xmx2g')
+            sourceResources sourceSets.main
+            String springProfilesActive = 'spring.profiles.active'
+            systemProperty springProfilesActive, System.getProperty(springProfilesActive)
+        }
+
+        tasks.withType(GroovyCompile) {
+            configure(groovyOptions) {
+                forkOptions.jvmArgs = ['-Xmx2g']
+            }
+        }
+
+        tasks.named("jar") {
+            duplicatesStrategy = 'include'
+        }
+
+        if (isGrailsApp) {
+            assets {
+                minifyJs = true
+                minifyCss = true
+                configOptions = [commonJs: false] //useful for custom config on extension libraries
+
+                excludes = ['**/*esm*']
+
+                //for plugin packaging
+                packagePlugin = false //set to true if this is a library
+
+                //developmentRuntime can be turned off
+                developmentRuntime = false
+
+                //if you want to customize the jar task this task runs on you can specify a jarTaskName
+                jarTaskName = null
+            }
+        } else {
+            bootJar.enabled = false
+
+            if (isGrailsWithGsp) {
+                assets {
+                    packagePlugin = true
+                }
+            }
+        }
+    } else {
+        apply plugin: 'groovy'
+        apply plugin: 'java-library'
+
+        repositories {
+            mavenCentral()
+        }
+    }
+}

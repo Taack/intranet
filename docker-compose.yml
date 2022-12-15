@@ -1,0 +1,55 @@
+version: "3.9"
+services:
+  image-db:
+    image: postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    volumes:
+      - data-db:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: taackdb
+      POSTGRES_PASSWORD: 123auo
+    networks:
+      - postgres
+
+  #https://solr.apache.org/guide/solr/latest/deployment-guide/solr-in-docker.html
+  image-search:
+    image: solr
+    restart: always
+    ports:
+      - "8983:8983"
+    volumes:
+      - $PWD/server/taack/taack_core_config/conf:/taack_core_config/conf
+      - data-search:/var/solr
+    command:
+      - solr-precreate
+      - taack
+      - /taack_core_config
+    networks:
+      - solr
+
+  taack-org-app:
+    volumes:
+      - data-taack:/root/taack-org-website
+    build: .
+    links:
+      - image-db:taackdb
+      - image-search
+    ports:
+      - "9442:9442"
+    depends_on:
+      - image-db
+      - image-search
+    networks:
+      - solr
+      - postgres
+
+volumes:
+  data-taack:
+  data-search:
+  data-db:
+
+networks:
+  solr:
+  postgres:

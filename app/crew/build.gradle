@@ -1,0 +1,17 @@
+dependencies {
+    implementation "org.grails:grails-plugin-rest"
+    // implementation project(':infra:taack-jdbc-common')
+
+    implementation group: 'jakarta.mail', name: 'jakarta.mail-api', version: "${jakartaMail}"
+    implementation group: 'jakarta.activation', name: 'jakarta.activation-api', version: '1.2.2'
+    implementation group: 'com.sun.activation', name: 'jakarta.activation', version: '1.2.2'
+    implementation group: 'com.sun.mail', name: 'jakarta.mail', version: "${jakartaMail}"
+
+}
+
+grails {
+    // should use gradle -Dgrails.run.active=true bootRun
+    exploded = true
+    plugins {
+    }
+}
