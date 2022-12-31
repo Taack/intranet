@@ -138,7 +138,7 @@ subprojects {
             if (isEmbeddingInfra.equals('true')) {
                 if (!['taack-ui', 'server'].contains(project.name)) implementation project(':infra:taack-ui')
             } else {
-                implementation 'org.taack:taack-ui:0.1'
+                implementation 'org.taack:taack-ui:0.2'
             }
 
             implementation "org.apache.commons:commons-csv:1.9.0"
