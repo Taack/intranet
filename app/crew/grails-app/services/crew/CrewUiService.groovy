@@ -49,7 +49,7 @@ class CrewUiService implements WebAttributes {
                 filterField u.username_
                 filterField u.lastName_
                 filterField u.firstName_
-                filterField "Manager", u.manager_, u.manager.username_
+                filterField u.manager_, u.manager.username_
                 filterField u.subsidiary_
                 filterField u.businessUnit_
                 filterField u.enabled_
@@ -133,11 +133,11 @@ class CrewUiService implements WebAttributes {
                         rowLink "Show User", ActionIcon.SHOW * ActionIconStyleModifier.SCALE_DOWN, CrewController.&showUser as MethodClosure, ru.id, true
                         if (hasSelect) rowLink "Select User", ActionIcon.SELECT * ActionIconStyleModifier.SCALE_DOWN, CrewController.&selectUserM2OCloseModal as MethodClosure, ru.id, true
                         else if (hasActions) {
-                            rowLink "Edit User", ActionIcon.EDIT * ActionIconStyleModifier.SCALE_DOWN, CrewController.&userForm as MethodClosure, [id: ru.id, redirectAction: actionName]
+                            rowLink "Edit User", ActionIcon.EDIT * ActionIconStyleModifier.SCALE_DOWN, CrewController.&editUser as MethodClosure, ru.id
                             if (canSwitchUser && ru.enabled) rowLink "Switch User", ActionIcon.SHOW * ActionIconStyleModifier.SCALE_DOWN, CrewController.&switchUser as MethodClosure, [id: ru.id], false
                             else if (canSwitchUser && !ru.enabled) {
-                                rowLink "Replace By User", ActionIcon.MERGE * ActionIconStyleModifier.SCALE_DOWN, CrewController.&replaceUser as MethodClosure, [id: ru.id], false
-                                rowLink "Remove User", ActionIcon.DELETE * ActionIconStyleModifier.SCALE_DOWN, CrewController.&deleteUser as MethodClosure, [id: ru.id], false
+                                rowLink "Replace By User", ActionIcon.MERGE * ActionIconStyleModifier.SCALE_DOWN, CrewController.&replaceUser as MethodClosure, ru.id, false
+                                rowLink "Remove User", ActionIcon.DELETE * ActionIconStyleModifier.SCALE_DOWN, CrewController.&deleteUser as MethodClosure, ru.id, false
                             }
                         }
 
@@ -153,7 +153,7 @@ class CrewUiService implements WebAttributes {
                         rowField ru.firstName_
                     }
                     rowColumn {
-                        if (hasActions && !hasSelect) rowLink "Edit Roles", ActionIcon.EDIT * ActionIconStyleModifier.SCALE_DOWN, CrewController.&editUserRoles as MethodClosure, [id: ru.id, redirectAction: actionName], true
+                        if (hasActions && !hasSelect) rowLink "Edit Roles", ActionIcon.EDIT * ActionIconStyleModifier.SCALE_DOWN, CrewController.&editUserRoles as MethodClosure, ru.id, true
                         rowField ru.authorities*.authority.join(', ')
                     }
                 }

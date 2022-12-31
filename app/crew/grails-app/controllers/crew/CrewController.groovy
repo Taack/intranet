@@ -45,15 +45,14 @@ class CrewController implements WebAttributes {
         (authenticatedUser as User).authorities*.authority.contains("ROLE_ADMIN")
     }
 
-    static private UiMenuSpecifier buildMenu(String q = null) {
+    private UiMenuSpecifier buildMenu(String q = null) {
         UiMenuSpecifier m = new UiMenuSpecifier()
-
         m.ui {
             menu "Users", CrewController.&index as MC
             menu "Roles", CrewController.&listRoles as MC
             menu "Alerts", CrewController.&listAlerts as MC
-            menu "Hierachy", CrewController.&hierarchy as MC
-            menuIcon "Config MySelf", ActionIcon.CONFIG_USER, this.&userSelfEdit as MC, null, true
+            menu "Hierarchy", CrewController.&hierarchy as MC
+            menuIcon "Config MySelf", ActionIcon.CONFIG_USER, this.&editUser as MC, [id: springSecurityService.currentUserId], true
             menuSearch this.&search as MethodClosure, q
         }
         m
@@ -98,7 +97,7 @@ class CrewController implements WebAttributes {
                         boolean muHasChildren = !mu.managedUsers.isEmpty()
                         rowTree muHasChildren, {
                             rowColumn {
-                                if (hasActions) rowLink "Edit User", ActionIcon.EDIT * ActionIconStyleModifier.SCALE_DOWN, this.&userForm as MC, [id: mu.id, redirectAction: actionName]
+                                if (hasActions) rowLink "Edit User", ActionIcon.EDIT * ActionIconStyleModifier.SCALE_DOWN, this.&editUser as MC, mu.id
                                 rowField mu.username_
                                 rowField mu.businessUnit_
                             }
@@ -162,7 +161,7 @@ class CrewController implements WebAttributes {
         b.ui {
             ajaxBlock 'userList', {
                 tableFilter 'Filter', f, 'Users', t, BlockSpec.Width.MAX, {
-                    if (isAdmin()) action 'Create User', ActionIcon.CREATE, CrewController.&userForm as MC, [redirectAction: actionName], true
+                    action 'Create User', ActionIcon.CREATE, CrewController.&editUser as MC, true
                 }
             }
         }
@@ -194,7 +193,7 @@ class CrewController implements WebAttributes {
 
         UiBlockSpecifier b = new UiBlockSpecifier()
         b.ui {
-            modal !params.boolean("refresh"), {
+            modal {
                 ajaxBlock "userListSelect", {
                     tableFilter "Filter", f, "Users", t, BlockSpec.Width.MAX
                 }
@@ -226,7 +225,7 @@ class CrewController implements WebAttributes {
         taackUiSimpleService.show(new UiBlockSpecifier().ui {
             modal {
                 ajaxBlock "showUser", {
-                    show "${u.username}", crewUiService.buildUserShow(u), BlockSpec.Width.MAX
+                    show u.username, crewUiService.buildUserShow(u), BlockSpec.Width.MAX
                 }
             }
         })
@@ -237,7 +236,7 @@ class CrewController implements WebAttributes {
         User u = User.read(params.long('id'))
         taackUiSimpleService.show(new UiBlockSpecifier().ui {
             ajaxBlock "showUserFromSearch", {
-                show "${u.username}", crewUiService.buildUserShow(u), BlockSpec.Width.MAX
+                show u.username, crewUiService.buildUserShow(u), BlockSpec.Width.MAX
             }
         }, buildMenu())
     }
@@ -274,8 +273,8 @@ class CrewController implements WebAttributes {
         }
     }
 
-    def userForm() {
-        User user = User.read(params.long("id")) ?: new User(params)
+    def editUser(User user) {
+        user ?= new User(params)
 
         UiFormSpecifier f = new UiFormSpecifier()
         f.ui user, {
@@ -298,7 +297,7 @@ class CrewController implements WebAttributes {
                 field user.accountLocked_
                 field user.passwordExpired_
             }
-            formAction "Save", this.&saveUser as MC, user.id, [redirectAction: params.get("redirectAction")], true
+            formAction "Save", this.&saveUser as MC, user.id, true
         }
 
         UiBlockSpecifier b = new UiBlockSpecifier()
@@ -312,23 +311,10 @@ class CrewController implements WebAttributes {
         taackUiSimpleService.show(b)
     }
 
-    def userSelfEdit() {
-        def connectedUSer = authenticatedUser as User
-        boolean completeEdit = isAdmin()
-
-        if (completeEdit) {
-            chain action: "userForm", id: connectedUSer.id, params: [isAjax: true]
-        } else {
-            UiShowSpecifier s = new UiShowSpecifier()
-
-        }
-    }
-
     @Secured("ROLE_ADMIN")
     @Transactional
-    def saveUser(String redirectAction) {
-        MethodClosure red = (redirectAction ? this.&"$redirectAction" : this.&index) as MethodClosure
-        taackSimpleSaveService.saveThenRedirectOrRenderErrors(User, redirectAction == "null" ? null : red)
+    def saveUser() {
+        taackSimpleSaveService.saveThenReloadOrRenderErrors(User)
     }
 
     def listAlerts() {
