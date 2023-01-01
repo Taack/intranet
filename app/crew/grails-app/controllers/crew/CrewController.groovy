@@ -48,11 +48,11 @@ class CrewController implements WebAttributes {
     private UiMenuSpecifier buildMenu(String q = null) {
         UiMenuSpecifier m = new UiMenuSpecifier()
         m.ui {
-            menu "Users", CrewController.&index as MC
-            menu "Roles", CrewController.&listRoles as MC
-            menu "Alerts", CrewController.&listAlerts as MC
-            menu "Hierarchy", CrewController.&hierarchy as MC
-            menuIcon "Config MySelf", ActionIcon.CONFIG_USER, this.&editUser as MC, [id: springSecurityService.currentUserId], true
+            menu 'Users', CrewController.&index as MC
+            menu 'Roles', CrewController.&listRoles as MC
+            menu 'Alerts', CrewController.&listAlerts as MC
+            menu 'Hierarchy', CrewController.&hierarchy as MC
+            menuIcon 'Config MySelf', ActionIcon.CONFIG_USER, this.&editUser as MC, [id: springSecurityService.currentUserId], true
             menuSearch this.&search as MethodClosure, q
         }
         m
@@ -74,16 +74,16 @@ class CrewController implements WebAttributes {
         t.ui User, {
             header {
                 column {
-                    fieldHeader "Username"
-                    groupFieldHeader "Business Unit", u.businessUnit_
+                    fieldHeader 'Username'
+                    groupFieldHeader 'Business Unit', u.businessUnit_
                 }
                 column {
-                    groupFieldHeader "Subsidiary", u.subsidiary_
-                    fieldHeader "Manager"
+                    groupFieldHeader 'Subsidiary', u.subsidiary_
+                    fieldHeader 'Manager'
                 }
                 column {
-                    fieldHeader "Last Name"
-                    fieldHeader "First Name"
+                    fieldHeader 'Last Name'
+                    fieldHeader 'First Name'
                 }
             }
 
@@ -97,7 +97,7 @@ class CrewController implements WebAttributes {
                         boolean muHasChildren = !mu.managedUsers.isEmpty()
                         rowTree muHasChildren, {
                             rowColumn {
-                                if (hasActions) rowLink "Edit User", ActionIcon.EDIT * ActionIconStyleModifier.SCALE_DOWN, this.&editUser as MC, mu.id
+                                if (hasActions) rowLink 'Edit User', ActionIcon.EDIT * ActionIconStyleModifier.SCALE_DOWN, this.&editUser as MC, mu.id
                                 rowField mu.username_
                                 rowField mu.businessUnit_
                             }
@@ -203,28 +203,18 @@ class CrewController implements WebAttributes {
         taackUiSimpleService.show(b)
     }
 
-    @Secured("isAuthenticated()")
     def selectRoleM2OCloseModal(Role role) {
-        UiBlockSpecifier block = new UiBlockSpecifier()
-        block.ui {
-            closeModal role.id, "${role}"
-        }
-        taackUiSimpleService.show(block)
+        taackUiSimpleService.closeModal(role.id, role.toString())
     }
 
-    @Secured("isAuthenticated()")
     def selectUserM2OCloseModal(User user) {
-        UiBlockSpecifier block = new UiBlockSpecifier()
-        block.ui {
-            closeModal user.id, "${user}"
-        }
-        taackUiSimpleService.show(block)
+        taackUiSimpleService.closeModal(user.id, user.toString())
     }
 
     def showUser(User u) {
         taackUiSimpleService.show(new UiBlockSpecifier().ui {
             modal {
-                ajaxBlock "showUser", {
+                ajaxBlock 'showUser', {
                     show u.username, crewUiService.buildUserShow(u), BlockSpec.Width.MAX
                 }
             }
@@ -235,7 +225,7 @@ class CrewController implements WebAttributes {
     def showUserFromSearch() {
         User u = User.read(params.long('id'))
         taackUiSimpleService.show(new UiBlockSpecifier().ui {
-            ajaxBlock "showUserFromSearch", {
+            ajaxBlock 'showUserFromSearch', {
                 show u.username, crewUiService.buildUserShow(u), BlockSpec.Width.MAX
             }
         }, buildMenu())
@@ -244,8 +234,8 @@ class CrewController implements WebAttributes {
     def updateUserMainPicture(User u) {
         taackUiSimpleService.show(new UiBlockSpecifier().ui {
             modal {
-                ajaxBlock "updateUserMainPicture", {
-                    form "Update a File", AttachmentUiService.buildAttachmentForm(Attachment.read(u.mainPictureId) ?: new Attachment(type: AttachmentType.mainPicture), this.&saveUserMainPicture as MethodClosure, [userId: u.id]), BlockSpec.Width.MAX
+                ajaxBlock 'updateUserMainPicture', {
+                    form 'Update a File', AttachmentUiService.buildAttachmentForm(Attachment.read(u.mainPictureId) ?: new Attachment(type: AttachmentType.mainPicture), this.&saveUserMainPicture as MethodClosure, [userId: u.id]), BlockSpec.Width.MAX
                 }
             }
         })
