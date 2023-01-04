@@ -15,6 +15,7 @@ buildscript {
         classpath "org.grails.plugins:hibernate5:${grailsHibernate5}"
         classpath 'org.openjdk.nashorn:nashorn-core:15.4'
         classpath "com.bertramlabs.plugins:asset-pipeline-gradle:${assetPipeline}"
+        classpath "org.taack:taack-ui-commands:0.3"
     }
 }
 
@@ -95,7 +96,9 @@ subprojects {
             }
             if (isGrailsApp) developmentOnly("org.springframework.boot:spring-boot-devtools")
             compileOnly "io.micronaut:micronaut-inject-groovy"
-//            console "org.grails:grails-console"
+
+            console "org.grails:grails-console"
+
             implementation "org.springframework.boot:spring-boot-starter-logging"
             implementation "org.springframework.boot:spring-boot-starter-validation"
 //            implementation "org.springframework.boot:spring-boot-autoconfigure"
@@ -139,6 +142,7 @@ subprojects {
                 if (!['taack-ui', 'server'].contains(project.name)) implementation project(':infra:taack-ui')
             } else {
                 implementation 'org.taack:taack-ui:0.2'
+                implementation 'org.taack:taack-ui-commands:0.3'
             }
 
             implementation "org.apache.commons:commons-csv:1.9.0"
@@ -150,9 +154,9 @@ subprojects {
 
         }
 
-//        configurations.implementation {
-//            exclude(group: 'com.h2database', module: 'h2')
-//        }
+        configurations.implementation {
+            exclude(group: 'com.h2database', module: 'h2')
+        }
 
         bootRun {
             ignoreExitValue true
