@@ -147,16 +147,12 @@ subprojects {
 
             implementation "org.apache.commons:commons-csv:1.9.0"
             implementation "org.postgresql:postgresql:${postgresJdbc}"
-
+            implementation "com.h2database:h2:1.4.200"
 
             if (isGrailsApp) implementation group: 'org.questdb', name: 'questdb', version: '6.2.1'
             implementation "org.apache.solr:solr-solrj:${solrj}"
 
         }
-
-//        configurations.implementation {
-//            exclude(group: 'com.h2database', module: 'h2')
-//        }
 
         bootRun {
             ignoreExitValue true
