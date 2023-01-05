@@ -154,9 +154,9 @@ subprojects {
 
         }
 
-        configurations.implementation {
-            exclude(group: 'com.h2database', module: 'h2')
-        }
+//        configurations.implementation {
+//            exclude(group: 'com.h2database', module: 'h2')
+//        }
 
         bootRun {
             ignoreExitValue true
