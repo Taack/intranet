@@ -5,7 +5,6 @@ import grails.plugin.springsecurity.annotation.Secured
 import org.codehaus.groovy.runtime.MethodClosure
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.i18n.LocaleContextHolder
-import taack.base.TaackSearchService
 import taack.base.TaackUiSimpleService
 import taack.ui.TaackPluginConfiguration
 import taack.ui.TaackPluginService
@@ -25,7 +24,6 @@ class RootController {
     TaackPluginService taackPluginService
     TaackUiSimpleService taackUiSimpleService
     RootSearchService rootSearchService
-    TaackSearchService taackSearchService
 
     @Autowired
     TaackUiConfiguration taackUiPluginConfiguration
@@ -79,12 +77,6 @@ class RootController {
 
     def search(String q) {
         taackUiSimpleService.show(rootSearchService.buildSearchBlock(q), buildMenu(q))
-    }
-
-    @Secured(["ROLE_ADMIN"])
-    def indexAll() {
-        taackSearchService.indexAll()
-        render "OK"
     }
 
     def updates() {
