@@ -1,0 +1,15 @@
+.fieldcontain {
+    margin-top: 0.3em;
+}
+fieldset, .property-list {
+    font-size: 11px;
+}
+
+.taackTable th {
+    font-size: 11px;
+}
+
+#body .taackSection {
+    border:3px double #999999;
+    width: 92%;
+}
