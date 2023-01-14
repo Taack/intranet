@@ -141,7 +141,7 @@ subprojects {
             if (isEmbeddingInfra.equals('true')) {
                 if (!['taack-ui', 'server'].contains(project.name)) implementation project(':infra:taack-ui')
             } else {
-                implementation 'org.taack:taack-ui:0.3.3'
+                implementation 'org.taack:taack-ui:0.3.4'
                 implementation 'org.taack:taack-ui-commands:0.3'
             }
 

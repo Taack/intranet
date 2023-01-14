@@ -3,3 +3,70 @@
     background: white;
     color: #555;
 }
+
+a {
+    color: #49759b;
+    text-decoration: none;
+}
+
+.tag {
+    padding: .2em .5em .2em .5em;
+    color: white;
+    border-radius: 4px;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+    background: rgb(78, 164, 221);
+    white-space: nowrap;
+}
+
+.blueTag {
+    background: #4EA4DD;
+}
+
+.greenTag {
+    background: #73ad00;
+}
+
+.yellowTag {
+    background: #ffe84c;
+    color: #423d0a;
+    border: solid #dfe14e 1px;
+    text-shadow: none;
+}
+
+.orangeTag {
+    background: #fb9a00;
+}
+
+.redTag {
+    background: #f50f0f;
+}
+
+.pinkTag {
+    background: #ff598e;
+}
+
+.greyTag {
+    background: #9ba3a9;
+}
+
+.whiteTag {
+    background: white;
+    color: #1f1f1f;
+    border: solid #e0e0e0 1px;
+    text-shadow: none;
+}
+
+.pure-table td {
+    line-height: 24px;
+    padding: .1em 1em .1em .5em !important;
+}
+
+.taackColorBlue {
+    color-scheme: dark;
+    color: #000099;
+}
+
+/*
+*= require custom-gantt.css
+*= require_self
+*/
