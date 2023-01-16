@@ -1,12 +1,13 @@
 package taack.website
 
+import grails.artefact.Interceptor
 import grails.compiler.GrailsCompileStatic
 import grails.plugin.springsecurity.SpringSecurityService
 import org.grails.web.util.WebUtils
 import org.taack.User
 
 @GrailsCompileStatic
-class ActionDefaultLogInterceptor {
+class ActionDefaultLogInterceptor implements Interceptor {
 
     ActionDefaultLogInterceptor() {
         matchAll()
