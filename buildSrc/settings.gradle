@@ -1,0 +1,23 @@
+
+pluginManagement {
+    Properties properties = new Properties()
+    FileInputStream input = new FileInputStream(file('../gradle.properties'))
+    properties.load(input)
+    input.close()
+
+    for (String key : properties.stringPropertyNames()) {
+        ext.set(key, properties.getProperty(key))
+    }
+    repositories {
+        mavenLocal()
+        maven { url "https://repo.grails.org/grails/core/" }
+        gradlePluginPortal()
+    }
+    plugins {
+        id "org.grails.grails-web" version "${grailsGradlePluginVersion}"
+        id "com.bertramlabs.asset-pipeline" version "3.4.4"
+        id "org.grails.grails-gsp" version "${grailsGradlePluginVersion}"
+    }
+}
+
+rootProject.name="taack-grails-gradle"

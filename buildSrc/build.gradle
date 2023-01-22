@@ -1,0 +1,14 @@
+plugins {
+    id 'groovy-gradle-plugin'
+}
+
+repositories {
+    mavenLocal()
+    maven { url "https://repo.grails.org/grails/core/" }
+    gradlePluginPortal() // so that external plugins can be resolved in dependencies section
+}
+
+dependencies {
+    implementation "org.grails:grails-gradle-plugin:5.2.4"
+    implementation "com.bertramlabs.plugins:asset-pipeline-gradle:3.4.4"
+}

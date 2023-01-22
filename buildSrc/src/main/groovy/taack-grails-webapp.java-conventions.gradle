@@ -1,0 +1,34 @@
+import org.apache.tools.ant.taskdefs.condition.Os
+
+plugins {
+    id "taack-grails-plugin.java-conventions"
+    id "com.bertramlabs.asset-pipeline"
+    id "application"
+}
+
+version = "0.1"
+group = "testAuoTaack"
+
+repositories {
+    mavenCentral()
+    maven { url "https://repo.grails.org/grails/core/" }
+    gradlePluginPortal()
+}
+
+dependencies {
+    if (Os.isFamily(Os.FAMILY_MAC)) {
+        runtimeOnly "net.java.dev.jna:jna:5.9.0"
+        implementation "io.methvin:directory-watcher:0.15.0"
+    }
+
+    developmentOnly("org.springframework.boot:spring-boot-devtools")
+    runtimeOnly("com.bertramlabs.plugins:asset-pipeline-grails:3.4.4")
+}
+
+bootJar.enabled = true
+
+assets {
+    minifyJs = true
+    minifyCss = true
+    packagePlugin = false
+}

@@ -1,9 +1,19 @@
+plugins {
+    id 'taack-grails-webapp.java-conventions'
+}
+
+//dependencies {
+//    implementation project(':crew')
+//}
+
+application {
+    mainClass.set("taack.website.Application")
+}
+
 grails {
-    // should use gradle -Dgrails.run.active=true bootRun
     exploded = true
     plugins {
         implementation project(':app:crew')
     }
 }
-//exploded="true"
 bootJar.enabled = true

@@ -1,0 +1,23 @@
+plugins {
+    id "taack-grails-plugin.java-conventions"
+    id "com.bertramlabs.asset-pipeline"
+}
+
+version = "0.1"
+group = "testAuoTaack"
+
+repositories {
+    mavenCentral()
+    maven { url "https://repo.grails.org/grails/core/" }
+    gradlePluginPortal()
+}
+
+dependencies {
+    runtimeOnly("com.bertramlabs.plugins:asset-pipeline-grails:3.4.4")
+}
+
+assets {
+    minifyJs = true
+    minifyCss = true
+    packagePlugin = true
+}
