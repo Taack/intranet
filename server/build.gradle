@@ -21,7 +21,6 @@ bootRun {
 grails {
     exploded = true
     plugins {
-        println it.dump()
         implementation project(':crew')
     }
 }
