@@ -12,5 +12,7 @@ bootJar.enabled = false
 assets {
     minifyJs = true
     minifyCss = true
+    configOptions = [commonJs: false] //useful for custom config on extension libraries
+    excludes = ['**/*esm*']
     packagePlugin = true
 }
