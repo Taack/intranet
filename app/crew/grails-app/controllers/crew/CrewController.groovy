@@ -30,7 +30,7 @@ import taack.ui.base.filter.expression.Operator
 import taack.ui.base.table.ColumnHeaderFieldSpec
 
 @GrailsCompileStatic
-@Secured(["IS_AUTHENTICATED_REMEMBERED"])
+@Secured(['isAuthenticated()'])
 class CrewController implements WebAttributes {
     TaackUiSimpleService taackUiSimpleService
     TaackSimpleFilterService taackSimpleFilterService

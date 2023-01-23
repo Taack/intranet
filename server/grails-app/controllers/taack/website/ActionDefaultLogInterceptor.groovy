@@ -4,7 +4,6 @@ import grails.artefact.Interceptor
 import grails.compiler.GrailsCompileStatic
 import grails.plugin.springsecurity.SpringSecurityService
 import org.grails.web.util.WebUtils
-import org.taack.User
 
 @GrailsCompileStatic
 class ActionDefaultLogInterceptor implements Interceptor {
@@ -23,7 +22,7 @@ class ActionDefaultLogInterceptor implements Interceptor {
         def request = WebUtils.retrieveGrailsWebRequest().getCurrentRequest()
         if (c && a) {
             try {
-                def user = springSecurityService.currentUser as User
+                def user = springSecurityService.currentUser
                 log.info "AUOINT ${c} ${a} ${user} ${request.post ? 'post' : request.get ? 'get' : 'unknown'} ${request.remoteHost}|${request.getHeader('user-agent')} $params ${request.forwardURI}"
             } catch (ignored) {
                 log.error "AUOEXP ${params.get('controller')} ${params.get('action')} ${ignored.message}"

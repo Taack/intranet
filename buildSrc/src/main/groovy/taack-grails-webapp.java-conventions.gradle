@@ -6,23 +6,18 @@ plugins {
     id "application"
 }
 
-version = "0.1"
-group = "testAuoTaack"
-
-repositories {
-    mavenCentral()
-    maven { url "https://repo.grails.org/grails/core/" }
-    gradlePluginPortal()
-}
-
 dependencies {
     if (Os.isFamily(Os.FAMILY_MAC)) {
-        runtimeOnly "net.java.dev.jna:jna:5.9.0"
-        implementation "io.methvin:directory-watcher:0.15.0"
+        runtimeOnly "net.java.dev.jna:jna:5.6.0"
+        implementation "io.methvin:directory-watcher:0.17.1"
     }
 
     developmentOnly("org.springframework.boot:spring-boot-devtools")
+    console "org.grails:grails-console"
+    implementation "org.grails.plugins:gsp"
+    profile "org.grails.profiles:web"
     runtimeOnly("com.bertramlabs.plugins:asset-pipeline-grails:3.4.4")
+
 }
 
 bootJar.enabled = true
