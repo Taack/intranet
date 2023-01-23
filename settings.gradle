@@ -1,3 +1,7 @@
 include 'server'
-include 'app:crew'
+
+file('app').eachDir { dir ->
+    include dir.name
+    project(":${dir.name}").projectDir = dir
+}
 

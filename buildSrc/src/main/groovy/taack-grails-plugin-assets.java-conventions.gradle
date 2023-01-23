@@ -1,0 +1,16 @@
+plugins {
+    id "taack-grails-plugin.java-conventions"
+    id "com.bertramlabs.asset-pipeline"
+}
+
+dependencies {
+    runtimeOnly("com.bertramlabs.plugins:asset-pipeline-grails:3.4.4")
+}
+
+bootJar.enabled = false
+
+assets {
+    minifyJs = true
+    minifyCss = true
+    packagePlugin = true
+}

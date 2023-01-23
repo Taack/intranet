@@ -1,3 +1,7 @@
+plugins {
+    id 'taack-grails-plugin.java-conventions'
+}
+
 dependencies {
     implementation "org.grails:grails-plugin-rest"
     // implementation project(':infra:taack-jdbc-common')

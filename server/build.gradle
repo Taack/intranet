@@ -1,9 +1,27 @@
+plugins {
+    id 'taack-grails-webapp.java-conventions'
+}
+
+application {
+    mainClass.set("taack.website.Application")
+}
+
+bootRun {
+    ignoreExitValue true
+    jvmArgs(
+            '-Dspring.output.ansi.enabled=always',
+            '-noverify',
+            '-XX:TieredStopAtLevel=1',
+            '-Xmx1024m')
+    sourceResources sourceSets.main
+    String springProfilesActive = 'spring.profiles.active'
+    systemProperty springProfilesActive, System.getProperty(springProfilesActive)
+}
+
 grails {
-    // should use gradle -Dgrails.run.active=true bootRun
     exploded = true
     plugins {
-        implementation project(':app:crew')
+        println it.dump()
+        implementation project(':crew')
     }
 }
-//exploded="true"
-bootJar.enabled = true

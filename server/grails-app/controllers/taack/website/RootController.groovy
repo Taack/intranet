@@ -35,7 +35,7 @@ class RootController {
     private static UiMenuSpecifier buildMenu(String q = null) {
         UiMenuSpecifier m = new UiMenuSpecifier()
         m.ui {
-            menu "Home", this.&index as MethodClosure
+            menu "Home auo", this.&index as MethodClosure
             menuSearch RootController.&search as MethodClosure, q
         }
         m

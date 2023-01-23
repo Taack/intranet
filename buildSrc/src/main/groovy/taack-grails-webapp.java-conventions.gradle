@@ -1,0 +1,29 @@
+import org.apache.tools.ant.taskdefs.condition.Os
+
+plugins {
+    id "taack-grails-plugin.java-conventions"
+    id "com.bertramlabs.asset-pipeline"
+    id "application"
+}
+
+dependencies {
+    if (Os.isFamily(Os.FAMILY_MAC)) {
+        runtimeOnly "net.java.dev.jna:jna:5.6.0"
+        implementation "io.methvin:directory-watcher:0.17.1"
+    }
+
+    developmentOnly("org.springframework.boot:spring-boot-devtools")
+    console "org.grails:grails-console"
+    implementation "org.grails.plugins:gsp"
+    profile "org.grails.profiles:web"
+    runtimeOnly("com.bertramlabs.plugins:asset-pipeline-grails:3.4.4")
+
+}
+
+bootJar.enabled = true
+
+assets {
+    minifyJs = true
+    minifyCss = true
+    packagePlugin = false
+}

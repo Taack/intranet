@@ -1,0 +1,24 @@
+plugins {
+    id 'groovy-gradle-plugin'
+}
+
+repositories {
+    mavenLocal()
+    maven { url "https://repo.grails.org/grails/core/" }
+    gradlePluginPortal() // so that external plugins can be resolved in dependencies section
+}
+
+Properties properties = new Properties()
+FileInputStream input = new FileInputStream(file('../gradle.properties'))
+properties.load(input)
+input.close()
+
+for (String key : properties.stringPropertyNames()) {
+    ext.set(key, properties.getProperty(key))
+}
+
+dependencies {
+    implementation "org.grails:grails-gradle-plugin:${grailsGradlePluginVersion}"
+    implementation "com.bertramlabs.plugins:asset-pipeline-gradle:3.4.4"
+    implementation "org.grails.plugins:hibernate5:${grailsHibernate5}"
+}
