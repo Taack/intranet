@@ -34,3 +34,4 @@ grails.plugin.springsecurity.rememberMe.persistentToken.domainClassName = 'org.t
 
 grails.plugin.springsecurity.roleHierarchyEntryClassName = 'org.taack.RoleHierarchyEntry'
 
+HOME = userHome
