@@ -22,5 +22,6 @@ grails {
     exploded = true
     plugins {
         implementation project(':crew')
+        implementation project(':plm')
     }
 }
