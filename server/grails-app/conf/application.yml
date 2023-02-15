@@ -107,7 +107,7 @@ environments:
     development:
         dataSource:
             dbCreate: update
-            url: jdbc:h2:./test1Db;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
+            url: jdbc:h2:./plmDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
     test:
         dataSource:
             dbCreate: update
@@ -174,3 +174,6 @@ intercom:
 ---
 plm:
   freecadPath: ${HOME}/FreeCAD_0.20.2-2022-12-27-conda-Linux-x86_64-py310.AppImage
+exe:
+  dot:
+    path: /usr/bin/dot
