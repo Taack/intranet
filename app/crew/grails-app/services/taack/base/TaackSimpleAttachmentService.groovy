@@ -529,7 +529,7 @@ class TaackSimpleAttachmentService implements WebAttributes, DataBinder {
 
     void postPrepareSave(Attachment attachment) {
         attachment.contentTypeEnum = AttachmentContentType.fromMimeType(attachment.contentType)
-        attachment.contentTypeCategoryEnum = attachment.contentTypeEnum.category
+        attachment.contentTypeCategoryEnum = attachment.contentTypeEnum?.category ?: AttachmentContentType.OTHER.category
     }
 
     String attachmentContent(Attachment attachment) {
