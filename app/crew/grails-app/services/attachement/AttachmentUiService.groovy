@@ -403,7 +403,6 @@ final class AttachmentUiService implements WebAttributes {
     }
 
     UiTableSpecifier buildTermTable(final UiFilterSpecifier f, boolean selectMode = false) {
-        User currentUser = springSecurityService.currentUser as User
         UiTableSpecifier t = new UiTableSpecifier()
         Term ti = new Term(parent: new Term())
         ColumnHeaderFieldSpec.SortableDirection defaultDirection

@@ -380,7 +380,6 @@ class AttachmentController implements Controller {
     }
 
     def listTerm() {
-        User currentUser = springSecurityService.currentUser as User
         UiBlockSpecifier b = new UiBlockSpecifier()
         UiFilterSpecifier f = attachmentUiService.buildTermFilter()
         UiTableSpecifier t = attachmentUiService.buildTermTable f
@@ -390,8 +389,8 @@ class AttachmentController implements Controller {
                     action "Create term", ActionIcon.CREATE, AttachmentController.&editTerm as MethodClosure, true
                 }
             }
-            taackUiSimpleService.show(b, buildMenu())
         }
+        taackUiSimpleService.show(b, buildMenu())
     }
 
     @Secured(['ROLE_ADMIN', 'ROLE_TERM_ADMIN'])
