@@ -6,7 +6,7 @@ plugins {
     id "eclipse"
 }
 
-version = "0.2"
+version = "0.4"
 group = "org.taack"
 
 repositories {
@@ -54,7 +54,7 @@ dependencies {
     testImplementation("io.micronaut:micronaut-http-client")
 
     implementation "org.taack:taack-ui:0.3.6"
-    implementation "org.grails.plugins:spring-security-core:5.2.0"
+    implementation "org.grails.plugins:spring-security-core:5.2.1"
 }
 
 java {
