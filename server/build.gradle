@@ -1,3 +1,6 @@
+import java.nio.file.Files
+import java.nio.file.Paths
+
 plugins {
     id 'taack-grails-webapp.java-conventions'
 }
@@ -19,9 +22,11 @@ bootRun {
 }
 
 grails {
+    def hasPlm = Files.exists(Paths.get(parent.rootDir.path, 'app', 'plm'))
+    println "hasPlm: ${hasPlm}"
     exploded = true
     plugins {
         implementation project(':crew')
-        implementation project(':plm')
+        if (hasPlm) implementation project(':plm')
     }
 }
