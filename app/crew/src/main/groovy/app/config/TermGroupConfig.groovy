@@ -5,6 +5,8 @@ import groovy.transform.CompileStatic
 @CompileStatic
 enum TermGroupConfig {
     certificate,
+    product,
+    plm,
     qualitySystemProcedure,
     tagsPlanet(false),
     ticketCategory(false),
