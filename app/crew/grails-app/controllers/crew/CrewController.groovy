@@ -474,9 +474,7 @@ class CrewController implements WebAttributes {
 
         UiFormSpecifier f = new UiFormSpecifier()
         f.ui role, {
-            section "Main", {
-                field role.authority_
-            }
+            field role.authority_
             formAction "Save", this.&saveRole as MC, role.id, null, true
         }
         UiBlockSpecifier b = new UiBlockSpecifier()
