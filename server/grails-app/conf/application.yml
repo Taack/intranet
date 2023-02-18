@@ -73,6 +73,7 @@ grails:
       maxsize: 1000
   controllers:
     defaultScope: singleton
+
   converters:
     encoding: UTF-8
   views:
@@ -139,8 +140,8 @@ taack.admin.password: ChangeIt
 grails:
   controllers:
     upload:
-      maxFileSize: 26214400
-      maxRequestSize: 26214400
+      maxFileSize: 536870912
+      maxRequestSize: 536870912
   plugin:
     springsecurity:
       rest:
