@@ -6,7 +6,7 @@ plugins {
     id "eclipse"
 }
 
-version = "0.4"
+version = "0.5"
 group = "org.taack"
 
 repositories {
