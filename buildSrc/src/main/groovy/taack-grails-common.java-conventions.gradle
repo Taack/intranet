@@ -53,8 +53,8 @@ dependencies {
     testRuntimeOnly("org.seleniumhq.selenium:selenium-firefox-driver:4.7.2")
     testImplementation("io.micronaut:micronaut-http-client")
 
-    implementation "org.taack:taack-ui:0.3.6"
-    implementation "org.taack:taack-ui-commands:0.4"
+    implementation "org.taack:taack-ui:0.3.7"
+    implementation "org.taack:taack-ui-commands:0.5"
     implementation "org.grails.plugins:spring-security-core:5.2.1"
 }
 

@@ -1,7 +1,9 @@
 include 'server'
 
+gradle.ext.taackPlugins = []
+
 file('app').eachDir { dir ->
     include dir.name
+    gradle.ext.taackPlugins << dir.name
     project(":${dir.name}").projectDir = dir
 }
-

@@ -9,6 +9,7 @@ application {
     mainClass.set("taack.website.Application")
 }
 
+
 bootRun {
     ignoreExitValue true
     jvmArgs(
@@ -22,11 +23,10 @@ bootRun {
 }
 
 grails {
-    def hasPlm = Files.exists(Paths.get(parent.rootDir.path, 'app', 'plm'))
-    println "hasPlm: ${hasPlm}"
     exploded = true
     plugins {
-        implementation project(':crew')
-        if (hasPlm) implementation project(':plm')
+        gradle.ext.taackPlugins.each {
+            implementation project(':' + it)
+        }
     }
 }
