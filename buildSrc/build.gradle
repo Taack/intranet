@@ -22,5 +22,5 @@ dependencies {
     implementation 'com.bertramlabs.plugins:asset-pipeline-gradle:3.4.4'
     implementation 'org.openjdk.nashorn:nashorn-core:15.4'
     implementation "org.grails.plugins:hibernate5:${grailsHibernate5}"
-    implementation "org.taack:taack-ui-commands:0.4"
+    implementation "org.taack:taack-ui-commands:0.5"
 }
