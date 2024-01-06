@@ -173,8 +173,8 @@ taack-ui:
 intercom:
   vegaPath: ${HOME}/dev/yarn/vega/packages/vega-cli/bin/
 ---
-plm:
-  freecadPath: ${HOME}/FreeCAD_0.20.2-2022-12-27-conda-Linux-x86_64-py310.AppImage
 exe:
   dot:
     path: /usr/bin/dot
+plm:
+  freecadPath: ${HOME}/FreeCAD_0.21.1-Linux-x86_64.AppImage

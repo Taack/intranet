@@ -1,5 +1,5 @@
 plugins {
-    id 'taack-grails-common.java-conventions'
+    id 'taack-grails-common'
     id 'org.grails.grails-plugin'
 }
 

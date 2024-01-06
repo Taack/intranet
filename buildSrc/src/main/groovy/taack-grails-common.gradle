@@ -1,4 +1,5 @@
 plugins {
+    id 'java-library'
     id "groovy"
     id "org.grails.grails-web"
     id "org.grails.grails-gsp"
@@ -23,6 +24,7 @@ dependencies {
     implementation("org.grails:grails-plugin-databinding")
     implementation("org.grails:grails-plugin-i18n")
     implementation("org.grails:grails-plugin-interceptors")
+    implementation("org.grails.plugins:async")
     implementation("org.grails:grails-plugin-rest")
     implementation("org.grails:grails-plugin-services")
     implementation("org.grails:grails-plugin-url-mappings")
@@ -53,11 +55,15 @@ dependencies {
     testRuntimeOnly("org.seleniumhq.selenium:selenium-firefox-driver:4.7.2")
     testImplementation("io.micronaut:micronaut-http-client")
 
-    implementation "org.taack:taack-ui:0.3.8"
+    implementation "org.taack:taack-ui:0.3.8-SNAPSHOT"
     implementation "org.taack:taack-ui-commands:0.5"
     implementation "org.grails.plugins:spring-security-core:${grailsSpringSecurity}"
 }
 
 java {
     sourceCompatibility = JavaVersion.toVersion("17")
+}
+
+tasks.named("jar") {
+    duplicatesStrategy = 'include'
 }

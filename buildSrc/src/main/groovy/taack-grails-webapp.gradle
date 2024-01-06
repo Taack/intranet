@@ -1,8 +1,8 @@
 import org.apache.tools.ant.taskdefs.condition.Os
 
 plugins {
-    id "taack-grails-plugin.java-conventions"
-    id "com.bertramlabs.asset-pipeline"
+    id "taack-grails-plugin"
+    id "taack-grails-assets-app"
     id "application"
 }
 
@@ -23,16 +23,5 @@ dependencies {
     console "org.grails:grails-console"
     implementation "org.grails.plugins:gsp"
     profile "org.grails.profiles:web"
-    runtimeOnly("com.bertramlabs.plugins:asset-pipeline-grails:3.4.4")
-
 }
 
-bootJar.enabled = true
-
-assets {
-    minifyJs = true
-    minifyCss = true
-    configOptions = [commonJs: false] //useful for custom config on extension libraries
-    excludes = ['**/*esm*']
-    packagePlugin = false
-}

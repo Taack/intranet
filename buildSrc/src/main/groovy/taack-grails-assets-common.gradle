@@ -1,0 +1,29 @@
+plugins {
+    id "taack-grails-plugin"
+    id "com.bertramlabs.asset-pipeline"
+}
+
+dependencies {
+    implementation("com.bertramlabs.plugins:asset-pipeline-grails:${assetPipelineGrails}")
+}
+
+assets {
+    minifyJs = true
+    minifyCss = true
+
+    configOptions = [
+            commonJs: false,
+            babel: [
+                    enabled: false,
+                    processJsFiles: false
+            ]
+    ] //useful for custom config on extension libraries
+
+    excludes = ['reveal.js/plugin/*/plugin.js', '**/*esm*']
+
+    //developmentRuntime can be turned off
+    developmentRuntime = false
+
+    //if you want to customize the jar task this task runs on you can specify a jarTaskName
+    jarTaskName = null
+}

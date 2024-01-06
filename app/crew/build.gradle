@@ -1,5 +1,5 @@
 plugins {
-    id 'taack-grails-plugin.java-conventions'
+    id 'taack-grails-plugin'
 }
 
 dependencies {
