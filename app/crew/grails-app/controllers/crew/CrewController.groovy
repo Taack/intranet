@@ -9,9 +9,7 @@ import grails.plugin.springsecurity.annotation.Secured
 import grails.web.api.WebAttributes
 import org.codehaus.groovy.runtime.MethodClosure
 import org.codehaus.groovy.runtime.MethodClosure as MC
-import org.springframework.security.access.AccessDeniedException
 import org.springframework.transaction.TransactionStatus
-import org.taack.Alert
 import org.taack.Attachment
 import org.taack.Role
 import org.taack.User
@@ -20,13 +18,13 @@ import taack.base.TaackMetaModelService
 import taack.base.TaackSimpleFilterService
 import taack.base.TaackSimpleSaveService
 import taack.base.TaackUiSimpleService
-import taack.ui.TaackPluginService
 import taack.ui.base.*
 import taack.ui.base.block.BlockSpec
 import taack.ui.base.common.ActionIcon
 import taack.ui.base.common.ActionIconStyleModifier
 import taack.ui.base.filter.expression.FilterExpression
 import taack.ui.base.filter.expression.Operator
+import taack.ui.base.form.FormSpec
 import taack.ui.base.table.ColumnHeaderFieldSpec
 
 @GrailsCompileStatic
@@ -39,7 +37,6 @@ class CrewController implements WebAttributes {
     CrewUiService crewUiService
     CrewSearchService crewSearchService
     AttachmentUiService attachmentUiService
-    TaackPluginService taackPluginService
 
     private boolean isAdmin() {
         (authenticatedUser as User).authorities*.authority.contains("ROLE_ADMIN")
@@ -50,7 +47,6 @@ class CrewController implements WebAttributes {
         m.ui {
             menu 'Users', CrewController.&index as MC
             menu 'Roles', CrewController.&listRoles as MC
-            menu 'Alerts', CrewController.&listAlerts as MC
             menu 'Hierarchy', CrewController.&hierarchy as MC
             menuIcon 'Config MySelf', ActionIcon.CONFIG_USER, this.&editUser as MC, [id: springSecurityService.currentUserId], true
             menuSearch this.&search as MethodClosure, q
@@ -203,14 +199,6 @@ class CrewController implements WebAttributes {
         taackUiSimpleService.show(b)
     }
 
-    def selectRoleM2OCloseModal(Role role) {
-        taackUiSimpleService.closeModal(role.id, role.toString())
-    }
-
-    def selectUserM2OCloseModal(User user) {
-        taackUiSimpleService.closeModal(user.id, user.toString())
-    }
-
     def showUser(User u) {
         taackUiSimpleService.show(new UiBlockSpecifier().ui {
             modal {
@@ -269,19 +257,19 @@ class CrewController implements WebAttributes {
         UiFormSpecifier f = new UiFormSpecifier()
         f.ui user, {
             hiddenField user.subsidiary_
-            section "User", {
+            section "User", FormSpec.Width.ONE_THIRD, {
                 field user.username_
                 field user.firstName_
                 field user.lastName_
                 ajaxField user.manager_, this.&selectUserM2O as MC
                 field user.password_
             }
-            section "Coords", {
+            section "Coords", FormSpec.Width.ONE_THIRD, {
                 field user.businessUnit_
                 field user.mail_
                 field user.subsidiary_
             }
-            section "Status", {
+            section "Status", FormSpec.Width.ONE_THIRD, {
                 field user.enabled_
                 field user.accountExpired_
                 field user.accountLocked_
@@ -305,57 +293,6 @@ class CrewController implements WebAttributes {
     @Transactional
     def saveUser() {
         taackSimpleSaveService.saveThenReloadOrRenderErrors(User)
-    }
-
-    def listAlerts() {
-        boolean hasActions = isAdmin()
-        UiTableSpecifier t = crewUiService.buildAlertTable()
-        UiBlockSpecifier b = new UiBlockSpecifier()
-        b.ui {
-            ajaxBlock "blockList", {
-                table "Alerts", t, BlockSpec.Width.MAX, {
-                    if (hasActions) action "Create alert", ActionIcon.CREATE, CrewController.&alertForm as MC, true
-                }
-            }
-        }
-
-        taackUiSimpleService.show(b, buildMenu())
-    }
-
-    @Secured("ROLE_ADMIN")
-    def alertForm() {
-        final Alert alert = Alert.read(params.long("id")) ?: new Alert(params)
-
-        UiFormSpecifier f = new UiFormSpecifier()
-        f.ui alert, {
-            section "Section 1", {
-                field alert.name_
-                field alert.description_
-                field alert.origin_, taackPluginService.enumOptions
-            }
-            section "Section 2", {
-                ajaxField alert.restrictedRoles_, CrewController.&selectRoleM2O as MethodClosure, alert.restrictedRoles_
-                ajaxField alert.users_, CrewController.&selectUserM2O as MethodClosure, alert.users_
-                field alert.isSubscriptionEnabled_
-                field alert.active_
-            }
-            formAction "Save", this.&saveAlert as MC, alert.id, null, true
-        }
-        UiBlockSpecifier b = new UiBlockSpecifier()
-        b.ui {
-            modal {
-                ajaxBlock "blockForm", {
-                    form "Alert Form", f, BlockSpec.Width.MAX
-                }
-            }
-        }
-        taackUiSimpleService.show(b, buildMenu())
-    }
-
-    @Secured("ROLE_ADMIN")
-    @Transactional
-    def saveAlert() {
-        taackSimpleSaveService.saveThenRedirectOrRenderErrors(Alert, this.&listAlerts as MC)
     }
 
     @Secured("ROLE_ADMIN")
@@ -542,33 +479,4 @@ class CrewController implements WebAttributes {
         taackSimpleSaveService.saveThenRedirectOrRenderErrors(Role, this.&listRoles as MC)
     }
 
-    @Transactional
-    def subscribeToAlert(Alert alert) {
-        def cu = springSecurityService.currentUser as User
-        String controllerRedirect = params.get("controllerRedirect") ?: controllerName
-        String actionRedirect = params.get("actionRedirect") ?: 'listAlerts'
-        String subsidiaryRedirect = params.get("subsidiaryRedirect") ?: null
-        if (alert.canSubscribe(cu)) {
-            alert.addToUsers(cu)
-            alert.save(failOnError: true)
-            redirect controller: controllerRedirect, action: actionRedirect, params: [subsidiary: subsidiaryRedirect]
-        } else {
-            throw new AccessDeniedException("No access")
-        }
-    }
-
-    @Transactional
-    def unsubscribeFromAlert(Alert alert) {
-        def cu = springSecurityService.currentUser as User
-        String controllerRedirect = params.get("controllerRedirect") ?: controllerName
-        String actionRedirect = params.get("actionRedirect") ?: 'listAlerts'
-        String subsidiaryRedirect = params.get("subsidiaryRedirect") ?: null
-        if (alert.canSubscribe(cu)) {
-            alert.removeFromUsers(cu)
-            alert.save(failOnError: true)
-            redirect controller: controllerRedirect, action: actionRedirect, params: [subsidiary: subsidiaryRedirect]
-        } else {
-            throw new AccessDeniedException("No access")
-        }
-    }
 }

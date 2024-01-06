@@ -10,7 +10,6 @@ import org.taack.Attachment
 import org.taack.Role
 import org.taack.User
 import org.taack.UserRole
-import org.taack.Alert
 import taack.base.TaackSimpleFilterService
 import taack.ui.base.UiBlockSpecifier
 import taack.ui.base.UiFilterSpecifier
@@ -80,7 +79,7 @@ class CrewUiService implements WebAttributes {
                 row {
                     rowColumn {
                         rowField r.authority
-                        if (hasSelect) rowLink "Select Role", ActionIcon.SELECT * ActionIconStyleModifier.SCALE_DOWN, CrewController.&selectRoleM2OCloseModal as MethodClosure, r.id, true
+                        if (hasSelect) rowLink "Select Role", ActionIcon.SELECT * ActionIconStyleModifier.SCALE_DOWN, r.id, r.toString(), true
                     }
                 }
             }
@@ -131,7 +130,7 @@ class CrewUiService implements WebAttributes {
                     }
                     rowColumn {
                         rowLink "Show User", ActionIcon.SHOW * ActionIconStyleModifier.SCALE_DOWN, CrewController.&showUser as MethodClosure, ru.id, true
-                        if (hasSelect) rowLink "Select User", ActionIcon.SELECT * ActionIconStyleModifier.SCALE_DOWN, CrewController.&selectUserM2OCloseModal as MethodClosure, ru.id, true
+                        if (hasSelect) rowLink "Select User", ActionIcon.SELECT * ActionIconStyleModifier.SCALE_DOWN, ru.id, ru.toString(), true
                         else if (hasActions) {
                             rowLink "Edit User", ActionIcon.EDIT * ActionIconStyleModifier.SCALE_DOWN, CrewController.&editUser as MethodClosure, ru.id
                             if (canSwitchUser && ru.enabled) rowLink "Switch User", ActionIcon.SHOW * ActionIconStyleModifier.SCALE_DOWN, CrewController.&switchUser as MethodClosure, [id: ru.id], false
@@ -191,57 +190,4 @@ class CrewUiService implements WebAttributes {
         return u.authorities*.authority.contains("ROLE_ADMIN") || u.managedUsers*.id.contains(other.id)
     }
 
-    UiTableSpecifier buildAlertTable(String application = null, String controllerRedirect = null,
-                                     String actionRedirect = null, String subsidiaryRedirect = null) {
-        Alert ra = new Alert()
-        boolean hasActions = !application
-        User cu = springSecurityService.currentUser as User
-        UiTableSpecifier t = new UiTableSpecifier()
-        ColumnHeaderFieldSpec.SortableDirection dir
-        t.ui Alert, {
-            header {
-                dir = sortableFieldHeader ColumnHeaderFieldSpec.DefaultSortingDirection.ASC, ra.name_
-                fieldHeader "Description"
-                fieldHeader "Origin"
-                fieldHeader "Is Subscription Enabled"
-                fieldHeader "Active"
-                fieldHeader "Subscribe"
-                if (hasActions) {
-                    fieldHeader "Edit"
-                }
-            }
-
-            UiFilterSpecifier alertFilter = new UiFilterSpecifier().ui Alert, {
-                if (application) {
-                    filterFieldExpressionBool(null, new FilterExpression(ra.origin_, Operator.EQ, application), true)
-                }
-            }
-
-            def alerts = taackSimpleFilterService.list(Alert, 20, alertFilter, null, dir)
-            paginate(20, params.long('offset'), alerts.bValue)
-            for (def a : alerts.aValue) {
-                row {
-                    rowField a.name_
-                    rowField a.description_
-                    rowField a.origin_
-                    rowField a.isSubscriptionEnabled_
-                    rowField a.active_
-                    if (a.canSubscribe(cu)) {
-                        Map params = [id: a.id, controllerRedirect: controllerRedirect, actionRedirect: actionRedirect, subsidiaryRedirect: subsidiaryRedirect]
-                        if (a.users.contains(cu)) {
-                            rowLink "Unsubscribe", ActionIcon.DELETE, CrewController.&unsubscribeFromAlert as MethodClosure, params, false
-                        } else {
-                            rowLink "Subscribe", ActionIcon.ADD, CrewController.&subscribeToAlert as MethodClosure, params, false
-                        }
-                    } else {
-                        rowField ""
-                    }
-                    if (hasActions) {
-                        rowLink "Edit alert", ActionIcon.EDIT, CrewController.&alertForm as MethodClosure, a.id
-                    }
-                }
-            }
-        }
-        t
-    }
 }
