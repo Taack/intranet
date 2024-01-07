@@ -174,7 +174,6 @@ intercom:
   vegaPath: ${HOME}/dev/yarn/vega/packages/vega-cli/bin/
 ---
 exe:
-  dot.path: /usr/bin/dot
   convertPath: /usr/bin/convert
   unzipPath: /usr/bin/unzip
 plm:
