@@ -174,7 +174,11 @@ intercom:
   vegaPath: ${HOME}/dev/yarn/vega/packages/vega-cli/bin/
 ---
 exe:
-  dot:
-    path: /usr/bin/dot
+  dot.path: /usr/bin/dot
+  convertPath: /usr/bin/convert
+  unzipPath: /usr/bin/unzip
 plm:
-  freecadPath: ${HOME}/FreeCAD_0.21.1-Linux-x86_64.AppImage
+  freecadPath: /usr/bin/freecad
+  singleInstance: true
+  xvfbRun: false
+  useWeston: true
