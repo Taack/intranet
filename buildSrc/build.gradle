@@ -5,6 +5,7 @@ plugins {
 repositories {
     mavenLocal()
     maven { url "https://repo.grails.org/grails/core/" }
+    maven { url 'https://central.sonatype.com/' }
     gradlePluginPortal() // so that external plugins can be resolved in dependencies section
 }
 
