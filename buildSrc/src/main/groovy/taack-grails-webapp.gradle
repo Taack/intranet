@@ -1,9 +1,9 @@
 import org.apache.tools.ant.taskdefs.condition.Os
 
 plugins {
-    id "taack-grails-plugin"
-    id "taack-grails-assets-app"
-    id "application"
+    id 'taack-grails-plugin'
+    id 'taack-grails-assets-app'
+    id 'application'
 }
 
 configurations {
@@ -15,13 +15,13 @@ configurations {
 
 dependencies {
     if (Os.isFamily(Os.FAMILY_MAC)) {
-        runtimeOnly "net.java.dev.jna:jna:5.12.1"
-        implementation "io.methvin:directory-watcher:0.17.1"
+        runtimeOnly 'net.java.dev.jna:jna:5.12.1'
+        implementation 'io.methvin:directory-watcher:0.17.1'
     }
 
-    developmentOnly("org.springframework.boot:spring-boot-devtools")
-    console "org.grails:grails-console"
-    implementation "org.grails.plugins:gsp"
-    profile "org.grails.profiles:web"
+    developmentOnly('org.springframework.boot:spring-boot-devtools')
+    console 'org.grails:grails-console'
+    implementation 'org.grails.plugins:gsp'
+    profile 'org.grails.profiles:web'
 }
 

@@ -3,6 +3,7 @@ package org.taack
 import grails.events.annotation.gorm.Listener
 import grails.plugin.springsecurity.SpringSecurityService
 import groovy.transform.CompileStatic
+import crew.User
 import org.grails.datastore.mapping.engine.event.AbstractPersistenceEvent
 import org.grails.datastore.mapping.engine.event.PreInsertEvent
 import org.grails.datastore.mapping.engine.event.PreUpdateEvent
