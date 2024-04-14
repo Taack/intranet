@@ -6,8 +6,10 @@ import app.config.AttachmentType
 import app.config.SupportedLanguage
 import grails.compiler.GrailsCompileStatic
 import groovy.transform.AutoClone
+import groovy.transform.CompileStatic
 import taack.ast.annotation.TaackFieldEnum
 
+@CompileStatic
 enum AttachmentStatus {
     proposal,
     valid,
@@ -15,7 +17,6 @@ enum AttachmentStatus {
     obsolete
 }
 
-@AutoClone
 @TaackFieldEnum
 @GrailsCompileStatic
 class Attachment {
@@ -24,7 +25,6 @@ class Attachment {
     Date dateCreated
     User userUpdated
     Date lastUpdated
-    Date dateImported = new Date()
 
     AttachmentType type
     String fileOrigin
@@ -67,21 +67,9 @@ class Attachment {
         type nullable: true
         status nullable: true
         lastUpdated nullable: true
-        dateImported nullable: true
         fileOrigin nullable: true
         declaredLanguage nullable: true
         nextVersion nullable: true, unique: true//, validator: { Attachment val, Attachment obj ->
-//            if (val) {
-//                if (val.contentShaOne == obj.contentShaOne)
-//                    return "attachment.nextVersion.isIdentical.error"
-//                if (val.contentShaOne in obj.getOldVersions()*.contentShaOne)
-//                    return "attachment.nextVersion.isOlder.error"
-//            }
-//        }
-        grantedRoles nullable: true
-        grantedUsers nullable: true
-        grantedRolesRead nullable: true
-        grantedUsersRead nullable: true
         active validator: { boolean val, Attachment obj ->
             if (val && obj.nextVersion)
                 return "attachment.active.hasNextVersion.error"
@@ -92,15 +80,10 @@ class Attachment {
     static mapping = {
         filePath type: 'text'
         originalName type: 'text'
-        grantedRolesRead joinTable: [name: 'roles_read_attachment']
-        grantedUsersRead joinTable: [name: 'users_read_attachment']
     }
 
-    static hasMany = [grantedRoles        : Role,
-                      grantedUsers        : User,
-                      grantedRolesRead    : Role,
-                      grantedUsersRead    : User,
-                      tags                : Term,
+    static hasMany = [
+            tags: Term
     ]
 
     String getName() {
@@ -114,46 +97,6 @@ class Attachment {
     String getOriginalNameWithoutExtension() {
         if (originalName.contains('.')) originalName.substring(0, originalName.lastIndexOf('.'))
         else originalName
-    }
-
-    int getVersionNumber() {
-        return getOldVersions().size() + 1
-    }
-
-    List<Attachment> getNewVersions() {
-        List<Attachment> newVersions = []
-        Attachment tmp = this
-        while (tmp = tmp.nextVersion) {
-            newVersions << tmp
-        }
-        return newVersions.reverse()
-    }
-
-    List<Attachment> getOldVersions() {
-        List<Attachment> oldVersions = []
-        Attachment tmp = this
-        while (tmp = Attachment.findByNextVersion(tmp)) {
-            oldVersions << tmp
-        }
-        return oldVersions
-    }
-
-    List<Attachment> getAllVersions() {
-        List<Attachment> versions = []
-        Attachment tmp = this
-        Attachment first
-        while (first = Attachment.findByNextVersion(tmp)) {
-            tmp = first
-        }
-        versions << tmp
-        while (tmp = tmp.nextVersion) {
-            versions << tmp
-        }
-        return versions.reverse()
-    }
-
-    boolean isImage() {
-        return contentType?.toString()?.startsWith("image/")
     }
 
     @Override

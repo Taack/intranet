@@ -438,8 +438,6 @@ class TaackSimpleAttachmentService implements WebAttributes, DataBinder {
         }
         newAtt.nextVersion = refAtt
         newAtt.active = false
-        newAtt.dateImported = refAtt.dateImported
-        refAtt.dateImported = new Date()
         if (newAtt.validate()) {
             newAtt.save(flush: true)
         } else {

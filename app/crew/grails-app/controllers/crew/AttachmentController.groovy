@@ -34,7 +34,7 @@ import taack.ui.utils.Markdown
 
 @GrailsCompileStatic
 @Secured(["IS_AUTHENTICATED_REMEMBERED"])
-class AttachmentController implements Controller {
+class AttachmentController {
     TaackUiSimpleService taackUiSimpleService
     TaackSimpleAttachmentService taackSimpleAttachmentService
     TaackMetaModelService taackMetaModelService
