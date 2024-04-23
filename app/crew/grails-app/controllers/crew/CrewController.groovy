@@ -21,7 +21,7 @@ import taack.base.TaackUiSimpleService
 import taack.ui.base.*
 import taack.ui.base.block.BlockSpec
 import taack.ui.base.common.ActionIcon
-import taack.ui.base.common.ActionIconStyleModifier
+import taack.ui.base.common.IconStyle
 import taack.ui.base.filter.expression.FilterExpression
 import taack.ui.base.filter.expression.Operator
 import taack.ui.base.form.FormSpec
@@ -36,11 +36,8 @@ class CrewController implements WebAttributes {
     SpringSecurityService springSecurityService
     CrewUiService crewUiService
     CrewSearchService crewSearchService
+    CrewSecurityService crewSecurityService
     AttachmentUiService attachmentUiService
-
-    private boolean isAdmin() {
-        (authenticatedUser as User).authorities*.authority.contains("ROLE_ADMIN")
-    }
 
     private UiMenuSpecifier buildMenu(String q = null) {
         UiMenuSpecifier m = new UiMenuSpecifier()
@@ -55,19 +52,12 @@ class CrewController implements WebAttributes {
     }
 
     private UiTableSpecifier buildUserTableHierarchy(final User u) {
-        /*
-        TODO: Improve grouping with subTable, sub total
-        TODO: Choose Grouping layout: Per subsidiary, per Business Unit, (or both) flat ... why not adding filters ?
-        TODO: Repeat user if grouping per subsidiary (Henri does not belongs to Citel Inc, but manage PC from CitelInc, so PC should appear 2 times)
-        TODO: When grouping, capability to expend and focus on PC in Citel Inc from Citel Holding Henri hierarchy
-         */
-        UiTableSpecifier t = new UiTableSpecifier()
 
         def groups = taackSimpleFilterService.listGroup(User)
 
-        boolean hasActions = isAdmin()
+        boolean hasActions = crewSecurityService.admin
 
-        t.ui User, {
+        new UiTableSpecifier().ui User, {
             header {
                 column {
                     fieldHeader 'Username'
@@ -93,7 +83,7 @@ class CrewController implements WebAttributes {
                         boolean muHasChildren = !mu.managedUsers.isEmpty()
                         rowTree muHasChildren, {
                             rowColumn {
-                                if (hasActions) rowLink 'Edit User', ActionIcon.EDIT * ActionIconStyleModifier.SCALE_DOWN, this.&editUser as MC, mu.id
+                                if (hasActions) rowLink 'Edit User', ActionIcon.EDIT * IconStyle.SCALE_DOWN, this.&editUser as MC, mu.id
                                 rowField mu.username_
                                 rowField mu.businessUnit_
                             }
@@ -119,7 +109,7 @@ class CrewController implements WebAttributes {
                     int oldCount = count
                     rowGroupHeader g
                     rec(taackSimpleFilterService.listInGroup(g, User, new UiFilterSpecifier().ui(User, {
-                        filterFieldExpressionBool null, new FilterExpression(filterUser.enabled_, Operator.EQ, true), true
+                        filterFieldExpressionBool new FilterExpression(true, Operator.EQ, filterUser.enabled_)
                     })).aValue, 0)
                     rowGroupFooter "Count: ${count - oldCount}"
                 }
@@ -127,8 +117,6 @@ class CrewController implements WebAttributes {
                 rec(User.findAllByManagerIsNullAndEnabled(true), 0)
             }
         }
-
-        t
     }
 
     def search(String q) {
@@ -187,16 +175,13 @@ class CrewController implements WebAttributes {
         UiFilterSpecifier f = CrewUiService.buildUserTableFilter cu
         UiTableSpecifier t = crewUiService.buildUserTable f, true
 
-        UiBlockSpecifier b = new UiBlockSpecifier()
-        b.ui {
+        taackUiSimpleService.show new UiBlockSpecifier().ui {
             modal {
                 ajaxBlock "userListSelect", {
                     tableFilter "Filter", f, "Users", t, BlockSpec.Width.MAX
                 }
             }
         }
-
-        taackUiSimpleService.show(b)
     }
 
     def showUser(User u) {
@@ -231,8 +216,7 @@ class CrewController implements WebAttributes {
 
     def saveUserMainPicture() {
         def u = User.get(params.long("userId"))
-        def cu = springSecurityService.currentUser as User
-        if (cu.id == u.id || cu.authorities*.authority.contains("ROLE_ADMIN")) {
+        if (crewSecurityService.canEdit(u)) {
             Attachment a = null
             Attachment.withTransaction { TransactionStatus status ->
                 a = attachmentUiService.saveAttachment()
@@ -278,15 +262,13 @@ class CrewController implements WebAttributes {
             formAction "Save", this.&saveUser as MC, user.id, true
         }
 
-        UiBlockSpecifier b = new UiBlockSpecifier()
-        b.ui {
+        taackUiSimpleService.show new UiBlockSpecifier().ui {
             modal {
                 ajaxBlock "userForm", {
                     form "User Form", f, BlockSpec.Width.MAX
                 }
             }
         }
-        taackUiSimpleService.show(b)
     }
 
     @Secured("ROLE_ADMIN")
@@ -356,7 +338,7 @@ class CrewController implements WebAttributes {
     }
 
     def listRoles() {
-        boolean hasActions = isAdmin()
+        boolean hasActions = crewSecurityService.admin
 
         UiTableSpecifier t = new UiTableSpecifier()
         ColumnHeaderFieldSpec.SortableDirection dir
@@ -466,7 +448,7 @@ class CrewController implements WebAttributes {
             User.withNewTransaction {
                 user.delete()
             }
-        } catch(e) {
+        } catch (e) {
             log.error(e.message)
             render("Error: ${e.message}")
         }

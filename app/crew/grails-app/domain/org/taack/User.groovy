@@ -85,4 +85,16 @@ class User implements Serializable {
         }
         ret
     }
+
+    List<User> getAllManagers() {
+        final List<User> res = []
+        User cursor = this
+        User m
+        while ((m = cursor.manager) && m) {
+            res.add m
+            cursor = m
+        }
+        res
+    }
+
 }
