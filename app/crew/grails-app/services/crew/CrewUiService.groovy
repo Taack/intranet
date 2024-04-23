@@ -52,7 +52,7 @@ class CrewUiService implements WebAttributes {
                 filterField u.subsidiary_
                 filterField u.businessUnit_
                 filterField u.enabled_
-                filterFieldExpressionBool "My Team", new FilterExpression(u.selfObject_, Operator.IN, cu.allManagedUsers_), user ? false : true
+                filterFieldExpressionBool "My Team", new FilterExpression(cu.allManagedUsers*.id, Operator.IN, u.selfObject_), user ? false : true
             }
             section "Credentials", {
                 UserRole ur = new UserRole(role: new Role())
