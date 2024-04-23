@@ -4,7 +4,6 @@ import app.config.TermGroupConfig
 import attachement.AttachmentSearchService
 import attachement.AttachmentSecurityService
 import attachement.AttachmentUiService
-import grails.artefact.Controller
 import grails.compiler.GrailsCompileStatic
 import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.SpringSecurityService
@@ -15,19 +14,11 @@ import org.springframework.beans.factory.annotation.Value
 import org.taack.Attachment
 import org.taack.Term
 import org.taack.User
-import taack.base.TaackMetaModelService
-import taack.base.TaackSimpleAttachmentService
-import taack.base.TaackSimpleFilterService
-import taack.base.TaackSimpleSaveService
-import taack.base.TaackUiSimpleService
-import taack.ui.base.UiBlockSpecifier
-import taack.ui.base.UiFilterSpecifier
-import taack.ui.base.UiMenuSpecifier
-import taack.ui.base.UiShowSpecifier
-import taack.ui.base.UiTableSpecifier
+import taack.base.*
+import taack.ui.base.*
 import taack.ui.base.block.BlockSpec
 import taack.ui.base.common.ActionIcon
-import taack.ui.base.common.ActionIconStyleModifier
+import taack.ui.base.common.IconStyle
 import taack.ui.base.common.Style
 import taack.ui.base.table.ColumnHeaderFieldSpec
 import taack.ui.utils.Markdown
@@ -238,7 +229,7 @@ class AttachmentController {
                     boolean termHasChildren = !children.isEmpty()
                     rowTree termHasChildren, {
                         rowField term.name
-                        rowLink "See Attachments", ActionIcon.SHOW * ActionIconStyleModifier.SCALE_DOWN, this.&showTermAttachments as MethodClosure, term.id, true
+                        rowLink "See Attachments", ActionIcon.SHOW * IconStyle.SCALE_DOWN, this.&showTermAttachments as MethodClosure, term.id, true
                     }
                     if (termHasChildren) {
                         for (def tc : children) rec(tc)
@@ -271,8 +262,7 @@ class AttachmentController {
         Attachment a = new Attachment()
         User u = new User()
         def attachments = Attachment.executeQuery('from Attachment a where a.active = true and ?0 in elements(a.tags)', term) as List<Attachment>
-        def ts = new UiTableSpecifier()
-        ts.ui Attachment, {
+        def ts = new UiTableSpecifier().ui Attachment, {
             ColumnHeaderFieldSpec.SortableDirection defaultSort
             header {
                 column {
@@ -297,7 +287,7 @@ class AttachmentController {
                 }
             }
             def objects = taackSimpleFilterService.list(Attachment, 20, null, null, defaultSort, attachments*.id)
-            paginate(20, params.int('offset'), objects.bValue)
+            paginate(20, params.long('offset'), objects.bValue)
             for (def att : objects.aValue) {
                 row att, {
                     rowColumn {
@@ -350,7 +340,7 @@ class AttachmentController {
                     rowTree termHasChildren, {
                         rowField term.name
                         rowField term.termGroupConfig?.toString()
-                        rowLink "Select Tag", ActionIcon.SELECT * ActionIconStyleModifier.SCALE_DOWN, this.&selectTagsM2MCloseModal as MethodClosure, term.id, true
+                        rowLink "Select Tag", ActionIcon.SELECT * IconStyle.SCALE_DOWN, this.&selectTagsM2MCloseModal as MethodClosure, term.id, true
                     }
                     if (termHasChildren) {
                         for (def tc : children) rec(tc)
