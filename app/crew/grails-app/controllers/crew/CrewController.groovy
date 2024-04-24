@@ -14,10 +14,11 @@ import org.taack.Attachment
 import org.taack.Role
 import org.taack.User
 import org.taack.UserRole
-import taack.base.TaackMetaModelService
-import taack.base.TaackSimpleFilterService
 import taack.base.TaackSimpleSaveService
-import taack.base.TaackUiSimpleService
+import taack.domain.TaackFilter
+import taack.domain.TaackFilterService
+import taack.domain.TaackMetaModelService
+import taack.render.TaackUiSimpleService
 import taack.ui.base.*
 import taack.ui.base.block.BlockSpec
 import taack.ui.base.common.ActionIcon
@@ -25,13 +26,12 @@ import taack.ui.base.common.IconStyle
 import taack.ui.base.filter.expression.FilterExpression
 import taack.ui.base.filter.expression.Operator
 import taack.ui.base.form.FormSpec
-import taack.ui.base.table.ColumnHeaderFieldSpec
 
 @GrailsCompileStatic
 @Secured(['isAuthenticated()'])
 class CrewController implements WebAttributes {
     TaackUiSimpleService taackUiSimpleService
-    TaackSimpleFilterService taackSimpleFilterService
+    TaackFilterService taackFilterService
     TaackSimpleSaveService taackSimpleSaveService
     SpringSecurityService springSecurityService
     CrewUiService crewUiService
@@ -53,14 +53,14 @@ class CrewController implements WebAttributes {
 
     private UiTableSpecifier buildUserTableHierarchy(final User u) {
 
-        def groups = taackSimpleFilterService.listGroup(User)
+        def groups = taackFilterService.listGroup(User)
 
         boolean hasActions = crewSecurityService.admin
 
-        new UiTableSpecifier().ui User, {
+        new UiTableSpecifier().ui {
             header {
                 column {
-                    fieldHeader 'Username'
+                    fieldHeader u.username_
                     groupFieldHeader 'Business Unit', u.businessUnit_
                 }
                 column {
@@ -108,7 +108,7 @@ class CrewController implements WebAttributes {
                 for (def g : groups) {
                     int oldCount = count
                     rowGroupHeader g
-                    rec(taackSimpleFilterService.listInGroup(g, User, new UiFilterSpecifier().ui(User, {
+                    rec(taackFilterService.listInGroup(g, User, new UiFilterSpecifier().ui(User, {
                         filterFieldExpressionBool new FilterExpression(true, Operator.EQ, filterUser.enabled_)
                     })).aValue, 0)
                     rowGroupFooter "Count: ${count - oldCount}"
@@ -281,45 +281,42 @@ class CrewController implements WebAttributes {
     def editUserRoles(User user) {
         Role role = new Role()
 
-        UiTableSpecifier t = new UiTableSpecifier()
-
-        ColumnHeaderFieldSpec.SortableDirection dir
-        t.ui Role, {
+        UiTableSpecifier t = new UiTableSpecifier().ui {
             header {
                 column {
-                    dir = sortableFieldHeader ColumnHeaderFieldSpec.DefaultSortingDirection.ASC, role.authority_
+                    sortableFieldHeader role.authority_
                 }
                 column {
                     fieldHeader "Action"
                 }
             }
-            def roles = taackSimpleFilterService.list(Role, 20, null, null, dir)
-            paginate(20, params.long('offset'), roles.bValue)
-            for (def r : roles.aValue) {
-                row {
-                    rowColumn {
-                        rowField r.authority
-                    }
-                    rowColumn {
-                        if (!UserRole.exists(user.id, r.id)) {
-                            rowLink "Add ROLE", ActionIcon.ADD, this.&addRoleToUser as MC, [userId: user.id, roleId: r.id]
-                        } else {
-                            rowLink "Remove ROLE", ActionIcon.DELETE, this.&removeRoleToUser as MC, [userId: user.id, roleId: r.id]
+            taackFilterService.getBuilder(Role)
+                    .setMaxNumberOfLine(20)
+                    .setSortOrder(TaackFilter.Order.DESC, role.authority_)
+                    .build()
+                    .iterate { Role r, Long counter ->
+                        row {
+                            rowColumn {
+                                rowField r.authority
+                            }
+                            rowColumn {
+                                if (!UserRole.exists(user.id, r.id)) {
+                                    rowLink "Add ROLE", ActionIcon.ADD, this.&addRoleToUser as MC, [userId: user.id, roleId: r.id]
+                                } else {
+                                    rowLink "Remove ROLE", ActionIcon.DELETE, this.&removeRoleToUser as MC, [userId: user.id, roleId: r.id]
+                                }
+                            }
                         }
                     }
-                }
-            }
         }
 
-        UiBlockSpecifier b = new UiBlockSpecifier()
-        b.ui {
+        taackUiSimpleService.show(new UiBlockSpecifier().ui {
             modal !params.boolean("refresh"), {
                 ajaxBlock "userRoleBlock", {
                     table "Edit User Role for ${user.username}", t, BlockSpec.Width.MAX
                 }
             }
-        }
-        taackUiSimpleService.show(b, buildMenu())
+        }, buildMenu())
     }
 
     @Secured("ROLE_ADMIN")
@@ -341,11 +338,10 @@ class CrewController implements WebAttributes {
         boolean hasActions = crewSecurityService.admin
 
         UiTableSpecifier t = new UiTableSpecifier()
-        ColumnHeaderFieldSpec.SortableDirection dir
-        t.ui UserRole, {
+        t.ui {
             header {
                 column {
-                    dir = sortableFieldHeader "Role Name", new Role().authority_, ColumnHeaderFieldSpec.DefaultSortingDirection.ASC
+                    sortableFieldHeader new Role().authority_
                 }
                 column {
                     fieldHeader "Users"
@@ -357,34 +353,34 @@ class CrewController implements WebAttributes {
                 }
             }
 
-            def roles = taackSimpleFilterService.list(Role, 20, null, null, dir)
-            paginate(20, params.long('offset'), roles.bValue)
-            for (def r : roles.aValue) {
-                row {
-                    rowColumn {
-                        rowField r.authority_
-                    }
-                    rowColumn {
-                        String userList = (UserRole.findAllByRole(r) as List<UserRole>)*.user.username.join(', ')
-                        rowField userList
-                    }
-                    if (hasActions) {
-                        rowColumn {
-                            rowLink "Edit Role", ActionIcon.EDIT, this.&roleForm as MC, r.id
+            taackFilterService.getBuilder(Role)
+                    .setMaxNumberOfLine(20)
+                    .setSortOrder(TaackFilter.Order.DESC, new Role().authority_)
+                    .build()
+                    .iterate { Role r ->
+                        row {
+                            rowColumn {
+                                rowField r.authority_
+                            }
+                            rowColumn {
+                                String userList = (UserRole.findAllByRole(r) as List<UserRole>)*.user.username.join(', ')
+                                rowField userList
+                            }
+                            if (hasActions) {
+                                rowColumn {
+                                    rowLink "Edit Role", ActionIcon.EDIT, this.&roleForm as MC, r.id
+                                }
+                            }
                         }
                     }
-                }
-            }
         }
-        UiBlockSpecifier b = new UiBlockSpecifier()
-        b.ui {
+        UiBlockSpecifier b = new UiBlockSpecifier().ui {
             ajaxBlock "blockList", {
                 table "Roles", t, BlockSpec.Width.MAX, {
                     if (hasActions) action "Create Role", ActionIcon.CREATE, CrewController.&roleForm as MC, true
                 }
             }
         }
-
         taackUiSimpleService.show(b, buildMenu())
     }
 

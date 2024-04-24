@@ -9,12 +9,14 @@ import org.codehaus.groovy.runtime.MethodClosure as MC
 import org.grails.plugins.web.taglib.ApplicationTagLib
 import org.springframework.beans.factory.annotation.Autowired
 import org.taack.Attachment
+import org.taack.AttachmentDescriptor
 import org.taack.Term
 import org.taack.User
 import taack.ast.type.FieldInfo
 import taack.base.TaackSimpleAttachmentService
-import taack.base.TaackSimpleFilterService
 import taack.base.TaackSimpleSaveService
+import taack.domain.TaackFilter
+import taack.domain.TaackFilterService
 import taack.ui.TaackPluginService
 import taack.ui.base.UiFilterSpecifier
 import taack.ui.base.UiFormSpecifier
@@ -31,7 +33,7 @@ import taack.ui.base.table.ColumnHeaderFieldSpec
 @GrailsCompileStatic
 final class AttachmentUiService implements WebAttributes {
     TaackSimpleAttachmentService taackSimpleAttachmentService
-    TaackSimpleFilterService taackSimpleFilterService
+    TaackFilterService taackFilterService
     TaackSimpleSaveService taackSimpleSaveService
     AttachmentSecurityService attachmentSecurityService
     TaackPluginService taackPluginService
@@ -58,6 +60,7 @@ final class AttachmentUiService implements WebAttributes {
 
     Closure<BlockSpec> buildAttachmentsBlock(final MC selectMC = null, final Map selectParams = null, final MC uploadAttachment = AttachmentController.&uploadAttachment as MC, String fileOrigin = null) {
         Attachment a = new Attachment(fileOrigin: fileOrigin)
+        AttachmentDescriptor ad = new AttachmentDescriptor()
         Term term = new Term()
         User u = new User()
 
@@ -65,38 +68,37 @@ final class AttachmentUiService implements WebAttributes {
         f.ui Attachment, selectParams, {
             section "File Metadata Filter", {
                 filterField a.originalName_
-                filterField a.publicName_
-                filterField a.contentTypeCategoryEnum_
-                filterField a.contentTypeEnum_
-                filterField a.type_
-                filterField a.tags_, term.termGroupConfig_
-                filterFieldExpressionBool "Active", new FilterExpression(a.active_, Operator.EQ, true), true
+                filterField a.attachmentDescriptor_, ad.publicName_
+                filterField a.attachmentDescriptor_, ad.contentTypeCategoryEnum_
+                filterField a.attachmentDescriptor_, ad.contentTypeEnum_
+                filterField a.attachmentDescriptor_, ad.type_
+                filterField a.attachmentDescriptor_, ad.tags_, term.termGroupConfig_
+                filterFieldExpressionBool "Active", new FilterExpression(true, Operator.EQ, a.active_), true
             }
             section "File Access Related Filter", {
                 filterField a.userCreated_, u.username_
                 filterField a.userCreated_, u.firstName_
                 filterField a.userCreated_, u.lastName_
                 filterField a.userCreated_, u.subsidiary_
-                filterField a.fileOrigin_, taackPluginService.enumOptions
+                filterField taackPluginService.enumOptions, a.attachmentDescriptor_, ad.fileOrigin_
             }
         }
 
         UiTableSpecifier t = new UiTableSpecifier()
-        ColumnHeaderFieldSpec.SortableDirection defaultSort
-        t.ui Attachment, {
+        t.ui {
             header {
                 column {
                     fieldHeader "Preview"
                 }
                 column {
                     sortableFieldHeader a.originalName_
-                    sortableFieldHeader a.publicName_
-                    defaultSort = sortableFieldHeader ColumnHeaderFieldSpec.DefaultSortingDirection.DESC, a.dateCreated_
+                    sortableFieldHeader a.attachmentDescriptor_, ad.publicName_
+                    sortableFieldHeader a.dateCreated_
                 }
                 column {
                     sortableFieldHeader a.fileSize_
                     sortableFieldHeader a.contentType_
-                    sortableFieldHeader a.fileOrigin_
+                    sortableFieldHeader a.attachmentDescriptor_, ad.fileOrigin_
                 }
                 column {
                     sortableFieldHeader a.userCreated_, u.username_
@@ -106,34 +108,37 @@ final class AttachmentUiService implements WebAttributes {
                     fieldHeader "Actions"
                 }
             }
-            def attachments = taackSimpleFilterService.list(Attachment, 8, f, a, defaultSort)
-            for (def att : attachments.aValue as List<Attachment>) {
-                row att, {
-                    rowColumn {
-                        rowField preview(att.id)
+            taackFilterService.getBuilder(Attachment)
+                    .setMaxNumberOfLine(8)
+                    .addFilter(f)
+                    .setSortOrder(TaackFilter.Order.DESC, a.dateCreated_)
+                    .build()
+                    .iterate { Attachment att ->
+                        row att, {
+                            rowColumn {
+                                rowField preview(att.id)
+                            }
+                            rowColumn {
+                                rowField att.originalName
+                                rowField att.attachmentDescriptor.publicName
+                                rowField att.dateCreated
+                            }
+                            rowColumn {
+                                rowField att.fileSize
+                                rowField att.contentType
+                                rowField att.attachmentDescriptor.fileOrigin
+                            }
+                            rowColumn {
+                                rowField att.userCreated.username
+                                rowField att.userCreated.subsidiary?.toString()
+                            }
+                            rowColumn {
+                                if (selectMC) rowLink "Select", ActionIcon.SELECT, selectMC, att.id, selectParams
+                                else if (attachmentSecurityService.canDownloadFile(att)) rowLink "Download", ActionIcon.DOWNLOAD, AttachmentController.&downloadAttachment as MC, att.id, false
+                                rowLink "Show", ActionIcon.SHOW, AttachmentController.&showAttachment as MC, att.id
+                            }
+                        }
                     }
-                    rowColumn {
-                        rowField att.originalName
-                        rowField att.publicName
-                        rowField att.dateCreated
-                    }
-                    rowColumn {
-                        rowField att.fileSize
-                        rowField att.contentType
-                        rowField att.fileOrigin
-                    }
-                    rowColumn {
-                        rowField att.userCreated.username
-                        rowField att.userCreated.subsidiary?.toString()
-                    }
-                    rowColumn {
-                        if (selectMC) rowLink "Select", ActionIcon.SELECT, selectMC, att.id, selectParams
-                        else if (attachmentSecurityService.canDownloadFile(att)) rowLink "Download", ActionIcon.DOWNLOAD, AttachmentController.&downloadAttachment as MC, att.id, false
-                        rowLink "Show", ActionIcon.SHOW, AttachmentController.&showAttachment as MC, att.id
-                    }
-                }
-            }
-            paginate(8, params.long("offset"), attachments.bValue)
         }
         BlockSpec.buildBlockSpec {
             ajaxBlock "attachmentList", {
@@ -197,7 +202,7 @@ final class AttachmentUiService implements WebAttributes {
     }
 
     UiTableSpecifier buildAttachmentsTable(final Collection<Attachment> attachments, final String fieldName = null, final boolean hasUpload = false) {
-        new UiTableSpecifier().ui Attachment, {
+        new UiTableSpecifier().ui {
             for (Attachment a : attachments.sort { a1, a2 -> a2.dateCreated <=> a1.dateCreated }) {
                 row {
                     rowField preview(a.id)
@@ -216,15 +221,13 @@ final class AttachmentUiService implements WebAttributes {
         }
     }
 
-    static UiFormSpecifier buildAttachmentForm(Attachment attachment, MC returnMethod = AttachmentController.&saveAttachment as MC, Map other = null) {
+    static UiFormSpecifier buildAttachmentDescriptorForm(AttachmentDescriptor attachment, MC returnMethod = AttachmentController.&saveAttachment as MC, Map other = null) {
         new UiFormSpecifier().ui attachment, {
             hiddenField attachment.fileOrigin_
             section "File Info", FormSpec.Width.DOUBLE_WIDTH, {
                 field attachment.type_
                 field attachment.status_
                 field attachment.declaredLanguage_
-                field attachment.filePath_
-                field attachment.active_
                 ajaxField attachment.tags_, AttachmentController.&selectTagsM2M as MC
             }
             section "Security", FormSpec.Width.DOUBLE_WIDTH, {
@@ -232,6 +235,16 @@ final class AttachmentUiService implements WebAttributes {
                 field attachment.isRestrictedToMyBusinessUnit_
                 field attachment.isRestrictedToMyManagers_
                 field attachment.isRestrictedToEmbeddingObjects_
+            }
+            formAction "Save", returnMethod, attachment.id, other, true
+        }
+    }
+
+    static UiFormSpecifier buildAttachmentForm(Attachment attachment, MC returnMethod = AttachmentController.&saveAttachment as MC, Map other = null) {
+        new UiFormSpecifier().ui attachment, {
+            section "File Info", FormSpec.Width.DOUBLE_WIDTH, {
+                field attachment.filePath_
+                ajaxField attachment.attachmentDescriptor_,
             }
             formAction "Save", returnMethod, attachment.id, other, true
         }
@@ -295,37 +308,38 @@ final class AttachmentUiService implements WebAttributes {
 
     UiTableSpecifier buildTermTable(final UiFilterSpecifier f, boolean selectMode = false) {
         Term ti = new Term(parent: new Term())
-        ColumnHeaderFieldSpec.SortableDirection defaultDirection
-        new UiTableSpecifier().ui Term, {
+        new UiTableSpecifier().ui {
             header {
-                defaultDirection = sortableFieldHeader ColumnHeaderFieldSpec.DefaultSortingDirection.ASC, ti.name_
+                sortableFieldHeader ti.name_
                 sortableFieldHeader ti.termGroupConfig_
                 sortableFieldHeader ti.parent_, ti.parent.name_
                 sortableFieldHeader ti.display_
                 sortableFieldHeader ti.active_
                 fieldHeader "Actions"
 
-                def objects = taackSimpleFilterService.list(Term, 30, f, null, defaultDirection)
-                paginate(30, params.long("offset"), objects.bValue)
-
-                for (Term term : objects.aValue) {
-                    row {
-                        rowField term.name
-                        rowField term.termGroupConfig?.toString()
-                        rowField term.parent?.name
-                        rowField term.display.toString()
-                        rowField term.active.toString()
-                        rowColumn {
-                            if (selectMode)
-                                rowLink "Select", ActionIcon.SELECT * IconStyle.SCALE_DOWN, AttachmentController.&selectTermM2OCloseModal as MC, term.id
-                            else {
-                                if (term.active)
-                                    rowLink "Delete term", ActionIcon.DELETE * IconStyle.SCALE_DOWN, AttachmentController.&deleteTerm as MC, term.id, false
-                                rowLink "Edit term", ActionIcon.EDIT * IconStyle.SCALE_DOWN, AttachmentController.&editTerm as MC, term.id, true
+                taackFilterService.getBuilder(Term)
+                        .setMaxNumberOfLine(30)
+                        .addFilter(f)
+                        .setSortOrder(TaackFilter.Order.ASC, ti.name_)
+                        .build()
+                        .iterate { Term term ->
+                            row {
+                                rowField term.name
+                                rowField term.termGroupConfig?.toString()
+                                rowField term.parent?.name
+                                rowField term.display.toString()
+                                rowField term.active.toString()
+                                rowColumn {
+                                    if (selectMode)
+                                        rowLink "Select", ActionIcon.SELECT * IconStyle.SCALE_DOWN, AttachmentController.&selectTermM2OCloseModal as MC, term.id
+                                    else {
+                                        if (term.active)
+                                            rowLink "Delete term", ActionIcon.DELETE * IconStyle.SCALE_DOWN, AttachmentController.&deleteTerm as MC, term.id, false
+                                        rowLink "Edit term", ActionIcon.EDIT * IconStyle.SCALE_DOWN, AttachmentController.&editTerm as MC, term.id, true
+                                    }
+                                }
                             }
                         }
-                    }
-                }
             }
         }
     }

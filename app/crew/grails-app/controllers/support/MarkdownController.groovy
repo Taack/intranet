@@ -7,7 +7,7 @@ import grails.plugin.springsecurity.annotation.Secured
 import org.codehaus.groovy.runtime.MethodClosure
 import org.taack.Attachment
 import taack.base.TaackSimpleSaveService
-import taack.base.TaackUiSimpleService
+import taack.render.TaackUiSimpleService
 import taack.ui.base.UiBlockSpecifier
 import taack.ui.base.block.BlockSpec
 import taack.ui.utils.Markdown

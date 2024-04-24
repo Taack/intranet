@@ -6,8 +6,8 @@ import grails.compiler.GrailsCompileStatic
 import org.codehaus.groovy.runtime.MethodClosure
 import org.grails.datastore.gorm.GormEntity
 import org.taack.Attachment
-import taack.base.TaackSearchService
 import taack.base.TaackSimpleAttachmentService
+import taack.domain.TaackSearchService
 import taack.solr.SolrFieldType
 import taack.solr.SolrSpecifier
 import taack.ui.base.UiBlockSpecifier

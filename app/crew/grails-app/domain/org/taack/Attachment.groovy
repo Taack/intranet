@@ -1,80 +1,41 @@
 package org.taack
 
-import app.config.AttachmentContentType
-import app.config.AttachmentContentTypeCategory
-import app.config.AttachmentType
-import app.config.SupportedLanguage
 import grails.compiler.GrailsCompileStatic
-import groovy.transform.AutoClone
-import groovy.transform.CompileStatic
 import taack.ast.annotation.TaackFieldEnum
-
-@CompileStatic
-enum AttachmentStatus {
-    proposal,
-    valid,
-    toFix,
-    obsolete
-}
+import taack.domain.IDomainHistory
 
 @TaackFieldEnum
 @GrailsCompileStatic
-class Attachment {
+class Attachment implements IDomainHistory<Attachment> {
 
     User userCreated
     Date dateCreated
     User userUpdated
     Date lastUpdated
 
-    AttachmentType type
-    String fileOrigin
-
-    AttachmentStatus status = AttachmentStatus.proposal
-    SupportedLanguage declaredLanguage
-
     String filePath
     String originalName
-    String publicName
     Integer version
     String contentType
-    AttachmentContentType contentTypeEnum
-    AttachmentContentTypeCategory contentTypeCategoryEnum
 
     Boolean active = true
-    Boolean isInternal
-    Boolean isRestrictedToMyBusinessUnit
-    Boolean isRestrictedToMySubsidiary
-    Boolean isRestrictedToMyManagers
-    Boolean isRestrictedToEmbeddingObjects
 
     Long fileSize = 0
 
     String contentShaOne
     Attachment nextVersion
-
-    Set<Term> tags
+    AttachmentDescriptor attachmentDescriptor
 
     static constraints = {
         userUpdated nullable: true
+        attachmentDescriptor nullable: true
         filePath widget: "filePath"
-        isRestrictedToMyBusinessUnit nullable: true
-        isRestrictedToMySubsidiary nullable: true
-        isRestrictedToMyManagers nullable: true
-        isRestrictedToEmbeddingObjects nullable: true
-        contentTypeEnum nullable: true
-        contentTypeCategoryEnum nullable: true
-        publicName nullable: true
-        type nullable: true
-        status nullable: true
         lastUpdated nullable: true
-        fileOrigin nullable: true
-        declaredLanguage nullable: true
         nextVersion nullable: true, unique: true//, validator: { Attachment val, Attachment obj ->
         active validator: { boolean val, Attachment obj ->
             if (val && obj.nextVersion)
                 return "attachment.active.hasNextVersion.error"
         }
-        isInternal nullable: true
     }
 
     static mapping = {
@@ -82,12 +43,8 @@ class Attachment {
         originalName type: 'text'
     }
 
-    static hasMany = [
-            tags: Term
-    ]
-
     String getName() {
-        publicName ?: originalName
+        attachmentDescriptor.publicName ?: originalName
     }
 
     String getExtension() {
@@ -102,5 +59,31 @@ class Attachment {
     @Override
     String toString() {
         return getName() ?: "[$id]"
+    }
+
+    @Override
+    Attachment cloneDirectObjectData() {
+        if (this.id) {
+            Attachment oldValue = new Attachment()
+            //  oldValue.dateCreated = lastUpdated
+            oldValue.userCreated = userUpdated
+            log.info "Attachment::cloneDirectObjectData ${version} ${userCreated}: ${dateCreated}, ${userUpdated}: ${lastUpdated} for ${name}"
+            oldValue.filePath = filePath
+            oldValue.originalName = originalName
+            oldValue.contentType = contentType
+            oldValue.active = active
+            oldValue.fileSize = fileSize
+            oldValue.contentShaOne = contentShaOne
+
+            oldValue.active = false
+            oldValue.nextVersion = this
+            return oldValue
+        }
+        return null
+    }
+
+    @Override
+    List<Attachment> getHistory() {
+        return null
     }
 }

@@ -12,9 +12,14 @@ import org.codehaus.groovy.runtime.MethodClosure
 import org.codehaus.groovy.runtime.MethodClosure as MC
 import org.springframework.beans.factory.annotation.Value
 import org.taack.Attachment
+import org.taack.AttachmentDescriptor
 import org.taack.Term
 import org.taack.User
 import taack.base.*
+import taack.domain.TaackFilter
+import taack.domain.TaackFilterService
+import taack.domain.TaackMetaModelService
+import taack.render.TaackUiSimpleService
 import taack.ui.base.*
 import taack.ui.base.block.BlockSpec
 import taack.ui.base.common.ActionIcon
@@ -34,7 +39,7 @@ class AttachmentController {
     AttachmentSecurityService attachmentSecurityService
     TaackSimpleSaveService taackSimpleSaveService
     SpringSecurityService springSecurityService
-    TaackSimpleFilterService taackSimpleFilterService
+    TaackFilterService taackFilterService
 
     @Value('${intranet.root}')
     String rootPath
@@ -120,7 +125,17 @@ class AttachmentController {
         taackUiSimpleService.show(new UiBlockSpecifier().ui {
             modal {
                 ajaxBlock "uploadAttachment", {
-                    form "Upload a File", AttachmentUiService.buildAttachmentForm(new Attachment(fileOrigin: controllerName)), BlockSpec.Width.MAX
+                    form "Upload a File", AttachmentUiService.buildAttachmentForm(new Attachment()), BlockSpec.Width.MAX
+                }
+            }
+        })
+    }
+
+    def editAttachmentDescriptor(AttachmentDescriptor attachment) {
+        taackUiSimpleService.show(new UiBlockSpecifier().ui {
+            modal {
+                ajaxBlock "uploadAttachmentDescriptor", {
+                    form "Edit File Metadata", AttachmentUiService.buildAttachmentDescriptorForm(new Attachment()), BlockSpec.Width.MAX
                 }
             }
         })
@@ -260,23 +275,23 @@ class AttachmentController {
 
     def showTermAttachments(Term term) {
         Attachment a = new Attachment()
+        AttachmentDescriptor ad = new AttachmentDescriptor()
         User u = new User()
         def attachments = Attachment.executeQuery('from Attachment a where a.active = true and ?0 in elements(a.tags)', term) as List<Attachment>
-        def ts = new UiTableSpecifier().ui Attachment, {
-            ColumnHeaderFieldSpec.SortableDirection defaultSort
+        def ts = new UiTableSpecifier().ui {
             header {
                 column {
                     fieldHeader "Preview"
                 }
                 column {
                     sortableFieldHeader a.originalName_
-                    sortableFieldHeader a.publicName_
-                    defaultSort = sortableFieldHeader ColumnHeaderFieldSpec.DefaultSortingDirection.DESC, a.dateCreated_
+                    sortableFieldHeader a.attachmentDescriptor_, ad.publicName_
+                    sortableFieldHeader a.dateCreated_
                 }
                 column {
                     sortableFieldHeader a.fileSize_
                     sortableFieldHeader a.contentType_
-                    sortableFieldHeader a.fileOrigin_
+                    sortableFieldHeader a.attachmentDescriptor_, ad.fileOrigin_
                 }
                 column {
                     sortableFieldHeader a.userCreated_, u.username_
@@ -286,30 +301,35 @@ class AttachmentController {
                     fieldHeader "Actions"
                 }
             }
-            def objects = taackSimpleFilterService.list(Attachment, 20, null, null, defaultSort, attachments*.id)
-            paginate(20, params.long('offset'), objects.bValue)
-            for (def att : objects.aValue) {
-                row att, {
+
+            taackFilterService.getBuilder(Attachment)
+                    .setSortOrder(TaackFilter.Order.DESC, a.dateCreated_)
+                    .setMaxNumberOfLine(20)
+                    .addRestrictedIds(attachments*.id as Long[])
+                    .build().iterate { Attachment aIt, Long counter ->
+
+                row {
                     rowColumn {
-                        rowField attachmentUiService.preview(att.id)
+                        rowField attachmentUiService.preview(aIt.id)
                     }
                     rowColumn {
-                        rowField att.originalName
-                        rowField att.publicName
-                        rowField att.dateCreated
+                        rowField aIt.originalName
+                        rowField aIt.attachmentDescriptor.publicName
+                        rowField aIt.dateCreated
                     }
                     rowColumn {
-                        rowField att.fileSize
-                        rowField att.contentType
-                        rowField att.fileOrigin
+                        rowField aIt.fileSize
+                        rowField aIt.contentType
+                        rowField aIt.attachmentDescriptor.fileOrigin
                     }
                     rowColumn {
-                        rowField att.userCreated.username
-                        rowField att.userCreated.subsidiary.toString()
+                        rowField aIt.userCreated.username
+                        rowField aIt.userCreated.subsidiary.toString()
                     }
                     rowColumn {
-                        if (attachmentSecurityService.canDownloadFile(att)) rowLink "Download", ActionIcon.DOWNLOAD, AttachmentController.&downloadAttachment as MethodClosure, att.id, false
-                        rowLink "Show", ActionIcon.SHOW, AttachmentController.&showAttachment as MethodClosure, att.id
+                        if (attachmentSecurityService.canDownloadFile(aIt))
+                            rowLink "Download", ActionIcon.DOWNLOAD, AttachmentController.&downloadAttachment as MC, aIt.id, false
+                        rowLink "Show", ActionIcon.SHOW, AttachmentController.&showAttachment as MC, aIt.id
                     }
                 }
             }
@@ -324,11 +344,12 @@ class AttachmentController {
     def selectTagsM2M() {
         UiTableSpecifier ts = new UiTableSpecifier()
         List<Term> parentTerms = Term.findAllByActiveAndParentIsNull(true)
+        Term t = new Term()
 
-        ts.ui Term, {
+        ts.ui {
             header {
-                fieldHeader "Name"
-                fieldHeader "Group"
+                fieldHeader t.name_
+                fieldHeader t.termGroupConfig_
                 fieldHeader "Action"
             }
             Closure rec
@@ -349,9 +370,9 @@ class AttachmentController {
             }
 
             if (parentTerms) {
-                for (Term t in parentTerms) {
-                    if (t) {
-                        rec(t)
+                for (Term pt in parentTerms) {
+                    if (pt) {
+                        rec(pt)
                     }
                 }
             }
@@ -416,7 +437,7 @@ class AttachmentController {
         UiTableSpecifier t = attachmentUiService.buildTermTable f, true
         UiBlockSpecifier b = new UiBlockSpecifier()
         b.ui {
-            modal !params.boolean("refresh"), {
+            modal {
                 ajaxBlock "termListSelect", {
                     tableFilter "Filter", f, "Terms", t, BlockSpec.Width.MAX
                 }
