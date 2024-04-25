@@ -1,8 +1,12 @@
 package org.taack
 
+import app.config.AttachmentContentType
+import app.config.AttachmentContentTypeCategory
 import grails.compiler.GrailsCompileStatic
 import taack.ast.annotation.TaackFieldEnum
 import taack.domain.IDomainHistory
+
+import java.nio.file.Files
 
 @TaackFieldEnum
 @GrailsCompileStatic
@@ -25,13 +29,16 @@ class Attachment implements IDomainHistory<Attachment> {
     String contentShaOne
     Attachment nextVersion
     AttachmentDescriptor attachmentDescriptor
+    AttachmentContentType contentTypeEnum
+    AttachmentContentTypeCategory contentTypeCategoryEnum
+
 
     static constraints = {
         userUpdated nullable: true
         attachmentDescriptor nullable: true
         filePath widget: "filePath"
         lastUpdated nullable: true
-        nextVersion nullable: true, unique: true//, validator: { Attachment val, Attachment obj ->
+        nextVersion nullable: true, unique: true
         active validator: { boolean val, Attachment obj ->
             if (val && obj.nextVersion)
                 return "attachment.active.hasNextVersion.error"
@@ -65,11 +72,12 @@ class Attachment implements IDomainHistory<Attachment> {
     Attachment cloneDirectObjectData() {
         if (this.id) {
             Attachment oldValue = new Attachment()
-            //  oldValue.dateCreated = lastUpdated
             oldValue.userCreated = userUpdated
             log.info "Attachment::cloneDirectObjectData ${version} ${userCreated}: ${dateCreated}, ${userUpdated}: ${lastUpdated} for ${name}"
             oldValue.filePath = filePath
             oldValue.originalName = originalName
+            oldValue.contentTypeEnum = contentTypeEnum
+            oldValue.contentTypeCategoryEnum = contentTypeCategoryEnum
             oldValue.contentType = contentType
             oldValue.active = active
             oldValue.fileSize = fileSize
@@ -86,4 +94,5 @@ class Attachment implements IDomainHistory<Attachment> {
     List<Attachment> getHistory() {
         return null
     }
+
 }

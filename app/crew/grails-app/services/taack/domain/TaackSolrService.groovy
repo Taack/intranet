@@ -1,4 +1,4 @@
-package taack.base
+package taack.domain
 
 import grails.compiler.GrailsCompileStatic
 import org.grails.datastore.gorm.GormEntity

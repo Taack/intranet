@@ -13,8 +13,7 @@ import org.taack.AttachmentDescriptor
 import org.taack.Term
 import org.taack.User
 import taack.ast.type.FieldInfo
-import taack.base.TaackSimpleAttachmentService
-import taack.base.TaackSimpleSaveService
+import taack.domain.TaackAttachmentService
 import taack.domain.TaackFilter
 import taack.domain.TaackFilterService
 import taack.ui.TaackPluginService
@@ -28,13 +27,11 @@ import taack.ui.base.common.IconStyle
 import taack.ui.base.filter.expression.FilterExpression
 import taack.ui.base.filter.expression.Operator
 import taack.ui.base.form.FormSpec
-import taack.ui.base.table.ColumnHeaderFieldSpec
 
 @GrailsCompileStatic
 final class AttachmentUiService implements WebAttributes {
-    TaackSimpleAttachmentService taackSimpleAttachmentService
+    TaackAttachmentService taackAttachmentService
     TaackFilterService taackFilterService
-    TaackSimpleSaveService taackSimpleSaveService
     AttachmentSecurityService attachmentSecurityService
     TaackPluginService taackPluginService
 
@@ -43,13 +40,13 @@ final class AttachmentUiService implements WebAttributes {
 
     String preview(final Long id) {
         if (!id) return "<span/>"
-        if (params.boolean("isPdf")) """<img style="max-height: 64px; max-width: 64px;" src="file://${taackSimpleAttachmentService.attachmentPreview(Attachment.get(id)).path}">"""
+        if (params.boolean("isPdf")) """<img style="max-height: 64px; max-width: 64px;" src="file://${taackAttachmentService.attachmentPreview(Attachment.get(id)).path}">"""
         else """<div style="text-align: center;"><img style="max-height: 64px; max-width: 64px;" src="${applicationTagLib.createLink(controller: 'attachment', action: 'preview', id: id)}"></div>"""
     }
 
-    String preview(final Long id, TaackSimpleAttachmentService.PreviewFormat format) {
+    String preview(final Long id, TaackAttachmentService.PreviewFormat format) {
         if (!id) return "<span/>"
-        if (params.boolean("isPdf")) """<img style="max-height: 64px; max-width: 64px;" src="file://${taackSimpleAttachmentService.attachmentPreview(Attachment.get(id), format).path}">"""
+        if (params.boolean("isPdf")) """<img style="max-height: 64px; max-width: 64px;" src="file://${taackAttachmentService.attachmentPreview(Attachment.get(id), format).path}">"""
         else """<div style="text-align: center;"><img style="max-height: ${format.pixelHeight}px; max-width: ${format.pixelWidth}px;" src="${applicationTagLib.createLink(controller: 'attachment', action: 'preview', id: id, params: [format: format.toString()])}"></div>"""
     }
 
@@ -69,11 +66,11 @@ final class AttachmentUiService implements WebAttributes {
             section "File Metadata Filter", {
                 filterField a.originalName_
                 filterField a.attachmentDescriptor_, ad.publicName_
-                filterField a.attachmentDescriptor_, ad.contentTypeCategoryEnum_
-                filterField a.attachmentDescriptor_, ad.contentTypeEnum_
+                filterField a.contentTypeCategoryEnum_
+                filterField a.contentTypeEnum_
                 filterField a.attachmentDescriptor_, ad.type_
                 filterField a.attachmentDescriptor_, ad.tags_, term.termGroupConfig_
-                filterFieldExpressionBool "Active", new FilterExpression(true, Operator.EQ, a.active_), true
+                filterFieldExpressionBool "Active", new FilterExpression(true, Operator.EQ, a.active_)
             }
             section "File Access Related Filter", {
                 filterField a.userCreated_, u.username_
@@ -108,12 +105,11 @@ final class AttachmentUiService implements WebAttributes {
                     fieldHeader "Actions"
                 }
             }
-            taackFilterService.getBuilder(Attachment)
+            iterate(taackFilterService.getBuilder(Attachment)
                     .setMaxNumberOfLine(8)
                     .addFilter(f)
                     .setSortOrder(TaackFilter.Order.DESC, a.dateCreated_)
-                    .build()
-                    .iterate { Attachment att ->
+                    .build()) { Attachment att ->
                         row att, {
                             rowColumn {
                                 rowField preview(att.id)
@@ -151,8 +147,8 @@ final class AttachmentUiService implements WebAttributes {
     }
 
     Closure<BlockSpec> buildShowAttachmentBlock(final Attachment attachment, final String fieldName = "") {
-        String iFrame = TaackSimpleAttachmentService.showIFrame(attachment)
-        def converterExtensions = TaackSimpleAttachmentService.converterExtensions(attachment)
+        String iFrame = TaackAttachmentService.showIFrame(attachment)
+        def converterExtensions = TaackAttachmentService.converterExtensions(attachment)
         BlockSpec.buildBlockSpec {
             if (iFrame) {
                 ajaxBlock "showAttachment${fieldName}IFrame", {
@@ -179,6 +175,7 @@ final class AttachmentUiService implements WebAttributes {
     }
 
     UiShowSpecifier buildShowAttachment(final Attachment attachment, boolean hasPreview = true) {
+
         new UiShowSpecifier().ui attachment, {
             if (hasPreview)
                 section "Preview", {
@@ -192,10 +189,10 @@ final class AttachmentUiService implements WebAttributes {
 
             }
             section "Attachment Meta", {
-                field "Type", attachment.type_
-                field "Public Name", attachment.publicName_
-                field "Is Internal", attachment.isInternal_
-                field "Language", attachment.declaredLanguage_
+                field "Type", attachment.attachmentDescriptor.type_
+                field "Public Name", attachment.attachmentDescriptor.publicName_
+                field "Is Internal", attachment.attachmentDescriptor.isInternal_
+                field "Language", attachment.attachmentDescriptor.declaredLanguage_
             }
             showAction "Display Linked Data", AttachmentController.&showLinkedData as MC, attachment.id
         }
@@ -221,7 +218,7 @@ final class AttachmentUiService implements WebAttributes {
         }
     }
 
-    static UiFormSpecifier buildAttachmentDescriptorForm(AttachmentDescriptor attachment, MC returnMethod = AttachmentController.&saveAttachment as MC, Map other = null) {
+    static UiFormSpecifier buildAttachmentDescriptorForm(AttachmentDescriptor attachment, MC returnMethod = AttachmentController.&saveAttachmentDescriptor as MC, Map other = null) {
         new UiFormSpecifier().ui attachment, {
             hiddenField attachment.fileOrigin_
             section "File Info", FormSpec.Width.DOUBLE_WIDTH, {
@@ -244,32 +241,9 @@ final class AttachmentUiService implements WebAttributes {
         new UiFormSpecifier().ui attachment, {
             section "File Info", FormSpec.Width.DOUBLE_WIDTH, {
                 field attachment.filePath_
-                ajaxField attachment.attachmentDescriptor_,
+                ajaxField attachment.attachmentDescriptor_, AttachmentController.&editAttachmentDescriptor as MC
             }
             formAction "Save", returnMethod, attachment.id, other, true
-        }
-    }
-
-    Attachment saveAttachment() {
-        Long aId = params.long('id')
-        if (aId) {
-            def previous = taackSimpleAttachmentService.copyAttachment(Attachment.get(aId), new Attachment(), true)
-            def a = taackSimpleSaveService.prepareSave(Attachment)
-            taackSimpleAttachmentService.postPrepareSave(a)
-            if (!a.originalName && !a.fileSize) {
-                a.originalName = previous.originalName
-                a.fileSize = previous.fileSize
-                a.contentShaOne = previous.contentShaOne
-            }
-            a.save(flush: true)
-            previous.nextVersion = a
-            previous.save()
-            return a
-        } else {
-            def a = taackSimpleSaveService.prepareSave(Attachment)
-            taackSimpleAttachmentService.postPrepareSave(a)
-            a.save()
-            return a
         }
     }
 
@@ -300,8 +274,8 @@ final class AttachmentUiService implements WebAttributes {
                 section "Parent", {
                     filterField t.parent_, t.parent.name_
                 }
-                filterFieldExpressionBool "Display", new FilterExpression(true, Operator.EQ, t.display_), true
-                filterFieldExpressionBool "Active", new FilterExpression(true, Operator.EQ, t.active_), true
+                filterFieldExpressionBool "Display", new FilterExpression(true, Operator.EQ, t.display_)
+                filterFieldExpressionBool "Active", new FilterExpression(true, Operator.EQ, t.active_)
             }
         }
     }
@@ -317,12 +291,11 @@ final class AttachmentUiService implements WebAttributes {
                 sortableFieldHeader ti.active_
                 fieldHeader "Actions"
 
-                taackFilterService.getBuilder(Term)
+                iterate(taackFilterService.getBuilder(Term)
                         .setMaxNumberOfLine(30)
                         .addFilter(f)
                         .setSortOrder(TaackFilter.Order.ASC, ti.name_)
-                        .build()
-                        .iterate { Term term ->
+                        .build()) { Term term ->
                             row {
                                 rowField term.name
                                 rowField term.termGroupConfig?.toString()

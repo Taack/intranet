@@ -1,5 +1,6 @@
-package taack.base
+package taack.domain
 
+import app.config.AttachmentContentType
 import grails.artefact.Controller
 import grails.compiler.GrailsCompileStatic
 import grails.plugin.springsecurity.SpringSecurityService
@@ -16,8 +17,7 @@ import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.multipart.MultipartHttpServletRequest
 import org.taack.User
 import taack.ast.type.FieldInfo
-import taack.domain.IDomainHistory
-import taack.render.TaackUiSimpleService
+import taack.render.TaackUiService
 import taack.ui.base.UiBlockSpecifier
 import taack.ui.base.helper.Utils
 
@@ -28,9 +28,9 @@ import javax.imageio.stream.ImageInputStream
 import java.security.MessageDigest
 
 @GrailsCompileStatic
-class TaackSimpleSaveService implements Controller {
+class TaackSaveService implements Controller {
     SpringSecurityService springSecurityService
-    TaackUiSimpleService taackUiSimpleService
+    TaackUiService taackUiService
 
     static Map<String, File> filePaths = [:]
 
@@ -208,6 +208,9 @@ class TaackSimpleSaveService implements Controller {
                     params.remove("filePath")
                     if (gormEntity.hasProperty("contentType")) {
                         gormEntity["contentType"] = mf.contentType
+                        if (gormEntity.hasProperty("contentTypeEnum")) {
+                            gormEntity["contentTypeEnum"] = AttachmentContentType.fromMimeType(mf.contentType)
+                        }
                     }
                     if (gormEntity.hasProperty("originalName")) {
                         gormEntity["originalName"] = mf.originalFilename
@@ -329,7 +332,7 @@ class TaackSimpleSaveService implements Controller {
                 render """__ErrorKeyStart__${it.key}:<ul class="errorKey">${it.value.collect { """<li class="errorEntry">$it</li>""" }.join('')}</ul>__ErrorKeyEnd__"""
             }.join('')
         } else {
-            render taackUiSimpleService.visit(blockSpecifier, true)
+            render taackUiService.visit(blockSpecifier, true)
         }
     }
 

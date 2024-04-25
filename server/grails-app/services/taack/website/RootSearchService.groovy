@@ -2,7 +2,7 @@ package taack.website
 
 import grails.compiler.GrailsCompileStatic
 import org.codehaus.groovy.runtime.MethodClosure
-import taack.base.TaackSearchService
+import taack.domain.TaackSearchService
 import taack.ui.base.UiBlockSpecifier
 
 @GrailsCompileStatic

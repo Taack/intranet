@@ -19,9 +19,8 @@ import taack.ui.base.common.ActionIcon
 import taack.ui.base.common.IconStyle
 import taack.ui.base.filter.expression.FilterExpression
 import taack.ui.base.filter.expression.Operator
-import taack.ui.base.table.ColumnHeaderFieldSpec
 
-import static taack.render.TaackUiSimpleService.tr
+import static taack.render.TaackUiService.tr
 
 @GrailsCompileStatic
 class CrewUiService implements WebAttributes {
@@ -69,11 +68,10 @@ class CrewUiService implements WebAttributes {
                 }
             }
 
-            taackFilterService.getBuilder(Role)
+            iterate(taackFilterService.getBuilder(Role)
                     .setMaxNumberOfLine(20)
                     .setSortOrder(TaackFilter.Order.DESC, u.authority_)
-                    .build()
-                    .iterate { Role r, Long counter ->
+                    .build()) { Role r, Long counter ->
                         row {
                             rowColumn {
                                 rowField r.authority
@@ -112,72 +110,71 @@ class CrewUiService implements WebAttributes {
             }
             boolean canSwitchUser = crewSecurityService.canSwitchUser()
 
-            taackFilterService.getBuilder(User)
+            iterate(taackFilterService.getBuilder(User)
                     .setMaxNumberOfLine(10)
                     .setSortOrder(TaackFilter.Order.DESC, u.dateCreated_)
                     .addFilter(f)
-                    .build()
-                    .iterate { User ru, Long counter ->
-                        boolean hasActions = crewSecurityService.canEdit(ru)
-                        row {
-                                if (!hasSelect) {
-                                    Attachment picture = ru.attachments.find { it.attachmentDescriptor.type == AttachmentType.mainPicture }
-                                    rowColumn {
-                                        rowField attachmentUiService.preview(picture?.id)
-                                    }
-                                }
-                                rowColumn {
-                                    rowLink tr('show.user.label'), ActionIcon.SHOW * IconStyle.SCALE_DOWN, CrewController.&showUser as MC, ru.id, true
-                                    if (hasSelect) rowLink "Select User", ActionIcon.SELECT * IconStyle.SCALE_DOWN, ru.id, ru.toString(), true
-                                    else if (hasActions) {
-                                        rowLink "Edit User", ActionIcon.EDIT * IconStyle.SCALE_DOWN, CrewController.&editUser as MC, ru.id
-                                        if (canSwitchUser && ru.enabled) rowLink "Switch User", ActionIcon.SHOW * IconStyle.SCALE_DOWN, CrewController.&switchUser as MC, [id: ru.id], false
-                                        else if (canSwitchUser && !ru.enabled) {
-                                            rowLink "Replace By User", ActionIcon.MERGE * IconStyle.SCALE_DOWN, CrewController.&replaceUser as MC, ru.id, false
-                                            rowLink "Remove User", ActionIcon.DELETE * IconStyle.SCALE_DOWN, CrewController.&deleteUser as MC, ru.id, false
-                                        }
-                                    }
-
-                                    rowField ru.username_
-                                    rowField ru.dateCreated_
-                                }
-                                rowColumn {
-                                    rowField ru.subsidiary_
-                                    rowField ru.manager?.username
-                                }
-                                rowColumn {
-                                    rowField ru.lastName_
-                                    rowField ru.firstName_
-                                }
-                                rowColumn {
-                                    if (hasActions && !hasSelect) rowLink "Edit Roles", ActionIcon.EDIT * IconStyle.SCALE_DOWN, CrewController.&editUserRoles as MC, ru.id, true
-                                    rowField ru.authorities*.authority.join(', ')
-                                }
-                            }
+                    .build()) { User ru ->
+                row {
+                    boolean hasActions = crewSecurityService.canEdit(ru)
+                    if (!hasSelect) {
+                        Attachment picture = ru.attachments.find { it.attachmentDescriptor.type == AttachmentType.mainPicture }
+                        rowColumn {
+                            rowField attachmentUiService.preview(picture?.id)
                         }
                     }
-        }
+                    rowColumn {
+                        rowLink tr('show.user.label'), ActionIcon.SHOW * IconStyle.SCALE_DOWN, CrewController.&showUser as MC, ru.id, true
+                        if (hasSelect) rowLink "Select User", ActionIcon.SELECT * IconStyle.SCALE_DOWN, ru.id, ru.toString(), true
+                        else if (hasActions) {
+                            rowLink "Edit User", ActionIcon.EDIT * IconStyle.SCALE_DOWN, CrewController.&editUser as MC, ru.id
+                            if (canSwitchUser && ru.enabled) rowLink "Switch User", ActionIcon.SHOW * IconStyle.SCALE_DOWN, CrewController.&switchUser as MC, [id: ru.id], false
+                            else if (canSwitchUser && !ru.enabled) {
+                                rowLink "Replace By User", ActionIcon.MERGE * IconStyle.SCALE_DOWN, CrewController.&replaceUser as MC, ru.id, false
+                                rowLink "Remove User", ActionIcon.DELETE * IconStyle.SCALE_DOWN, CrewController.&deleteUser as MC, ru.id, false
+                            }
+                        }
 
-        static UiBlockSpecifier messageBlock(String message) {
-            new UiBlockSpecifier().ui {
-                modal {
-                    custom "Message", message
+                        rowField ru.username_
+                        rowField ru.dateCreated_
+                    }
+                    rowColumn {
+                        rowField ru.subsidiary_
+                        rowField ru.manager?.username
+                    }
+                    rowColumn {
+                        rowField ru.lastName_
+                        rowField ru.firstName_
+                    }
+                    rowColumn {
+                        if (hasActions && !hasSelect) rowLink "Edit Roles", ActionIcon.EDIT * IconStyle.SCALE_DOWN, CrewController.&editUserRoles as MC, ru.id, true
+                        rowField ru.authorities*.authority.join(', ')
+                    }
                 }
             }
         }
-
-        UiShowSpecifier buildUserShow(User u, boolean update = false) {
-            new UiShowSpecifier().ui(u, {
-                field "Picture", attachmentUiService.previewFull(u.mainPictureId, update ? "${System.currentTimeMillis()}" : null)
-                showAction "Change Picture", CrewController.&updateUserMainPicture as MC, u.id, true
-                field "User Name", u.username
-                field "First Name", u.firstName
-                field "Last Name", u.lastName
-                field "BU", u.businessUnit?.toString()
-                field "Main Subsidiary", u.subsidiary?.toString()
-                field "Mail", u.mail
-                field "Manager", u.manager?.toString()
-            })
-        }
-
     }
+
+    static UiBlockSpecifier messageBlock(String message) {
+        new UiBlockSpecifier().ui {
+            modal {
+                custom "Message", message
+            }
+        }
+    }
+
+    UiShowSpecifier buildUserShow(User u, boolean update = false) {
+        new UiShowSpecifier().ui(u, {
+            field "Picture", attachmentUiService.previewFull(u.mainPictureId, update ? "${System.currentTimeMillis()}" : null)
+            showAction "Change Picture", CrewController.&updateUserMainPicture as MC, u.id, true
+            field "User Name", u.username
+            field "First Name", u.firstName
+            field "Last Name", u.lastName
+            field "BU", u.businessUnit?.toString()
+            field "Main Subsidiary", u.subsidiary?.toString()
+            field "Mail", u.mail
+            field "Manager", u.manager?.toString()
+        })
+    }
+
+}

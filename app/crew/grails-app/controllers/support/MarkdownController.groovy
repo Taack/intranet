@@ -6,8 +6,8 @@ import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.annotation.Secured
 import org.codehaus.groovy.runtime.MethodClosure
 import org.taack.Attachment
-import taack.base.TaackSimpleSaveService
-import taack.render.TaackUiSimpleService
+import taack.domain.TaackSaveService
+import taack.render.TaackUiService
 import taack.ui.base.UiBlockSpecifier
 import taack.ui.base.block.BlockSpec
 import taack.ui.utils.Markdown
@@ -15,9 +15,9 @@ import taack.ui.utils.Markdown
 @GrailsCompileStatic
 @Secured(['isAuthenticated()'])
 class MarkdownController {
-    TaackUiSimpleService taackUiSimpleService
+    TaackUiService taackUiService
     AttachmentUiService attachmentUiService
-    TaackSimpleSaveService taackSimpleSaveService
+    TaackSaveService taackSaveService
 
     def showPreview(String body) {
         render Markdown.getContentHtml(body)
@@ -28,7 +28,7 @@ class MarkdownController {
             redirect action: "uploadAttachment", params: [directUpload: true, isAjax: true]
             return
         }
-        taackUiSimpleService.show(new UiBlockSpecifier().ui {
+        taackUiService.show(new UiBlockSpecifier().ui {
             modal {
                 inline(attachmentUiService.buildAttachmentsBlock(MarkdownController.&selectAttachmentCloseModal as MethodClosure, null, MarkdownController.&uploadAttachment as MethodClosure))
             }
@@ -40,11 +40,11 @@ class MarkdownController {
         block.ui {
             closeModal "/attachment/preview/${attachment.id}", attachment.toString()
         }
-        taackUiSimpleService.show(block)
+        taackUiService.show(block)
     }
 
     def uploadAttachment() {
-        taackUiSimpleService.show(new UiBlockSpecifier().ui {
+        taackUiService.show(new UiBlockSpecifier().ui {
             modal {
                 ajaxBlock "uploadAttachment", {
                     form "Upload a File", AttachmentUiService.buildAttachmentForm(new Attachment(), MarkdownController.&saveAttachment as MethodClosure, [directUpload: params['directUpload'] == "true"]), BlockSpec.Width.MAX
@@ -55,19 +55,19 @@ class MarkdownController {
 
     @Transactional
     def saveAttachment() {
-        if (taackUiSimpleService.isProcessingForm()) {
-            Attachment a = attachmentUiService.saveAttachment()
+        if (taackUiService.isProcessingForm()) {
+            Attachment a = taackSaveService.save(Attachment)
             a.save(flush: true, failOnError: true)
             if (params['directUpload'] == "true") {
                 selectAttachmentCloseModal(a)
             } else {
-                taackUiSimpleService.cleanForm()
-                taackSimpleSaveService.displayBlockOrRenderErrors(a, new UiBlockSpecifier().ui {
+                taackUiService.cleanForm()
+                taackSaveService.displayBlockOrRenderErrors(a, new UiBlockSpecifier().ui {
                     closeModalAndUpdateBlock attachmentUiService.buildAttachmentsBlock(MarkdownController.&selectAttachmentCloseModal as MethodClosure, null, MarkdownController.&uploadAttachment as MethodClosure)
                 })
             }
         } else {
-            taackUiSimpleService.show(new UiBlockSpecifier().ui {
+            taackUiService.show(new UiBlockSpecifier().ui {
                 inline(attachmentUiService.buildAttachmentsBlock(MarkdownController.&selectAttachmentCloseModal as MethodClosure, null, MarkdownController.&uploadAttachment as MethodClosure))
             })
         }

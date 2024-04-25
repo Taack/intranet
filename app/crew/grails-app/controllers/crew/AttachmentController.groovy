@@ -1,5 +1,6 @@
 package crew
 
+import app.config.AttachmentContentType
 import app.config.TermGroupConfig
 import attachement.AttachmentSearchService
 import attachement.AttachmentSecurityService
@@ -15,29 +16,31 @@ import org.taack.Attachment
 import org.taack.AttachmentDescriptor
 import org.taack.Term
 import org.taack.User
-import taack.base.*
+import taack.domain.TaackAttachmentService
+import taack.domain.TaackSaveService
 import taack.domain.TaackFilter
 import taack.domain.TaackFilterService
 import taack.domain.TaackMetaModelService
-import taack.render.TaackUiSimpleService
+import taack.render.TaackUiService
 import taack.ui.base.*
 import taack.ui.base.block.BlockSpec
 import taack.ui.base.common.ActionIcon
 import taack.ui.base.common.IconStyle
 import taack.ui.base.common.Style
-import taack.ui.base.table.ColumnHeaderFieldSpec
 import taack.ui.utils.Markdown
 
+import java.nio.file.Files
+
 @GrailsCompileStatic
-@Secured(["IS_AUTHENTICATED_REMEMBERED"])
+@Secured(['IS_AUTHENTICATED_REMEMBERED'])
 class AttachmentController {
-    TaackUiSimpleService taackUiSimpleService
-    TaackSimpleAttachmentService taackSimpleAttachmentService
+    TaackUiService taackUiService
+    TaackAttachmentService taackAttachmentService
     TaackMetaModelService taackMetaModelService
     AttachmentUiService attachmentUiService
     AttachmentSearchService attachmentSearchService
     AttachmentSecurityService attachmentSecurityService
-    TaackSimpleSaveService taackSimpleSaveService
+    TaackSaveService taackSaveService
     SpringSecurityService springSecurityService
     TaackFilterService taackFilterService
 
@@ -48,57 +51,57 @@ class AttachmentController {
         UiMenuSpecifier m = new UiMenuSpecifier()
 
         m.ui {
-            menu "List Files", AttachmentController.&index as MC
-            menu "Tagged", {
+            menu 'List Files', AttachmentController.&index as MC
+            menu 'Tagged', {
                 for (def tagGroup : TermGroupConfig.values().findAll { it.active }) {
                     menu tagGroup.toString(), AttachmentController.&showTermGroup as MC, [group: tagGroup.toString()]
                 }
             }
-            menu "Terms", AttachmentController.&listTerm as MC
+            menu 'Terms', AttachmentController.&listTerm as MC
             menuSearch this.&search as MC, q
         }
         m
     }
 
     def index() {
-        taackUiSimpleService.show(new UiBlockSpecifier().ui {
+        taackUiService.show(new UiBlockSpecifier().ui {
             inline(attachmentUiService.buildAttachmentsBlock())
         }, buildMenu())
     }
 
     def search(String q) {
-        taackUiSimpleService.show(attachmentSearchService.buildSearchBlock(q), buildMenu(q))
+        taackUiService.show(attachmentSearchService.buildSearchBlock(q), buildMenu(q))
     }
 
     def preview(Attachment attachment, String format) {
-        TaackSimpleAttachmentService.PreviewFormat f = format as TaackSimpleAttachmentService.PreviewFormat ?: TaackSimpleAttachmentService.PreviewFormat.DEFAULT
-        response.setContentType("image/webp")
-        response.setHeader("Content-disposition", "filename=\"${URLEncoder.encode(attachment?.getName() ?: 'noPreview.webp', 'UTF-8')}\"")
-        if (!attachment?.getName()) response.setHeader("Cache-Control", "max-age=604800")
-        response.outputStream << (taackSimpleAttachmentService.attachmentPreview(attachment, f)).bytes
+        TaackAttachmentService.PreviewFormat f = format as TaackAttachmentService.PreviewFormat ?: TaackAttachmentService.PreviewFormat.DEFAULT
+        response.setContentType('image/webp')
+        response.setHeader('Content-disposition', "filename=" + "${URLEncoder.encode((attachment?.getName() ?: 'noPreview.webp'), 'UTF-8')}")
+        if (!attachment?.getName()) response.setHeader('Cache-Control', 'max-age=604800')
+        response.outputStream << (taackAttachmentService.attachmentPreview(attachment, f)).bytes
         return false
     }
 
     def previewFull(Attachment attachment) {
-        response.setContentType("image/webp")
-        response.setHeader("Content-disposition", "filename=\"${URLEncoder.encode(attachment?.getName() ?: "noPreview.webp", "UTF-8")}\"")
-        if (!attachment?.getName()) response.setHeader("Cache-Control", "max-age=604800")
-        response.outputStream << (taackSimpleAttachmentService.attachmentPreview(attachment, TaackSimpleAttachmentService.PreviewFormat.PREVIEW_LARGE)).bytes
+        response.setContentType('image/webp')
+        response.setHeader('Content-disposition', "filename=" + "${URLEncoder.encode((attachment?.getName() ?: 'noPreview.webp'), 'UTF-8')}")
+        if (!attachment?.getName()) response.setHeader('Cache-Control', 'max-age=604800')
+        response.outputStream << (taackAttachmentService.attachmentPreview(attachment, TaackAttachmentService.PreviewFormat.PREVIEW_LARGE)).bytes
         return false
     }
 
     def showAttachment(Attachment attachment) {
-        if (params.boolean("isAjax"))
-            taackUiSimpleService.show(new UiBlockSpecifier().ui {
+        if (params.boolean('isAjax'))
+            taackUiService.show(new UiBlockSpecifier().ui {
                 modal {
-                    ajaxBlock "showAttachment", {
+                    ajaxBlock 'showAttachment', {
                         inline attachmentUiService.buildShowAttachmentBlock(attachment)
                     }
                 }
             })
         else {
-            taackUiSimpleService.show(new UiBlockSpecifier().ui {
-                ajaxBlock "showAttachment", {
+            taackUiService.show(new UiBlockSpecifier().ui {
+                ajaxBlock 'showAttachment', {
                     inline attachmentUiService.buildShowAttachmentBlock(attachment)
                 }
             }, buildMenu())
@@ -108,44 +111,55 @@ class AttachmentController {
     def downloadAttachment(Attachment attachment) {
         // TODO: Add Simple Security Layer here..
         if (!attachmentSecurityService.canDownloadFile(attachment, springSecurityService.currentUser as User)) {
-            taackUiSimpleService.show(CrewUiService.messageBlock("<p>Not Allowed ...</p>"))
+            taackUiService.show(CrewUiService.messageBlock('<p>Not Allowed ...</p>'))
 
         }
-        taackSimpleAttachmentService.downloadAttachment(attachment)
+        taackAttachmentService.downloadAttachment(attachment)
     }
 
     def renderAttachment(Attachment attachment) {
         if (attachment) {
-            TaackSimpleAttachmentService.showIFrame(attachment)
+            TaackAttachmentService.showIFrame(attachment)
         }
     }
 
 
     def uploadAttachment() {
-        taackUiSimpleService.show(new UiBlockSpecifier().ui {
+        taackUiService.show(new UiBlockSpecifier().ui {
             modal {
-                ajaxBlock "uploadAttachment", {
-                    form "Upload a File", AttachmentUiService.buildAttachmentForm(new Attachment()), BlockSpec.Width.MAX
+                ajaxBlock 'uploadAttachment', {
+                    form 'Upload a File', AttachmentUiService.buildAttachmentForm(new Attachment()), BlockSpec.Width.MAX
                 }
             }
         })
     }
 
-    def editAttachmentDescriptor(AttachmentDescriptor attachment) {
-        taackUiSimpleService.show(new UiBlockSpecifier().ui {
+    def editAttachmentDescriptor(AttachmentDescriptor attachmentDescriptor) {
+        attachmentDescriptor ?= new AttachmentDescriptor()
+        taackUiService.show(new UiBlockSpecifier().ui {
             modal {
-                ajaxBlock "uploadAttachmentDescriptor", {
-                    form "Edit File Metadata", AttachmentUiService.buildAttachmentDescriptorForm(new Attachment()), BlockSpec.Width.MAX
+                ajaxBlock 'uploadAttachmentDescriptor', {
+                    form 'Edit File Metadata', AttachmentUiService.buildAttachmentDescriptorForm(attachmentDescriptor), BlockSpec.Width.MAX
                 }
             }
         })
+    }
+
+    @Transactional
+    def saveAttachmentDescriptor() {
+        AttachmentDescriptor ad = taackSaveService.save(AttachmentDescriptor)
+        taackSaveService.displayBlockOrRenderErrors(ad,
+                new UiBlockSpecifier().ui {
+                    closeModal(ad.id, ad.toString())
+                }
+        )
     }
 
     def updateAttachment(Attachment attachment) {
-        taackUiSimpleService.show(new UiBlockSpecifier().ui {
+        taackUiService.show(new UiBlockSpecifier().ui {
             modal {
-                ajaxBlock "updateAttachment", {
-                    form "Update a File", AttachmentUiService.buildAttachmentForm(attachment), BlockSpec.Width.MAX
+                ajaxBlock 'updateAttachment', {
+                    form 'Update a File', AttachmentUiService.buildAttachmentForm(attachment), BlockSpec.Width.MAX
                 }
             }
         })
@@ -154,15 +168,18 @@ class AttachmentController {
     @Transactional
     @Secured(['ROLE_ADMIN', 'ROLE_ATT_USER'])
     def saveAttachment() {
-        if (taackUiSimpleService.isProcessingForm()) {
-            def a = attachmentUiService.saveAttachment()
-            a.save(flush: true)
-            taackUiSimpleService.cleanForm()
-            taackSimpleSaveService.displayBlockOrRenderErrors(a, new UiBlockSpecifier().ui {
+
+        if (taackUiService.isProcessingForm()) {
+            Attachment a = taackSaveService.save(Attachment)
+            a.contentType = Files.probeContentType(taackAttachmentService.attachmentFile(a).toPath())
+            a.contentTypeEnum = AttachmentContentType.fromMimeType(a.contentType)
+
+            taackUiService.cleanForm()
+            taackSaveService.displayBlockOrRenderErrors(a, new UiBlockSpecifier().ui {
                 closeModalAndUpdateBlock attachmentUiService.buildAttachmentsBlock()
             })
         } else {
-            taackUiSimpleService.show(new UiBlockSpecifier().ui {
+            taackUiService.show(new UiBlockSpecifier().ui {
                 inline(attachmentUiService.buildAttachmentsBlock())
             })
         }
@@ -170,28 +187,28 @@ class AttachmentController {
 
     def showLinkedData(Attachment attachment) {
         def objs = taackMetaModelService.listObjectsPointingTo(attachment)
-        taackUiSimpleService.show(new UiBlockSpecifier().ui {
+        taackUiService.show(new UiBlockSpecifier().ui {
             modal {
-                ajaxBlock "showLinkedData", {
-                    table "Object Referencing ${attachment.originalName}", new UiTableSpecifier().ui(Attachment, {
+                ajaxBlock 'showLinkedData', {
+                    table "Object Referencing ${attachment.originalName}", new UiTableSpecifier().ui({
                         for (def classNameField : objs.keySet()) {
                             row {
                                 rowColumn 3, {
                                     rowField "${classNameField.aValue}: ${classNameField.bValue}", Style.EMPHASIS + Style.BLUE
                                 }
-                                rowLink "Graph", ActionIcon.GRAPH, this.&model as MethodClosure, [modelName: classNameField.aValue], true
+                                rowLink 'Graph', ActionIcon.GRAPH, this.&model as MethodClosure, [modelName: classNameField.aValue], true
                             }
                             for (def obj : objs[classNameField]) {
                                 row {
                                     rowField obj.toString()
-                                    rowField((obj.hasProperty("userCreated") ? obj["userCreated"] : "") as String)
-                                    rowField((obj.hasProperty("dateCreated") ? obj["dateCreated"] : null) as Date)
-                                    rowField((obj.hasProperty("version") ? obj["version"] : "??") as String)
+                                    rowField((obj.hasProperty('userCreated') ? obj['userCreated'] : '') as String)
+                                    rowField((obj.hasProperty('dateCreated') ? obj['dateCreated'] : null) as Date)
+                                    rowField((obj.hasProperty('version') ? obj['version'] : '??') as String)
                                 }
                             }
                         }
                     }), BlockSpec.Width.MAX, {
-                        action "Graph", ActionIcon.GRAPH, this.&model as MethodClosure, [modelName: Attachment.name], true
+                        action 'Graph', ActionIcon.GRAPH, this.&model as MethodClosure, [modelName: Attachment.name], true
                     }
                 }
             }
@@ -200,9 +217,9 @@ class AttachmentController {
 
     def model(String modelName) {
         String graph = taackMetaModelService.modelGraph(modelName ? Class.forName(modelName) : null)
-        taackUiSimpleService.show(new UiBlockSpecifier().ui {
+        taackUiService.show(new UiBlockSpecifier().ui {
             modal {
-                ajaxBlock "model$modelName", {
+                ajaxBlock 'model$modelName', {
                     custom "Relation for domain: ${modelName}", taackMetaModelService.svg(graph)
                 }
             }
@@ -211,14 +228,14 @@ class AttachmentController {
 
     def extensionForAttachment(Attachment attachment) {
         if (!attachmentSecurityService.canDownloadFile(attachment, springSecurityService.currentUser as User)) {
-            taackUiSimpleService.show(CrewUiService.messageBlock("<p>Not Allowed ...</p>"))
+            taackUiService.show(CrewUiService.messageBlock('<p>Not Allowed ...</p>'))
             return
         }
-        String ext = (params["extension"] as String)?.toLowerCase()
-        def f = TaackSimpleAttachmentService.convertExtension(attachment, ext)
+        String ext = (params['extension'] as String)?.toLowerCase()
+        def f = TaackAttachmentService.convertExtension(attachment, ext)
         if (f?.exists()) {
             response.setContentType("application/${ext}")
-            response.setHeader("Content-disposition", "filename=\"${URLEncoder.encode("${attachment.originalNameWithoutExtension}.${ext}", "UTF-8")}\"")
+            response.setHeader('Content-disposition', "filename="+"${URLEncoder.encode('${attachment.originalNameWithoutExtension}.${ext}', 'UTF-8')}\"")
             response.outputStream << f.bytes
         } else return null
     }
@@ -231,10 +248,10 @@ class AttachmentController {
         List<Term> parentTerms = Term.findAllByActiveAndTermGroupConfigAndParentIsNull(true, termGroup)
         UiTableSpecifier ts = new UiTableSpecifier()
 
-        ts.ui Term, {
+        ts.ui {
             header {
-                fieldHeader "Name"
-                fieldHeader "Action"
+                fieldHeader 'Name'
+                fieldHeader 'Action'
             }
             Closure rec
 
@@ -244,7 +261,7 @@ class AttachmentController {
                     boolean termHasChildren = !children.isEmpty()
                     rowTree termHasChildren, {
                         rowField term.name
-                        rowLink "See Attachments", ActionIcon.SHOW * IconStyle.SCALE_DOWN, this.&showTermAttachments as MethodClosure, term.id, true
+                        rowLink 'See Attachments', ActionIcon.SHOW * IconStyle.SCALE_DOWN, this.&showTermAttachments as MethodClosure, term.id, true
                     }
                     if (termHasChildren) {
                         for (def tc : children) rec(tc)
@@ -261,13 +278,13 @@ class AttachmentController {
                 }
             }
         }
-        taackUiSimpleService.show new UiBlockSpecifier().ui {
-            ajaxBlock "tableTerm", {
-                table "Tags", ts, BlockSpec.Width.THIRD
+        taackUiService.show new UiBlockSpecifier().ui {
+            ajaxBlock 'tableTerm', {
+                table 'Tags', ts, BlockSpec.Width.THIRD
             }
-            ajaxBlock "tableAttachments", {
-                show "Files", new UiShowSpecifier().ui(new Object(), {
-                    field Markdown.getContentHtml("# Click on a tag ..")
+            ajaxBlock 'tableAttachments', {
+                show 'Files', new UiShowSpecifier().ui(new Object(), {
+                    field Markdown.getContentHtml('# Click on a tag ..')
                 }), BlockSpec.Width.TWO_THIRD
             }
         }, buildMenu()
@@ -281,7 +298,7 @@ class AttachmentController {
         def ts = new UiTableSpecifier().ui {
             header {
                 column {
-                    fieldHeader "Preview"
+                    fieldHeader 'Preview'
                 }
                 column {
                     sortableFieldHeader a.originalName_
@@ -298,15 +315,15 @@ class AttachmentController {
                     sortableFieldHeader a.userCreated_, u.subsidiary_
                 }
                 column {
-                    fieldHeader "Actions"
+                    fieldHeader 'Actions'
                 }
             }
 
-            taackFilterService.getBuilder(Attachment)
+            iterate(taackFilterService.getBuilder(Attachment)
                     .setSortOrder(TaackFilter.Order.DESC, a.dateCreated_)
                     .setMaxNumberOfLine(20)
                     .addRestrictedIds(attachments*.id as Long[])
-                    .build().iterate { Attachment aIt, Long counter ->
+                    .build()) { Attachment aIt, Long counter ->
 
                 row {
                     rowColumn {
@@ -328,14 +345,14 @@ class AttachmentController {
                     }
                     rowColumn {
                         if (attachmentSecurityService.canDownloadFile(aIt))
-                            rowLink "Download", ActionIcon.DOWNLOAD, AttachmentController.&downloadAttachment as MC, aIt.id, false
-                        rowLink "Show", ActionIcon.SHOW, AttachmentController.&showAttachment as MC, aIt.id
+                            rowLink 'Download', ActionIcon.DOWNLOAD, AttachmentController.&downloadAttachment as MC, aIt.id, false
+                        rowLink 'Show', ActionIcon.SHOW, AttachmentController.&showAttachment as MC, aIt.id
                     }
                 }
             }
         }
-        taackUiSimpleService.show new UiBlockSpecifier().ui {
-            ajaxBlock "tableAttachments", {
+        taackUiService.show new UiBlockSpecifier().ui {
+            ajaxBlock 'tableAttachments', {
                 table "Files for ${term.name}", ts, BlockSpec.Width.TWO_THIRD
             }
         }
@@ -350,7 +367,7 @@ class AttachmentController {
             header {
                 fieldHeader t.name_
                 fieldHeader t.termGroupConfig_
-                fieldHeader "Action"
+                fieldHeader 'Action'
             }
             Closure rec
 
@@ -361,7 +378,7 @@ class AttachmentController {
                     rowTree termHasChildren, {
                         rowField term.name
                         rowField term.termGroupConfig?.toString()
-                        rowLink "Select Tag", ActionIcon.SELECT * IconStyle.SCALE_DOWN, this.&selectTagsM2MCloseModal as MethodClosure, term.id, true
+                        rowLink 'Select Tag', ActionIcon.SELECT * IconStyle.SCALE_DOWN, this.&selectTagsM2MCloseModal as MethodClosure, term.id, true
                     }
                     if (termHasChildren) {
                         for (def tc : children) rec(tc)
@@ -377,17 +394,17 @@ class AttachmentController {
                 }
             }
         }
-        taackUiSimpleService.show new UiBlockSpecifier().ui {
+        taackUiService.show new UiBlockSpecifier().ui {
             modal {
-                ajaxBlock "tableTermSelect", {
-                    table "Tags", ts, BlockSpec.Width.MAX
+                ajaxBlock 'tableTermSelect', {
+                    table 'Tags', ts, BlockSpec.Width.MAX
                 }
             }
         }
     }
 
     def selectTagsM2MCloseModal(Term term) {
-        taackUiSimpleService.closeModal(term.id, term.toString())
+        taackUiService.closeModal(term.id, term.toString())
     }
 
     def listTerm() {
@@ -395,33 +412,33 @@ class AttachmentController {
         UiFilterSpecifier f = attachmentUiService.buildTermFilter()
         UiTableSpecifier t = attachmentUiService.buildTermTable f
         b.ui {
-            ajaxBlock "listTerm", {
-                tableFilter "Filter", f, "Terms", t, BlockSpec.Width.MAX, {
-                    action "Create term", ActionIcon.CREATE, AttachmentController.&editTerm as MethodClosure, true
+            ajaxBlock 'listTerm', {
+                tableFilter 'Filter', f, 'Terms', t, BlockSpec.Width.MAX, {
+                    action 'Create term', ActionIcon.CREATE, AttachmentController.&editTerm as MethodClosure, true
                 }
             }
         }
-        taackUiSimpleService.show(b, buildMenu())
+        taackUiService.show(b, buildMenu())
     }
 
     @Secured(['ROLE_ADMIN', 'ROLE_TERM_ADMIN'])
     def editTerm(Term term) {
-        String title = term ? "Edit term" : "New term"
+        String title = term ? 'Edit term' : 'New term'
         term = term ?: new Term()
         UiBlockSpecifier b = new UiBlockSpecifier().ui {
             modal {
-                ajaxBlock "editTerm", {
+                ajaxBlock 'editTerm', {
                     form title, attachmentUiService.buildTermForm(term), BlockSpec.Width.MAX
                 }
             }
         }
-        taackUiSimpleService.show(b)
+        taackUiService.show(b)
     }
 
     @Transactional
     @Secured(['ROLE_ADMIN', 'ROLE_TERM_ADMIN'])
     def saveTerm() {
-        taackSimpleSaveService.saveThenReloadOrRenderErrors(Term, null)
+        taackSaveService.saveThenReloadOrRenderErrors(Term, null)
     }
 
     @Transactional
@@ -438,12 +455,12 @@ class AttachmentController {
         UiBlockSpecifier b = new UiBlockSpecifier()
         b.ui {
             modal {
-                ajaxBlock "termListSelect", {
-                    tableFilter "Filter", f, "Terms", t, BlockSpec.Width.MAX
+                ajaxBlock 'termListSelect', {
+                    tableFilter 'Filter', f, 'Terms', t, BlockSpec.Width.MAX
                 }
             }
         }
-        taackUiSimpleService.show(b)
+        taackUiService.show(b)
     }
 
     @Secured(['ROLE_ADMIN', 'ROLE_TERM_ADMIN'])
@@ -452,6 +469,6 @@ class AttachmentController {
         block.ui {
             closeModal term.id, "${term}"
         }
-        taackUiSimpleService.show(block)
+        taackUiService.show(block)
     }
 }
