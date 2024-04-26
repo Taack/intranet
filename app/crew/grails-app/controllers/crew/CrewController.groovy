@@ -41,9 +41,9 @@ class CrewController implements WebAttributes {
     private UiMenuSpecifier buildMenu(String q = null) {
         UiMenuSpecifier m = new UiMenuSpecifier()
         m.ui {
-            menu 'Users', CrewController.&index as MC
-            menu 'Roles', CrewController.&listRoles as MC
-            menu 'Hierarchy', CrewController.&hierarchy as MC
+            menu CrewController.&index as MC
+            menu CrewController.&listRoles as MC
+            menu CrewController.&hierarchy as MC
             menuIcon 'Config MySelf', ActionIcon.CONFIG_USER, this.&editUser as MC, [id: springSecurityService.currentUserId], true
             menuSearch this.&search as MethodClosure, q
         }
