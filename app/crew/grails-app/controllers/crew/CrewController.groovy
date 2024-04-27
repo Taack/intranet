@@ -365,7 +365,7 @@ class CrewController implements WebAttributes {
                     }
                     if (hasActions) {
                         rowColumn {
-                            rowLink ActionIcon.EDIT, this.&roleForm as MC, r.id
+                            rowLink ActionIcon.EDIT * IconStyle.SCALE_DOWN, this.&roleForm as MC, r.id
                         }
                     }
                 }
@@ -403,21 +403,25 @@ class CrewController implements WebAttributes {
     @Secured(["ROLE_ADMIN", "ROLE_SWITCH_USER"])
     def switchUser(User user) {
         render """
+   <html>
    <form action='/login/impersonate' method='POST'>
       Switch to user: <input type='text' name='username' value="${user.username}"/> <br/>
       <input type='submit' value='Switch'/>
    </form>
+   </html>
         """
     }
 
     @Secured(["ROLE_ADMIN", "ROLE_SWITCH_USER"])
     def replaceUser(User user) {
         render """
+   <html>
    <form action='doReplaceUser' method='POST'>
       Replace user: <input type='text' name='userFrom' value="${user.username}"/> <br/>
       By user: <input type='text' name='userTo' value=""/> <br/>
       <input type='submit' value='Replace'/>
    </form>
+   </html>
         """
     }
 

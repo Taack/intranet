@@ -130,7 +130,7 @@ class CrewUiService implements WebAttributes {
                         else if (hasActions) {
                             rowLink ActionIcon.EDIT * IconStyle.SCALE_DOWN, CrewController.&editUser as MC, ru.id
                             if (canSwitchUser && ru.enabled)
-                                rowLink ActionIcon.SHOW * IconStyle.SCALE_DOWN, CrewController.&switchUser as MC, [id: ru.id]
+                                rowLink ActionIcon.SHOW * IconStyle.SCALE_DOWN, CrewController.&switchUser as MC, ru.id
                             else if (canSwitchUser && !ru.enabled) {
                                 rowLink ActionIcon.MERGE * IconStyle.SCALE_DOWN, CrewController.&replaceUser as MC, ru.id
                                 rowLink ActionIcon.DELETE * IconStyle.SCALE_DOWN, CrewController.&deleteUser as MC, ru.id
