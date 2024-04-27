@@ -6,9 +6,9 @@ import org.springframework.stereotype.Component
 import org.taack.Role
 import org.taack.User
 import org.taack.UserPasswordEncoderListener
-import org.taack.UserRole
 import grails.compiler.GrailsCompileStatic
 import org.springframework.beans.factory.annotation.Value
+import org.taack.UserRole
 
 @GrailsCompileStatic
 @Component

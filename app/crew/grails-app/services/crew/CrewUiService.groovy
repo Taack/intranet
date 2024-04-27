@@ -5,7 +5,7 @@ import attachement.AttachmentUiService
 import grails.compiler.GrailsCompileStatic
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.web.api.WebAttributes
-import org.codehaus.groovy.runtime.MethodClosure
+import org.codehaus.groovy.runtime.MethodClosure as MC
 import org.taack.Attachment
 import org.taack.Role
 import org.taack.User
@@ -16,35 +16,34 @@ import taack.ui.base.UiFilterSpecifier
 import taack.ui.base.UiShowSpecifier
 import taack.ui.base.UiTableSpecifier
 import taack.ui.base.common.ActionIcon
-import taack.ui.base.common.ActionIconStyleModifier
+import taack.ui.base.common.IconStyle
 import taack.ui.base.filter.expression.FilterExpression
 import taack.ui.base.filter.expression.Operator
 import taack.ui.base.table.ColumnHeaderFieldSpec
+
+import static taack.base.TaackUiSimpleService.tr
 
 @GrailsCompileStatic
 class CrewUiService implements WebAttributes {
     TaackSimpleFilterService taackSimpleFilterService
     SpringSecurityService springSecurityService
     AttachmentUiService attachmentUiService
+    CrewSecurityService crewSecurityService
 
-    static UiFilterSpecifier buildRoleTableFilter(final Role role = null) {
-        Role r = role ?: new Role()
-        UiFilterSpecifier f = new UiFilterSpecifier()
-
-        f.ui Role, {
-            section "Role", {
-                filterField r.authority_
+    static UiFilterSpecifier buildRoleTableFilter(Role role = null) {
+        role ?= new Role()
+        new UiFilterSpecifier().ui Role, {
+            section tr('default.role.label'), {
+                filterField role.authority_
             }
         }
-        f
     }
 
-    static UiFilterSpecifier buildUserTableFilter(final User cu, final User user = null) {
+    static UiFilterSpecifier buildUserTableFilter(final User cu, User user = null) {
         User u = user ?: new User(manager: new User(), enabled: true)
-        UiFilterSpecifier f = new UiFilterSpecifier()
 
-        f.ui User, {
-            section "User", {
+        new UiFilterSpecifier().ui User, {
+            section tr('default.user.label'), {
                 filterField u.username_
                 filterField u.lastName_
                 filterField u.firstName_
@@ -52,21 +51,20 @@ class CrewUiService implements WebAttributes {
                 filterField u.subsidiary_
                 filterField u.businessUnit_
                 filterField u.enabled_
-                filterFieldExpressionBool "My Team", new FilterExpression(u.selfObject_, Operator.IN, cu.allManagedUsers_), user ? false : true
+                filterFieldExpressionBool tr('user.myTeam.label'), new FilterExpression(cu.allManagedUsers*.id, Operator.IN, u.selfObject_), user ? false : true
             }
-            section "Credentials", {
+            section tr('default.role.label'), {
                 UserRole ur = new UserRole(role: new Role())
-                filterFieldInverse "Role", UserRole, ur.user_, ur.role_, ur.role.authority_
+                filterFieldInverse tr('default.role.label'), UserRole, ur.user_, ur.role_, ur.role.authority_
             }
         }
-        f
     }
 
     UiTableSpecifier buildRoleTable(final UiFilterSpecifier f, final boolean hasSelect = false) {
         Role u = new Role()
-        UiTableSpecifier t = new UiTableSpecifier()
+
         ColumnHeaderFieldSpec.SortableDirection defaultDirection
-        t.ui Role, {
+        new UiTableSpecifier().ui Role, {
             header {
                 column {
                     defaultDirection = sortableFieldHeader ColumnHeaderFieldSpec.DefaultSortingDirection.ASC, u.authority_
@@ -79,26 +77,24 @@ class CrewUiService implements WebAttributes {
                 row {
                     rowColumn {
                         rowField r.authority
-                        if (hasSelect) rowLink "Select Role", ActionIcon.SELECT * ActionIconStyleModifier.SCALE_DOWN, r.id, r.toString(), true
+                        if (hasSelect) rowLink tr('default.role.label'), ActionIcon.SELECT * IconStyle.SCALE_DOWN, r.id, r.toString(), true
                     }
                 }
             }
             paginate(10, params.long("offset"), roles.bValue)
         }
-        t
     }
 
     UiTableSpecifier buildUserTable(final UiFilterSpecifier f, final boolean hasSelect = false) {
         User u = new User(manager: new User(), enabled: true)
-        UiTableSpecifier t = new UiTableSpecifier()
-        boolean canSwitchUser = (springSecurityService.currentUser as User).authorities*.authority.contains("ROLE_SWITCH_USER")
-        boolean hasActions = (springSecurityService.currentUser as User).authorities*.authority.contains("ROLE_ADMIN")
+
         ColumnHeaderFieldSpec.SortableDirection defaultDirection
-        t.ui User, {
+
+        new UiTableSpecifier().ui User, {
             header {
                 if (!hasSelect) {
                     column {
-                        fieldHeader "Picture"
+                        fieldHeader tr('picture.header.label')
                     }
                 }
                 column {
@@ -114,13 +110,15 @@ class CrewUiService implements WebAttributes {
                     sortableFieldHeader u.firstName_
                 }
                 column {
-                    fieldHeader "Roles"
+                    fieldHeader tr('default.roles.label')
                 }
             }
 
             def users = taackSimpleFilterService.list(User, 10, f, null, defaultDirection)
 
+            boolean canSwitchUser = crewSecurityService.canSwitchUser()
             for (User ru : users.aValue) {
+                boolean hasActions = crewSecurityService.canEdit(ru)
                 row {
                     if (!hasSelect) {
                         Attachment picture = ru.attachments.find { it.type == AttachmentType.mainPicture }
@@ -129,14 +127,14 @@ class CrewUiService implements WebAttributes {
                         }
                     }
                     rowColumn {
-                        rowLink "Show User", ActionIcon.SHOW * ActionIconStyleModifier.SCALE_DOWN, CrewController.&showUser as MethodClosure, ru.id, true
-                        if (hasSelect) rowLink "Select User", ActionIcon.SELECT * ActionIconStyleModifier.SCALE_DOWN, ru.id, ru.toString(), true
+                        rowLink tr('show.user.label'), ActionIcon.SHOW * IconStyle.SCALE_DOWN, CrewController.&showUser as MC, ru.id, true
+                        if (hasSelect) rowLink "Select User", ActionIcon.SELECT * IconStyle.SCALE_DOWN, ru.id, ru.toString(), true
                         else if (hasActions) {
-                            rowLink "Edit User", ActionIcon.EDIT * ActionIconStyleModifier.SCALE_DOWN, CrewController.&editUser as MethodClosure, ru.id
-                            if (canSwitchUser && ru.enabled) rowLink "Switch User", ActionIcon.SHOW * ActionIconStyleModifier.SCALE_DOWN, CrewController.&switchUser as MethodClosure, [id: ru.id], false
+                            rowLink "Edit User", ActionIcon.EDIT * IconStyle.SCALE_DOWN, CrewController.&editUser as MC, ru.id
+                            if (canSwitchUser && ru.enabled) rowLink "Switch User", ActionIcon.SHOW * IconStyle.SCALE_DOWN, CrewController.&switchUser as MC, [id: ru.id], false
                             else if (canSwitchUser && !ru.enabled) {
-                                rowLink "Replace By User", ActionIcon.MERGE * ActionIconStyleModifier.SCALE_DOWN, CrewController.&replaceUser as MethodClosure, ru.id, false
-                                rowLink "Remove User", ActionIcon.DELETE * ActionIconStyleModifier.SCALE_DOWN, CrewController.&deleteUser as MethodClosure, ru.id, false
+                                rowLink "Replace By User", ActionIcon.MERGE * IconStyle.SCALE_DOWN, CrewController.&replaceUser as MC, ru.id, false
+                                rowLink "Remove User", ActionIcon.DELETE * IconStyle.SCALE_DOWN, CrewController.&deleteUser as MC, ru.id, false
                             }
                         }
 
@@ -152,14 +150,13 @@ class CrewUiService implements WebAttributes {
                         rowField ru.firstName_
                     }
                     rowColumn {
-                        if (hasActions && !hasSelect) rowLink "Edit Roles", ActionIcon.EDIT * ActionIconStyleModifier.SCALE_DOWN, CrewController.&editUserRoles as MethodClosure, ru.id, true
+                        if (hasActions && !hasSelect) rowLink "Edit Roles", ActionIcon.EDIT * IconStyle.SCALE_DOWN, CrewController.&editUserRoles as MC, ru.id, true
                         rowField ru.authorities*.authority.join(', ')
                     }
                 }
             }
             paginate(10, params.long("offset"), users.bValue)
         }
-        t
     }
 
     static UiBlockSpecifier messageBlock(String message) {
@@ -173,7 +170,7 @@ class CrewUiService implements WebAttributes {
     UiShowSpecifier buildUserShow(User u, boolean update = false) {
         new UiShowSpecifier().ui(u, {
             field "Picture", attachmentUiService.previewFull(u.mainPictureId, update ? "${System.currentTimeMillis()}": null)
-            showAction "Change Picture", CrewController.&updateUserMainPicture as MethodClosure, u.id, true
+            showAction "Change Picture", CrewController.&updateUserMainPicture as MC, u.id, true
             field "User Name", u.username
             field "First Name", u.firstName
             field "Last Name", u.lastName
@@ -182,12 +179,6 @@ class CrewUiService implements WebAttributes {
             field "Mail", u.mail
             field "Manager", u.manager?.toString()
         })
-    }
-
-    boolean canManage(User other) {
-        def u = springSecurityService.currentUser as User
-        if (u.id == other?.id) return true
-        return u.authorities*.authority.contains("ROLE_ADMIN") || u.managedUsers*.id.contains(other.id)
     }
 
 }

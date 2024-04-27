@@ -93,30 +93,30 @@ server:
   port: 9442                                            # The port to listen on
 ---
 hibernate:
-    cache:
-        queries: false
-        use_second_level_cache: false
-        use_query_cache: false
+  cache:
+    queries: false
+    use_second_level_cache: false
+    use_query_cache: false
 dataSource:
-    pooled: true
-    jmxExport: true
-    driverClassName: org.h2.Driver
-    username: sa
-    password: ''
+  pooled: true
+  jmxExport: true
+  driverClassName: org.h2.Driver
+  username: sa
+  password: ''
 
 environments:
-    development:
-        dataSource:
-            dbCreate: update
-            url: jdbc:h2:./plmDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
-    test:
-        dataSource:
-            dbCreate: update
-            url: jdbc:h2:mem:testDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
-    production:
-        dataSource:
-            dbCreate: update
-            url: jdbc:h2:./prodDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
+  development:
+    dataSource:
+      dbCreate: update
+      url: jdbc:h2:./plmDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
+  test:
+    dataSource:
+      dbCreate: update
+      url: jdbc:h2:mem:testDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
+  production:
+    dataSource:
+      dbCreate: update
+      url: jdbc:h2:./prodDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
 ---
 taack.admin.password: ChangeIt
 grails:
@@ -139,7 +139,7 @@ taack-ui:
   defaultTitle: Taack Framework
   root: ${HOME}/taack
   resources: ${HOME}/taack/resources
-#  logoFileName: logo-colored.webp
+  #  logoFileName: logo-colored.webp
   logoFileName: logo-colored.webp
   logoWidth: 180
   logoHeight: 70

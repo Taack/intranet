@@ -1,6 +1,6 @@
 plugins {
-    id "taack-grails-plugin"
-    id "com.bertramlabs.asset-pipeline"
+    id 'taack-grails-plugin'
+    id 'com.bertramlabs.asset-pipeline'
 }
 
 dependencies {
