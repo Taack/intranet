@@ -108,7 +108,7 @@ environments:
   development:
     dataSource:
       dbCreate: update
-      url: jdbc:h2:./plmDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
+      url: jdbc:h2:./intranetDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
   test:
     dataSource:
       dbCreate: update

@@ -1,11 +1,11 @@
 package taack.website
 
 import app.config.BusinessUnit
+import grails.plugin.springsecurity.SpringSecurityService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import org.taack.Role
 import org.taack.User
-import org.taack.UserPasswordEncoderListener
 import grails.compiler.GrailsCompileStatic
 import org.springframework.beans.factory.annotation.Value
 import org.taack.UserRole
@@ -15,7 +15,7 @@ import org.taack.UserRole
 class BootStrap {
 
     @Autowired
-    UserPasswordEncoderListener userPasswordEncoderListener
+    SpringSecurityService springSecurityService
 
     @Value('${taack.admin.password}')
     String adminPassword
@@ -27,7 +27,7 @@ class BootStrap {
     }
 
     def createDefaultRoleAndUser() {
-        log.info "Creating default user and role if needed ${userPasswordEncoderListener} ..."
+        log.info "Creating default user and role ..."
         User.withNewTransaction {
             def r = Role.findByAuthority("ROLE_ADMIN")
             if (!r) {
@@ -37,7 +37,7 @@ class BootStrap {
             }
             def u = User.findByUsername("admin")
             if (!u) {
-                u = new User(username: "admin", password: adminPassword, businessUnit: BusinessUnit.IT)
+                u = new User(username: "admin", password: springSecurityService.encodePassword(adminPassword), businessUnit: BusinessUnit.IT)
                 u.save(flush: true)
                 if (u.hasErrors()) log.error "${u.errors}"
                 def ur = UserRole.create(u, r, true)

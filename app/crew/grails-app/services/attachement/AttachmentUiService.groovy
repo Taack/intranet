@@ -117,10 +117,10 @@ final class AttachmentUiService implements WebAttributes {
                             rowColumn {
                                 rowField att.originalName
                                 rowField att.attachmentDescriptor.publicName
-                                rowField att.dateCreated
+                                rowField att.dateCreated_
                             }
                             rowColumn {
-                                rowField att.fileSize
+                                rowField att.fileSize_
                                 rowField att.contentType
                                 rowField att.attachmentDescriptor.fileOrigin
                             }
@@ -129,9 +129,11 @@ final class AttachmentUiService implements WebAttributes {
                                 rowField att.userCreated.subsidiary?.toString()
                             }
                             rowColumn {
-                                if (selectMC) rowLink "Select", ActionIcon.SELECT, selectMC, att.id, selectParams
-                                else if (attachmentSecurityService.canDownloadFile(att)) rowLink "Download", ActionIcon.DOWNLOAD, AttachmentController.&downloadAttachment as MC, att.id, false
-                                rowLink "Show", ActionIcon.SHOW, AttachmentController.&showAttachment as MC, att.id
+                                if (selectMC)
+                                    rowLink ActionIcon.SELECT, selectMC as MC, att.id, selectParams
+                                else if (attachmentSecurityService.canDownloadFile(att))
+                                    rowLink ActionIcon.DOWNLOAD, AttachmentController.&downloadAttachment as MC, att.id
+                                rowLink ActionIcon.SHOW, AttachmentController.&showAttachment as MC, att.id
                             }
                         }
                     }
@@ -205,14 +207,14 @@ final class AttachmentUiService implements WebAttributes {
                     rowField preview(a.id)
                     rowColumn {
                         rowField a.userCreated.username
-                        rowField a.dateCreated
+                        rowField a.dateCreated_
                     }
                     rowColumn {
                         rowField a.getName()
-                        rowField a.fileSize
+                        rowField a.fileSize_
                     }
                     if (attachmentSecurityService.canDownloadFile(a))
-                        rowLink "Download File", ActionIcon.DOWNLOAD, AttachmentController.&downloadAttachment as MC, a.id, false
+                        rowLink ActionIcon.DOWNLOAD, AttachmentController.&downloadAttachment as MC, a.id
                 }
             }
         }
@@ -304,11 +306,11 @@ final class AttachmentUiService implements WebAttributes {
                                 rowField term.active.toString()
                                 rowColumn {
                                     if (selectMode)
-                                        rowLink "Select", ActionIcon.SELECT * IconStyle.SCALE_DOWN, AttachmentController.&selectTermM2OCloseModal as MC, term.id
+                                        rowLink ActionIcon.SELECT * IconStyle.SCALE_DOWN, AttachmentController.&selectTermM2OCloseModal as MC, term.id
                                     else {
                                         if (term.active)
-                                            rowLink "Delete term", ActionIcon.DELETE * IconStyle.SCALE_DOWN, AttachmentController.&deleteTerm as MC, term.id, false
-                                        rowLink "Edit term", ActionIcon.EDIT * IconStyle.SCALE_DOWN, AttachmentController.&editTerm as MC, term.id, true
+                                            rowLink ActionIcon.DELETE * IconStyle.SCALE_DOWN, AttachmentController.&deleteTerm as MC, term.id
+                                        rowLink ActionIcon.EDIT * IconStyle.SCALE_DOWN, AttachmentController.&editTerm as MC, term.id
                                     }
                                 }
                             }

@@ -273,6 +273,7 @@ class CrewController implements WebAttributes {
     @Secured("ROLE_ADMIN")
     @Transactional
     def saveUser() {
+        params.password = springSecurityService.encodePassword(params.password as String)
         taackSaveService.saveThenReloadOrRenderErrors(User)
     }
 
@@ -291,21 +292,20 @@ class CrewController implements WebAttributes {
             }
             iterate(taackFilterService.getBuilder(Role)
                     .setMaxNumberOfLine(20)
-                    .setSortOrder(TaackFilter.Order.DESC, role.authority_)
-                    .build()) { Role r, Long counter ->
-                        row {
-                            rowColumn {
-                                rowField r.authority
-                            }
-                            rowColumn {
-                                if (!UserRole.exists(user.id, r.id)) {
-                                    rowLink "Add ROLE", ActionIcon.ADD, this.&addRoleToUser as MC, [userId: user.id, roleId: r.id]
-                                } else {
-                                    rowLink "Remove ROLE", ActionIcon.DELETE, this.&removeRoleToUser as MC, [userId: user.id, roleId: r.id]
-                                }
-                            }
+                    .setSortOrder(TaackFilter.Order.DESC, role.authority_).build()) { Role r, Long counter ->
+                row {
+                    rowColumn {
+                        rowField r.authority
+                    }
+                    rowColumn {
+                        if (!UserRole.exists(user.id, r.id)) {
+                            rowLink ActionIcon.ADD, this.&addRoleToUser as MC, [userId: user.id, roleId: r.id]
+                        } else {
+                            rowLink ActionIcon.DELETE, this.&removeRoleToUser as MC, [userId: user.id, roleId: r.id]
                         }
                     }
+                }
+            }
         }
 
         taackUiService.show(new UiBlockSpecifier().ui {
@@ -355,21 +355,21 @@ class CrewController implements WebAttributes {
                     .setMaxNumberOfLine(20)
                     .setSortOrder(TaackFilter.Order.DESC, new Role().authority_)
                     .build()) { Role r ->
-                        row {
-                            rowColumn {
-                                rowField r.authority_
-                            }
-                            rowColumn {
-                                String userList = (UserRole.findAllByRole(r) as List<UserRole>)*.user.username.join(', ')
-                                rowField userList
-                            }
-                            if (hasActions) {
-                                rowColumn {
-                                    rowLink "Edit Role", ActionIcon.EDIT, this.&roleForm as MC, r.id
-                                }
-                            }
+                row {
+                    rowColumn {
+                        rowField r.authority_
+                    }
+                    rowColumn {
+                        String userList = (UserRole.findAllByRole(r) as List<UserRole>)*.user.username.join(', ')
+                        rowField userList
+                    }
+                    if (hasActions) {
+                        rowColumn {
+                            rowLink ActionIcon.EDIT, this.&roleForm as MC, r.id
                         }
                     }
+                }
+            }
         }
         UiBlockSpecifier b = new UiBlockSpecifier().ui {
             ajaxBlock "blockList", {

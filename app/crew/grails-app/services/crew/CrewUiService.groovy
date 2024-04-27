@@ -72,13 +72,14 @@ class CrewUiService implements WebAttributes {
                     .setMaxNumberOfLine(20)
                     .setSortOrder(TaackFilter.Order.DESC, u.authority_)
                     .build()) { Role r, Long counter ->
-                        row {
-                            rowColumn {
-                                rowField r.authority
-                                if (hasSelect) rowLink tr('default.role.label'), ActionIcon.SELECT * IconStyle.SCALE_DOWN, r.id, r.toString(), true
-                            }
-                        }
+                row {
+                    rowColumn {
+                        rowField r.authority
+                        if (hasSelect)
+                            rowLink tr('default.role.label'), ActionIcon.SELECT * IconStyle.SCALE_DOWN, r.id, r.toString()
                     }
+                }
+            }
         }
     }
 
@@ -110,11 +111,10 @@ class CrewUiService implements WebAttributes {
             }
             boolean canSwitchUser = crewSecurityService.canSwitchUser()
 
-            iterate(taackFilterService.getBuilder(User)
-                    .setMaxNumberOfLine(10)
-                    .setSortOrder(TaackFilter.Order.DESC, u.dateCreated_)
-                    .addFilter(f)
-                    .build()) { User ru ->
+            TaackFilter tf = taackFilterService.getBuilder(User).setSortOrder(TaackFilter.Order.DESC, u.dateCreated_)
+                    .setMaxNumberOfLine(20).addFilter(f).build()
+
+            iterate(tf) { User ru ->
                 row {
                     boolean hasActions = crewSecurityService.canEdit(ru)
                     if (!hasSelect) {
@@ -124,14 +124,16 @@ class CrewUiService implements WebAttributes {
                         }
                     }
                     rowColumn {
-                        rowLink tr('show.user.label'), ActionIcon.SHOW * IconStyle.SCALE_DOWN, CrewController.&showUser as MC, ru.id, true
-                        if (hasSelect) rowLink "Select User", ActionIcon.SELECT * IconStyle.SCALE_DOWN, ru.id, ru.toString(), true
+                        rowLink ActionIcon.SHOW * IconStyle.SCALE_DOWN, CrewController.&showUser as MC, ru.id
+                        if (hasSelect)
+                            rowLink "Select User", ActionIcon.SELECT * IconStyle.SCALE_DOWN, ru.id, ru.toString()
                         else if (hasActions) {
-                            rowLink "Edit User", ActionIcon.EDIT * IconStyle.SCALE_DOWN, CrewController.&editUser as MC, ru.id
-                            if (canSwitchUser && ru.enabled) rowLink "Switch User", ActionIcon.SHOW * IconStyle.SCALE_DOWN, CrewController.&switchUser as MC, [id: ru.id], false
+                            rowLink ActionIcon.EDIT * IconStyle.SCALE_DOWN, CrewController.&editUser as MC, ru.id
+                            if (canSwitchUser && ru.enabled)
+                                rowLink ActionIcon.SHOW * IconStyle.SCALE_DOWN, CrewController.&switchUser as MC, [id: ru.id]
                             else if (canSwitchUser && !ru.enabled) {
-                                rowLink "Replace By User", ActionIcon.MERGE * IconStyle.SCALE_DOWN, CrewController.&replaceUser as MC, ru.id, false
-                                rowLink "Remove User", ActionIcon.DELETE * IconStyle.SCALE_DOWN, CrewController.&deleteUser as MC, ru.id, false
+                                rowLink ActionIcon.MERGE * IconStyle.SCALE_DOWN, CrewController.&replaceUser as MC, ru.id
+                                rowLink ActionIcon.DELETE * IconStyle.SCALE_DOWN, CrewController.&deleteUser as MC, ru.id
                             }
                         }
 
@@ -147,7 +149,8 @@ class CrewUiService implements WebAttributes {
                         rowField ru.firstName_
                     }
                     rowColumn {
-                        if (hasActions && !hasSelect) rowLink "Edit Roles", ActionIcon.EDIT * IconStyle.SCALE_DOWN, CrewController.&editUserRoles as MC, ru.id, true
+                        if (hasActions && !hasSelect)
+                            rowLink ActionIcon.EDIT * IconStyle.SCALE_DOWN, CrewController.&editUserRoles as MC, ru.id
                         rowField ru.authorities*.authority.join(', ')
                     }
                 }
