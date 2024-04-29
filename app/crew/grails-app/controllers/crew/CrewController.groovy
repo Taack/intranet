@@ -82,7 +82,7 @@ class CrewController implements WebAttributes {
                         boolean muHasChildren = !mu.managedUsers.isEmpty()
                         rowTree muHasChildren, {
                             rowColumn {
-                                if (hasActions) rowAction 'Edit User', ActionIcon.EDIT * IconStyle.SCALE_DOWN, this.&editUser as MC, mu.id
+                                if (hasActions) rowAction ActionIcon.EDIT * IconStyle.SCALE_DOWN, this.&editUser as MC, mu.id
                                 rowField mu.username_
                                 rowField mu.businessUnit_
                             }
@@ -126,9 +126,7 @@ class CrewController implements WebAttributes {
         UiTableSpecifier t = buildUserTableHierarchy(new User(enabled: true))
         UiBlockSpecifier b = new UiBlockSpecifier()
         b.ui {
-            ajaxBlock "userList", {
-                table "Users Hierarchy", t, BlockSpec.Width.MAX
-            }
+            table "Users Hierarchy", t, BlockSpec.Width.MAX
         }
 
         taackUiService.show(b, buildMenu())
@@ -142,11 +140,9 @@ class CrewController implements WebAttributes {
 
         UiBlockSpecifier b = new UiBlockSpecifier()
         b.ui {
-//            ajaxBlock 'userList', {
-                tableFilter 'Filter', f, 'Users', t, BlockSpec.Width.MAX, {
-                    action ActionIcon.CREATE, CrewController.&editUser as MC
-                }
-//            }
+            tableFilter 'Filter', f, 'Users', t, BlockSpec.Width.MAX, {
+                action ActionIcon.CREATE, CrewController.&editUser as MC
+            }
         }
         taackUiService.show(b, buildMenu())
     }
@@ -158,9 +154,7 @@ class CrewController implements WebAttributes {
         UiBlockSpecifier b = new UiBlockSpecifier()
         b.ui {
             modal !params.boolean("refresh"), {
-//                ajaxBlock "userListSelect", {
-                    tableFilter "Filter", f, "Roles", t, BlockSpec.Width.MAX
-//                }
+                tableFilter "Filter", f, "Roles", t, BlockSpec.Width.MAX
             }
         }
 
@@ -175,9 +169,7 @@ class CrewController implements WebAttributes {
 
         taackUiService.show new UiBlockSpecifier().ui {
             modal {
-                ajaxBlock "userListSelect", {
-                    tableFilter "Filter", f, "Users", t, BlockSpec.Width.MAX
-                }
+                tableFilter "Filter", f, "Users", t, BlockSpec.Width.MAX
             }
         }
     }
@@ -185,9 +177,7 @@ class CrewController implements WebAttributes {
     def showUser(User u) {
         taackUiService.show(new UiBlockSpecifier().ui {
             modal {
-                ajaxBlock 'showUser', {
-                    show u.username, crewUiService.buildUserShow(u), BlockSpec.Width.MAX
-                }
+                show u.username, crewUiService.buildUserShow(u), BlockSpec.Width.MAX
             }
         })
 
@@ -196,16 +186,14 @@ class CrewController implements WebAttributes {
     def showUserFromSearch() {
         User u = User.read(params.long('id'))
         taackUiService.show(new UiBlockSpecifier().ui {
-            ajaxBlock 'showUserFromSearch', {
                 show u.username, crewUiService.buildUserShow(u), BlockSpec.Width.MAX
-            }
         }, buildMenu())
     }
 
     def updateUserMainPicture(User u) {
         taackUiService.show(new UiBlockSpecifier().ui {
             modal {
-                    form AttachmentUiService.buildAttachmentForm(Attachment.read(u.mainPictureId) ?: new Attachment(type: AttachmentType.mainPicture), this.&saveUserMainPicture as MethodClosure, [userId: u.id]), BlockSpec.Width.MAX
+                form AttachmentUiService.buildAttachmentForm(Attachment.read(u.mainPictureId) ?: new Attachment(type: AttachmentType.mainPicture), this.&saveUserMainPicture as MethodClosure, [userId: u.id]), BlockSpec.Width.MAX
             }
         })
     }
@@ -221,9 +209,7 @@ class CrewController implements WebAttributes {
             }
             taackSaveService.displayBlockOrRenderErrors(a, new UiBlockSpecifier().ui {
                 closeModalAndUpdateBlock {
-                    ajaxBlock "showUser", {
                         show "${u.username} [Updated]", crewUiService.buildUserShow(u, true), BlockSpec.Width.MAX
-                    }
                 }
             })
         } else {
@@ -260,9 +246,7 @@ class CrewController implements WebAttributes {
 
         taackUiService.show new UiBlockSpecifier().ui {
             modal {
-                ajaxBlock "userForm", {
                     form f, BlockSpec.Width.MAX
-                }
             }
         }
     }
@@ -307,9 +291,7 @@ class CrewController implements WebAttributes {
 
         taackUiService.show(new UiBlockSpecifier().ui {
             modal !params.boolean("refresh"), {
-//                ajaxBlock "userRoleBlock", {
-                    table "Edit User Role for ${user.username}", t, BlockSpec.Width.MAX
-//                }
+                table "Edit User Role for ${user.username}", t, BlockSpec.Width.MAX
             }
         }, buildMenu())
     }
@@ -369,11 +351,9 @@ class CrewController implements WebAttributes {
             }
         }
         UiBlockSpecifier b = new UiBlockSpecifier().ui {
-           // ajaxBlock "blockList", {
-                table "Roles", t, BlockSpec.Width.MAX, {
-                    if (hasActions) action ActionIcon.CREATE, CrewController.&roleForm as MC
-                }
-            //}
+            table "Roles", t, BlockSpec.Width.MAX, {
+                if (hasActions) action ActionIcon.CREATE, CrewController.&roleForm as MC
+            }
         }
         taackUiService.show(b, buildMenu())
     }
@@ -389,9 +369,7 @@ class CrewController implements WebAttributes {
         UiBlockSpecifier b = new UiBlockSpecifier()
         b.ui {
             modal {
-//                ajaxBlock "blockForm", {
-                    form f, BlockSpec.Width.MAX
-//                }
+                form f, BlockSpec.Width.MAX
             }
         }
         taackUiService.show(b, buildMenu())

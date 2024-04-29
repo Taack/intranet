@@ -271,14 +271,10 @@ class AttachmentController {
             }
         }
         taackUiService.show new UiBlockSpecifier().ui {
-            ajaxBlock 'tableTerm', {
-                table 'Tags', ts, BlockSpec.Width.THIRD
-            }
-            ajaxBlock 'tableAttachments', {
-                show 'Files', new UiShowSpecifier().ui(new Object(), {
-                    field Markdown.getContentHtml('# Click on a tag ..')
-                }), BlockSpec.Width.TWO_THIRD
-            }
+            table 'Tags', ts, BlockSpec.Width.THIRD
+            show 'Files', new UiShowSpecifier().ui(new Object(), {
+                field Markdown.getContentHtml('# Click on a tag ..')
+            }), BlockSpec.Width.TWO_THIRD
         }, buildMenu()
     }
 
@@ -344,9 +340,7 @@ class AttachmentController {
             }
         }
         taackUiService.show new UiBlockSpecifier().ui {
-            ajaxBlock 'tableAttachments', {
                 table "Files for ${term.name}", ts, BlockSpec.Width.TWO_THIRD
-            }
         }
     }
 
@@ -388,9 +382,7 @@ class AttachmentController {
         }
         taackUiService.show new UiBlockSpecifier().ui {
             modal {
-                ajaxBlock 'tableTermSelect', {
                     table 'Tags', ts, BlockSpec.Width.MAX
-                }
             }
         }
     }
@@ -404,9 +396,9 @@ class AttachmentController {
         UiFilterSpecifier f = attachmentUiService.buildTermFilter()
         UiTableSpecifier t = attachmentUiService.buildTermTable f
         b.ui {
-                tableFilter 'Filter', f, 'Terms', t, BlockSpec.Width.MAX, {
-                    action ActionIcon.CREATE, AttachmentController.&editTerm as MC
-                }
+            tableFilter 'Filter', f, 'Terms', t, BlockSpec.Width.MAX, {
+                action ActionIcon.CREATE, AttachmentController.&editTerm as MC
+            }
         }
         taackUiService.show(b, buildMenu())
     }
@@ -416,7 +408,7 @@ class AttachmentController {
         term = term ?: new Term()
         UiBlockSpecifier b = new UiBlockSpecifier().ui {
             modal {
-                    form attachmentUiService.buildTermForm(term), BlockSpec.Width.MAX
+                form attachmentUiService.buildTermForm(term), BlockSpec.Width.MAX
             }
         }
         taackUiService.show(b)
@@ -442,7 +434,7 @@ class AttachmentController {
         UiBlockSpecifier b = new UiBlockSpecifier()
         b.ui {
             modal {
-                    tableFilter 'Filter', f, 'Terms', t, BlockSpec.Width.MAX
+                tableFilter 'Filter', f, 'Terms', t, BlockSpec.Width.MAX
             }
         }
         taackUiService.show(b)

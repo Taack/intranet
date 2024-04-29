@@ -58,7 +58,8 @@ a {
 
 .pure-table td {
     line-height: 24px;
-    padding: .1em 1em .1em .5em !important;
+    /*padding: .1em 1em .1em .5em !important;*/
+    padding: .1em 1em .1em .5em;
 }
 
 .taackColorBlue {

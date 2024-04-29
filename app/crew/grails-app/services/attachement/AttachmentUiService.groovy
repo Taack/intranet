@@ -110,39 +110,39 @@ final class AttachmentUiService implements WebAttributes {
                     .addFilter(f)
                     .setSortOrder(TaackFilter.Order.DESC, a.dateCreated_)
                     .build()) { Attachment att ->
-                        row att, {
-                            rowColumn {
-                                rowField preview(att.id)
-                            }
-                            rowColumn {
-                                rowField att.originalName
-                                rowField att.attachmentDescriptor.publicName
-                                rowField att.dateCreated_
-                            }
-                            rowColumn {
-                                rowField att.fileSize_
-                                rowField att.contentType
-                                rowField att.attachmentDescriptor.fileOrigin
-                            }
-                            rowColumn {
-                                rowField att.userCreated.username
-                                rowField att.userCreated.subsidiary?.toString()
-                            }
-                            rowColumn {
-                                if (selectMC)
-                                    rowAction ActionIcon.SELECT, selectMC as MC, att.id, selectParams
-                                else if (attachmentSecurityService.canDownloadFile(att))
-                                    rowAction ActionIcon.DOWNLOAD, AttachmentController.&downloadAttachment as MC, att.id
-                                rowAction ActionIcon.SHOW, AttachmentController.&showAttachment as MC, att.id
-                            }
-                        }
+                row att, {
+                    rowColumn {
+                        rowField preview(att.id)
                     }
+                    rowColumn {
+                        rowField att.originalName
+                        rowField att.attachmentDescriptor.publicName
+                        rowField att.dateCreated_
+                    }
+                    rowColumn {
+                        rowField att.fileSize_
+                        rowField att.contentType
+                        rowField att.attachmentDescriptor.fileOrigin
+                    }
+                    rowColumn {
+                        rowField att.userCreated.username
+                        rowField att.userCreated.subsidiary?.toString()
+                    }
+                    rowColumn {
+                        if (selectMC)
+                            rowAction ActionIcon.SELECT, selectMC as MC, att.id, selectParams
+                        else if (attachmentSecurityService.canDownloadFile(att))
+                            rowAction ActionIcon.DOWNLOAD, AttachmentController.&downloadAttachment as MC, att.id
+                        rowAction ActionIcon.SHOW, AttachmentController.&showAttachment as MC, att.id
+                    }
+                }
+            }
         }
         BlockSpec.buildBlockSpec {
-                tableFilter "Filter", f, "Attachment", t, BlockSpec.Width.MAX, {
-                    if (uploadAttachment)
-                        action ActionIcon.CREATE, uploadAttachment, selectParams
-                }
+            tableFilter "Filter", f, "Attachment", t, BlockSpec.Width.MAX, {
+                if (uploadAttachment)
+                    action ActionIcon.CREATE, uploadAttachment, selectParams
+            }
         }
     }
 
@@ -175,7 +175,7 @@ final class AttachmentUiService implements WebAttributes {
     }
 
     UiShowSpecifier buildShowAttachment(final Attachment attachment, boolean hasPreview = true) {
-
+        AttachmentDescriptor ad = new AttachmentDescriptor()
         new UiShowSpecifier().ui attachment, {
             if (hasPreview)
                 section "Preview", {
@@ -189,12 +189,12 @@ final class AttachmentUiService implements WebAttributes {
 
             }
             section "Attachment Meta", {
-                field "Type", attachment.attachmentDescriptor.type_
-                field "Public Name", attachment.attachmentDescriptor.publicName_
-                field "Is Internal", attachment.attachmentDescriptor.isInternal_
-                field "Language", attachment.attachmentDescriptor.declaredLanguage_
+                fieldLabeled attachment.attachmentDescriptor_, ad.type_
+                fieldLabeled attachment.attachmentDescriptor_, ad.publicName_
+                fieldLabeled attachment.attachmentDescriptor_, ad.isInternal_
+                fieldLabeled attachment.attachmentDescriptor_, ad.declaredLanguage_
             }
-            showAction "Display Linked Data", AttachmentController.&showLinkedData as MC, attachment.id
+            showAction AttachmentController.&showLinkedData as MC, attachment.id
         }
     }
 
@@ -296,23 +296,23 @@ final class AttachmentUiService implements WebAttributes {
                         .addFilter(f)
                         .setSortOrder(TaackFilter.Order.ASC, ti.name_)
                         .build()) { Term term ->
-                            row {
-                                rowField term.name
-                                rowField term.termGroupConfig?.toString()
-                                rowField term.parent?.name
-                                rowField term.display.toString()
-                                rowField term.active.toString()
-                                rowColumn {
-                                    if (selectMode)
-                                        rowAction ActionIcon.SELECT * IconStyle.SCALE_DOWN, AttachmentController.&selectTermM2OCloseModal as MC, term.id
-                                    else {
-                                        if (term.active)
-                                            rowAction ActionIcon.DELETE * IconStyle.SCALE_DOWN, AttachmentController.&deleteTerm as MC, term.id
-                                        rowAction ActionIcon.EDIT * IconStyle.SCALE_DOWN, AttachmentController.&editTerm as MC, term.id
-                                    }
-                                }
+                    row {
+                        rowField term.name
+                        rowField term.termGroupConfig?.toString()
+                        rowField term.parent?.name
+                        rowField term.display.toString()
+                        rowField term.active.toString()
+                        rowColumn {
+                            if (selectMode)
+                                rowAction ActionIcon.SELECT * IconStyle.SCALE_DOWN, AttachmentController.&selectTermM2OCloseModal as MC, term.id
+                            else {
+                                if (term.active)
+                                    rowAction ActionIcon.DELETE * IconStyle.SCALE_DOWN, AttachmentController.&deleteTerm as MC, term.id
+                                rowAction ActionIcon.EDIT * IconStyle.SCALE_DOWN, AttachmentController.&editTerm as MC, term.id
                             }
                         }
+                    }
+                }
             }
         }
     }
