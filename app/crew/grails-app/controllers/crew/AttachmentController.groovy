@@ -189,7 +189,7 @@ class AttachmentController {
                             rowColumn 3, {
                                 rowField "${classNameField.aValue}: ${classNameField.bValue}", Style.EMPHASIS + Style.BLUE
                             }
-                            rowLink ActionIcon.GRAPH, this.&model as MethodClosure, [modelName: classNameField.aValue]
+                            rowAction ActionIcon.GRAPH, this.&model as MethodClosure, [modelName: classNameField.aValue]
                         }
                         for (def obj : objs[classNameField]) {
                             row {
@@ -253,7 +253,7 @@ class AttachmentController {
                     boolean termHasChildren = !children.isEmpty()
                     rowTree termHasChildren, {
                         rowField term.name
-                        rowLink ActionIcon.SHOW * IconStyle.SCALE_DOWN, this.&showTermAttachments as MC, term.id
+                        rowAction ActionIcon.SHOW * IconStyle.SCALE_DOWN, this.&showTermAttachments as MC, term.id
                     }
                     if (termHasChildren) {
                         for (def tc : children) rec(tc)
@@ -337,8 +337,8 @@ class AttachmentController {
                     }
                     rowColumn {
                         if (attachmentSecurityService.canDownloadFile(aIt))
-                            rowLink ActionIcon.DOWNLOAD, AttachmentController.&downloadAttachment as MC, aIt.id
-                        rowLink ActionIcon.SHOW, AttachmentController.&showAttachment as MC, aIt.id
+                            rowAction ActionIcon.DOWNLOAD, AttachmentController.&downloadAttachment as MC, aIt.id
+                        rowAction ActionIcon.SHOW, AttachmentController.&showAttachment as MC, aIt.id
                     }
                 }
             }
@@ -370,7 +370,7 @@ class AttachmentController {
                     rowTree termHasChildren, {
                         rowField term.name
                         rowField term.termGroupConfig?.toString()
-                        rowLink ActionIcon.SELECT * IconStyle.SCALE_DOWN, this.&selectTagsM2MCloseModal as MethodClosure, term.id
+                        rowAction ActionIcon.SELECT * IconStyle.SCALE_DOWN, this.&selectTagsM2MCloseModal as MethodClosure, term.id
                     }
                     if (termHasChildren) {
                         for (def tc : children) rec(tc)

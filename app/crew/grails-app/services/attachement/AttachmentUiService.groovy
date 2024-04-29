@@ -130,10 +130,10 @@ final class AttachmentUiService implements WebAttributes {
                             }
                             rowColumn {
                                 if (selectMC)
-                                    rowLink ActionIcon.SELECT, selectMC as MC, att.id, selectParams
+                                    rowAction ActionIcon.SELECT, selectMC as MC, att.id, selectParams
                                 else if (attachmentSecurityService.canDownloadFile(att))
-                                    rowLink ActionIcon.DOWNLOAD, AttachmentController.&downloadAttachment as MC, att.id
-                                rowLink ActionIcon.SHOW, AttachmentController.&showAttachment as MC, att.id
+                                    rowAction ActionIcon.DOWNLOAD, AttachmentController.&downloadAttachment as MC, att.id
+                                rowAction ActionIcon.SHOW, AttachmentController.&showAttachment as MC, att.id
                             }
                         }
                     }
@@ -212,7 +212,7 @@ final class AttachmentUiService implements WebAttributes {
                         rowField a.fileSize_
                     }
                     if (attachmentSecurityService.canDownloadFile(a))
-                        rowLink ActionIcon.DOWNLOAD, AttachmentController.&downloadAttachment as MC, a.id
+                        rowAction ActionIcon.DOWNLOAD, AttachmentController.&downloadAttachment as MC, a.id
                 }
             }
         }
@@ -304,11 +304,11 @@ final class AttachmentUiService implements WebAttributes {
                                 rowField term.active.toString()
                                 rowColumn {
                                     if (selectMode)
-                                        rowLink ActionIcon.SELECT * IconStyle.SCALE_DOWN, AttachmentController.&selectTermM2OCloseModal as MC, term.id
+                                        rowAction ActionIcon.SELECT * IconStyle.SCALE_DOWN, AttachmentController.&selectTermM2OCloseModal as MC, term.id
                                     else {
                                         if (term.active)
-                                            rowLink ActionIcon.DELETE * IconStyle.SCALE_DOWN, AttachmentController.&deleteTerm as MC, term.id
-                                        rowLink ActionIcon.EDIT * IconStyle.SCALE_DOWN, AttachmentController.&editTerm as MC, term.id
+                                            rowAction ActionIcon.DELETE * IconStyle.SCALE_DOWN, AttachmentController.&deleteTerm as MC, term.id
+                                        rowAction ActionIcon.EDIT * IconStyle.SCALE_DOWN, AttachmentController.&editTerm as MC, term.id
                                     }
                                 }
                             }

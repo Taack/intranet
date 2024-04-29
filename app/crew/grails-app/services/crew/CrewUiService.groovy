@@ -76,7 +76,7 @@ class CrewUiService implements WebAttributes {
                     rowColumn {
                         rowField r.authority
                         if (hasSelect)
-                            rowLink tr('default.role.label'), ActionIcon.SELECT * IconStyle.SCALE_DOWN, r.id, r.toString()
+                            rowAction tr('default.role.label'), ActionIcon.SELECT * IconStyle.SCALE_DOWN, r.id, r.toString()
                     }
                 }
             }
@@ -124,16 +124,16 @@ class CrewUiService implements WebAttributes {
                         }
                     }
                     rowColumn {
-                        rowLink ActionIcon.SHOW * IconStyle.SCALE_DOWN, CrewController.&showUser as MC, ru.id
+                        rowAction ActionIcon.SHOW * IconStyle.SCALE_DOWN, CrewController.&showUser as MC, ru.id
                         if (hasSelect)
-                            rowLink "Select User", ActionIcon.SELECT * IconStyle.SCALE_DOWN, ru.id, ru.toString()
+                            rowAction "Select User", ActionIcon.SELECT * IconStyle.SCALE_DOWN, ru.id, ru.toString()
                         else if (hasActions) {
-                            rowLink ActionIcon.EDIT * IconStyle.SCALE_DOWN, CrewController.&editUser as MC, ru.id
+                            rowAction ActionIcon.EDIT * IconStyle.SCALE_DOWN, CrewController.&editUser as MC, ru.id
                             if (canSwitchUser && ru.enabled)
-                                rowLink ActionIcon.SHOW * IconStyle.SCALE_DOWN, CrewController.&switchUser as MC, ru.id
+                                rowAction ActionIcon.SHOW * IconStyle.SCALE_DOWN, CrewController.&switchUser as MC, ru.id
                             else if (canSwitchUser && !ru.enabled) {
-                                rowLink ActionIcon.MERGE * IconStyle.SCALE_DOWN, CrewController.&replaceUser as MC, ru.id
-                                rowLink ActionIcon.DELETE * IconStyle.SCALE_DOWN, CrewController.&deleteUser as MC, ru.id
+                                rowAction ActionIcon.MERGE * IconStyle.SCALE_DOWN, CrewController.&replaceUser as MC, ru.id
+                                rowAction ActionIcon.DELETE * IconStyle.SCALE_DOWN, CrewController.&deleteUser as MC, ru.id
                             }
                         }
 
@@ -150,7 +150,7 @@ class CrewUiService implements WebAttributes {
                     }
                     rowColumn {
                         if (hasActions && !hasSelect)
-                            rowLink ActionIcon.EDIT * IconStyle.SCALE_DOWN, CrewController.&editUserRoles as MC, ru.id
+                            rowAction ActionIcon.EDIT * IconStyle.SCALE_DOWN, CrewController.&editUserRoles as MC, ru.id
                         rowField ru.authorities*.authority.join(', ')
                     }
                 }

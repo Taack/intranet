@@ -82,7 +82,7 @@ class CrewController implements WebAttributes {
                         boolean muHasChildren = !mu.managedUsers.isEmpty()
                         rowTree muHasChildren, {
                             rowColumn {
-                                if (hasActions) rowLink 'Edit User', ActionIcon.EDIT * IconStyle.SCALE_DOWN, this.&editUser as MC, mu.id
+                                if (hasActions) rowAction 'Edit User', ActionIcon.EDIT * IconStyle.SCALE_DOWN, this.&editUser as MC, mu.id
                                 rowField mu.username_
                                 rowField mu.businessUnit_
                             }
@@ -296,9 +296,9 @@ class CrewController implements WebAttributes {
                     }
                     rowColumn {
                         if (!UserRole.exists(user.id, r.id)) {
-                            rowLink ActionIcon.ADD, this.&addRoleToUser as MC, [userId: user.id, roleId: r.id]
+                            rowAction ActionIcon.ADD, this.&addRoleToUser as MC, [userId: user.id, roleId: r.id]
                         } else {
-                            rowLink ActionIcon.DELETE, this.&removeRoleToUser as MC, [userId: user.id, roleId: r.id]
+                            rowAction ActionIcon.DELETE, this.&removeRoleToUser as MC, [userId: user.id, roleId: r.id]
                         }
                     }
                 }
@@ -362,7 +362,7 @@ class CrewController implements WebAttributes {
                     }
                     if (hasActions) {
                         rowColumn {
-                            rowLink ActionIcon.EDIT * IconStyle.SCALE_DOWN, this.&roleForm as MC, r.id
+                            rowAction ActionIcon.EDIT * IconStyle.SCALE_DOWN, this.&roleForm as MC, r.id
                         }
                     }
                 }
