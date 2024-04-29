@@ -6,8 +6,6 @@ import grails.compiler.GrailsCompileStatic
 import taack.ast.annotation.TaackFieldEnum
 import taack.domain.IDomainHistory
 
-import java.nio.file.Files
-
 @TaackFieldEnum
 @GrailsCompileStatic
 class Attachment implements IDomainHistory<Attachment> {
@@ -36,12 +34,21 @@ class Attachment implements IDomainHistory<Attachment> {
     static constraints = {
         userUpdated nullable: true
         attachmentDescriptor nullable: true
+        contentTypeEnum nullable: true
+        contentTypeCategoryEnum nullable: true
         filePath widget: "filePath"
         lastUpdated nullable: true
         nextVersion nullable: true, unique: true
         active validator: { boolean val, Attachment obj ->
             if (val && obj.nextVersion)
                 return "attachment.active.hasNextVersion.error"
+        }
+    }
+
+    def beforeValidate() {
+        if (isDirty("contentType")) {
+            this.contentTypeEnum = AttachmentContentType.fromMimeType(contentType)
+            this.contentTypeCategoryEnum = this.contentTypeEnum.category
         }
     }
 

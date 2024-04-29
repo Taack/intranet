@@ -19,6 +19,9 @@ enum AttachmentStatus {
 @TaackFieldEnum
 @GrailsCompileStatic
 class AttachmentDescriptor implements IDomainHistory<AttachmentDescriptor> {
+    User userCreated
+    Date dateCreated
+
     AttachmentType type
     String fileOrigin
 
@@ -48,6 +51,7 @@ class AttachmentDescriptor implements IDomainHistory<AttachmentDescriptor> {
         fileOrigin nullable: true
         declaredLanguage nullable: true
         isInternal nullable: true
+        nextVersion nullable: true
     }
 
     static hasMany = [
