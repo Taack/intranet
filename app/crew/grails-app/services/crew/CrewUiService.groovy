@@ -84,9 +84,9 @@ class CrewUiService implements WebAttributes {
     }
 
     UiTableSpecifier buildUserTable(final UiFilterSpecifier f, final boolean hasSelect = false) {
-        User u = new User(manager: new User(), enabled: true)
 
         new UiTableSpecifier().ui {
+            User u = new User(manager: new User(), enabled: true)
             header {
                 if (!hasSelect) {
                     column {

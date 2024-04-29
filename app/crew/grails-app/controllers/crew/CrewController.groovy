@@ -142,13 +142,12 @@ class CrewController implements WebAttributes {
 
         UiBlockSpecifier b = new UiBlockSpecifier()
         b.ui {
-            ajaxBlock 'userList', {
+//            ajaxBlock 'userList', {
                 tableFilter 'Filter', f, 'Users', t, BlockSpec.Width.MAX, {
                     action 'Create User', ActionIcon.CREATE, CrewController.&editUser as MC, true
                 }
-            }
+//            }
         }
-
         taackUiService.show(b, buildMenu())
     }
 
@@ -159,9 +158,9 @@ class CrewController implements WebAttributes {
         UiBlockSpecifier b = new UiBlockSpecifier()
         b.ui {
             modal !params.boolean("refresh"), {
-                ajaxBlock "userListSelect", {
+//                ajaxBlock "userListSelect", {
                     tableFilter "Filter", f, "Roles", t, BlockSpec.Width.MAX
-                }
+//                }
             }
         }
 
@@ -292,7 +291,7 @@ class CrewController implements WebAttributes {
             }
             iterate(taackFilterService.getBuilder(Role)
                     .setMaxNumberOfLine(20)
-                    .setSortOrder(TaackFilter.Order.DESC, role.authority_).build()) { Role r, Long counter ->
+                    .setSortOrder(TaackFilter.Order.DESC, role.authority_).build()) { Role r ->
                 row {
                     rowColumn {
                         rowField r.authority
@@ -310,9 +309,9 @@ class CrewController implements WebAttributes {
 
         taackUiService.show(new UiBlockSpecifier().ui {
             modal !params.boolean("refresh"), {
-                ajaxBlock "userRoleBlock", {
+//                ajaxBlock "userRoleBlock", {
                     table "Edit User Role for ${user.username}", t, BlockSpec.Width.MAX
-                }
+//                }
             }
         }, buildMenu())
     }
@@ -372,11 +371,11 @@ class CrewController implements WebAttributes {
             }
         }
         UiBlockSpecifier b = new UiBlockSpecifier().ui {
-            ajaxBlock "blockList", {
+           // ajaxBlock "blockList", {
                 table "Roles", t, BlockSpec.Width.MAX, {
                     if (hasActions) action "Create Role", ActionIcon.CREATE, CrewController.&roleForm as MC, true
                 }
-            }
+            //}
         }
         taackUiService.show(b, buildMenu())
     }
@@ -392,9 +391,9 @@ class CrewController implements WebAttributes {
         UiBlockSpecifier b = new UiBlockSpecifier()
         b.ui {
             modal {
-                ajaxBlock "blockForm", {
+//                ajaxBlock "blockForm", {
                     form "Role Form", f, BlockSpec.Width.MAX
-                }
+//                }
             }
         }
         taackUiService.show(b, buildMenu())
