@@ -160,7 +160,7 @@ exe:
   convertPath: /usr/bin/convert
   unzipPath: /usr/bin/unzip
 plm:
-  freecadPath: /usr/bin/freecad
+  freecadPath: /usr/bin/FreeCAD
   singleInstance: false
   xvfbRun: false
   useWeston: true
