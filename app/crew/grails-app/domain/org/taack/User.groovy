@@ -11,8 +11,8 @@ import taack.ast.annotation.TaackFieldEnum
 
 @GrailsCompileStatic
 @TaackFieldEnum
-@EqualsAndHashCode(includes='username')
-@ToString(includes='username', includeNames=true, includePackage=false)
+@EqualsAndHashCode(includes = 'username')
+@ToString(includes = 'username', includeNames = true, includePackage = false)
 class User implements Serializable {
 
     private static final long serialVersionUID = 1
@@ -42,7 +42,7 @@ class User implements Serializable {
     }
 
     static hasMany = [
-            attachments        : Attachment,
+            attachments: Attachment,
     ]
 
     static mappedBy = [attachments: 'none']
@@ -62,11 +62,11 @@ class User implements Serializable {
 
     static mapping = {
         table name: 'taack_users'
-	    password column: '`password`'
+        password column: '`password`'
     }
 
     Long getMainPictureId() {
-        this.attachments.find { it.type == AttachmentType.mainPicture && it.active }?.id
+        this.attachments.find { it.attachmentDescriptor.type == AttachmentType.mainPicture && it.active }?.id
     }
 
     List<User> getManagedUsers() {

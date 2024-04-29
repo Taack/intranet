@@ -6,8 +6,8 @@ import grails.compiler.GrailsCompileStatic
 import org.codehaus.groovy.runtime.MethodClosure
 import org.grails.datastore.gorm.GormEntity
 import org.taack.Attachment
-import taack.base.TaackSearchService
-import taack.base.TaackSimpleAttachmentService
+import taack.domain.TaackAttachmentService
+import taack.domain.TaackSearchService
 import taack.solr.SolrFieldType
 import taack.solr.SolrSpecifier
 import taack.ui.base.UiBlockSpecifier
@@ -20,17 +20,17 @@ class AttachmentSearchService implements TaackSearchService.IIndexService {
     static lazyInit = false
 
     TaackSearchService taackSearchService
-    TaackSimpleAttachmentService taackSimpleAttachmentService
+    TaackAttachmentService taackAttachmentService
 
     @PostConstruct
     private void init() {
         taackSearchService.registerSolrSpecifier(this, new SolrSpecifier(Attachment, AttachmentController.&showAttachment as MethodClosure, this.&labeling as MethodClosure, { Attachment a ->
             a ?= new Attachment()
-            String content = taackSimpleAttachmentService.attachmentContent(a)
+            String content = taackAttachmentService.attachmentContent(a)
             indexField "Original Name", SolrFieldType.TXT_GENERAL, a.originalName_
             if (content || !a.id)
                 indexField "File Content", SolrFieldType.TXT_GENERAL, "fileContent", content
-            indexField "File Origin", SolrFieldType.POINT_STRING, "fileOrigin", true, a.fileOrigin
+            indexField "File Origin", SolrFieldType.POINT_STRING, "fileOrigin", true, a.attachmentDescriptor.fileOrigin
             indexField "Content Type Cat.", SolrFieldType.POINT_STRING, "contentTypeCategoryEnum", true, a.contentTypeCategoryEnum?.toString()
             indexField "Date Created", SolrFieldType.DATE, 0.5f, true, a.dateCreated_
             indexField "User Created", SolrFieldType.POINT_STRING, "userCreated", 0.5f, true, a.userCreated?.username

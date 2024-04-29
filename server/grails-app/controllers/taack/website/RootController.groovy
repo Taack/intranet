@@ -5,7 +5,7 @@ import grails.plugin.springsecurity.annotation.Secured
 import org.codehaus.groovy.runtime.MethodClosure
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.i18n.LocaleContextHolder
-import taack.base.TaackUiSimpleService
+import taack.render.TaackUiService
 import taack.ui.TaackPluginConfiguration
 import taack.ui.TaackPluginService
 import taack.ui.TaackUiConfiguration
@@ -22,7 +22,7 @@ TODO: Add an infrastructure to list new stuffs from a user and a timestamp
 @Secured(["isAuthenticated()"])
 class RootController {
     TaackPluginService taackPluginService
-    TaackUiSimpleService taackUiSimpleService
+    TaackUiService taackUiService
     RootSearchService rootSearchService
 
     @Autowired
@@ -51,7 +51,7 @@ class RootController {
         render view: "root", model: [taackPluginService: taackPluginService,
                                      language: language,
                                      conf    : taackUiPluginConfiguration,
-                                     menu: taackUiSimpleService.visitMenu(buildMenu(params["q"] as String))]
+                                     menu: taackUiService.visitMenu(buildMenu(params["q"] as String))]
     }
 
     def getPluginLogo(String pluginControllerName) {
@@ -76,11 +76,11 @@ class RootController {
     }
 
     def search(String q) {
-        taackUiSimpleService.show(rootSearchService.buildSearchBlock(q), buildMenu(q))
+        taackUiService.show(rootSearchService.buildSearchBlock(q), buildMenu(q))
     }
 
     def updates() {
-        taackUiSimpleService.show(new UiBlockSpecifier().ui {
+        taackUiService.show(new UiBlockSpecifier().ui {
             ajaxBlock "updates", {
                 show("WiP", new UiShowSpecifier().ui {
                     inlineHtml("WiP", "")
@@ -90,7 +90,7 @@ class RootController {
     }
 
     def todo() {
-        taackUiSimpleService.show(new UiBlockSpecifier().ui {
+        taackUiService.show(new UiBlockSpecifier().ui {
             ajaxBlock "todo", {
                 show("WiP", new UiShowSpecifier().ui {
                     inlineHtml("WiP", "")

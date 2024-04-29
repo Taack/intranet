@@ -1,12 +1,7 @@
-package taack.base
+package taack.domain
 
-import app.config.AttachmentContentType
 import app.config.AttachmentContentTypeCategory
-import app.config.AttachmentType
-import app.config.SupportedLanguage
 import grails.compiler.GrailsCompileStatic
-import grails.gorm.transactions.Transactional
-import grails.plugin.springsecurity.SpringSecurityService
 import grails.util.Pair
 import grails.web.api.WebAttributes
 import grails.web.databinding.DataBinder
@@ -18,26 +13,17 @@ import org.apache.tika.parser.ocr.TesseractOCRConfig
 import org.apache.tika.sax.BodyContentHandler
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.web.multipart.MultipartFile
 import org.taack.Attachment
 import org.taack.IAttachmentConverter
 import org.taack.IAttachmentPreviewConverter
 import org.taack.IAttachmentShowIFrame
-import org.taack.User
 import taack.ui.TaackUiConfiguration
 
 import javax.annotation.PostConstruct
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
-import java.nio.file.StandardCopyOption
-import java.security.MessageDigest
-import java.text.SimpleDateFormat
 
 @GrailsCompileStatic
-class TaackSimpleAttachmentService implements WebAttributes, DataBinder {
+class TaackAttachmentService implements WebAttributes, DataBinder {
     final Object imageConverter = new Object()
-    SpringSecurityService springSecurityService
 
     @Autowired
     TaackUiConfiguration taackUiConfiguration
@@ -96,6 +82,10 @@ class TaackSimpleAttachmentService implements WebAttributes, DataBinder {
 
     String attachmentPath(final Attachment attachment) {
         storePath + '/' + attachmentFileName(attachment)
+    }
+
+    File attachmentFile(final Attachment attachment) {
+        new File(attachmentPath(attachment))
     }
 
     String attachmentTxtPath(final Attachment attachment) {
@@ -179,162 +169,6 @@ class TaackSimpleAttachmentService implements WebAttributes, DataBinder {
         }
     }
 
-    private static final String makeContentShaOne(File savedFile) {
-        return MessageDigest.getInstance("SHA1").digest(savedFile.bytes).encodeHex().toString()
-    }
-
-    private static final String makeContentShaOne(MultipartFile multipartFile) {
-        return MessageDigest.getInstance("SHA1").digest(multipartFile.bytes).encodeHex().toString()
-    }
-
-    List<Attachment> getAttachments(List<MultipartFile> files, String fileOrigin = null, AttachmentType type = null, Boolean activeOnly = true) {
-        if (!files || files.empty) {
-            return null
-        }
-
-        List<Attachment> attachmentList = []
-        files.each { f ->
-            Attachment a = getAttachment(f, fileOrigin, type, activeOnly)
-            if (a)
-                attachmentList.add(a)
-        }
-
-        return attachmentList
-    }
-
-    Attachment getAttachment(String contentShaOne, String fileOrigin = null, AttachmentType type = null, Boolean activeOnly = true) {
-        def results = Attachment.createCriteria().list() {
-            if (activeOnly)
-                eq "active", true
-            if (fileOrigin)
-                eq "fileOrigin", fileOrigin
-            if (type)
-                eq "type", type
-            eq "contentShaOne", contentShaOne
-        } as List<Attachment>
-
-        Attachment match = (results && !results.empty) ? results.first() : null
-        if (match) log.info "file exists on the server (id: ${match.id}, fileOrigin: ${match.fileOrigin}, type: ${match.type})"
-        else if (activeOnly) log.info "file does not exist on the server or is not active"
-        else log.info "file does not exist on the server"
-
-        return match
-    }
-
-    Attachment getAttachment(File f, String fileOrigin = null, AttachmentType type = null, Boolean activeOnly = true) {
-        getAttachment makeContentShaOne(f), fileOrigin, type, activeOnly
-    }
-
-    Attachment getAttachment(MultipartFile f, String fileOrigin = null, AttachmentType type = null, Boolean activeOnly = true) {
-        getAttachment makeContentShaOne(f), fileOrigin, type, activeOnly
-    }
-
-    List<Attachment> createAttachments(List<MultipartFile> files, String fileOrigin, AttachmentType type = null, Boolean forceCreate = null) {
-        if (!files || files.empty) {
-            return null
-        }
-
-        List<Attachment> attachments = []
-        String dateEnd = params?.dateEnd ?: null
-
-        files.each { f ->
-            if (!forceCreate && getAttachment(f, fileOrigin, type)) {
-                log.warn "file already exists: $f.originalFilename"
-                return
-            }
-            params?.dateEnd = dateEnd
-            Attachment att = getOrCreateAttachment(f, fileOrigin, type)
-            if (att) attachments << att
-        }
-
-        log.info("${attachments.size()} file(s) added")
-        return attachments
-    }
-
-    Attachment getOrCreateAttachment(MultipartFile f, String fileOrigin, AttachmentType type = null) {
-        if (!f || f.empty)
-            return null
-        println getAttachment(f, fileOrigin, type)
-        return getAttachment(f, fileOrigin, type) ?: createAttachment(f, fileOrigin, type)
-    }
-
-    List<Attachment> getOrCreateAttachments(List<MultipartFile> files, String fileOrigin, AttachmentType type = null) {
-        if (!files || files.empty) {
-            return null
-        }
-
-        if (params?.choiceFile instanceof String) params.choiceFile = [params.choiceFile]
-
-        List<Attachment> attachments = []
-        files.each { f ->
-            Attachment att = getOrCreateAttachment(f, fileOrigin, type)
-            if (att) attachments << att
-        }
-
-        params?.choiceFile?.each {
-            Attachment a = it ? Attachment.read(it as Long) : null
-
-            if (a)
-                attachments << a
-        }
-        log.info("${attachments.size()} file(s) added")
-        return attachments
-    }
-
-    Attachment createAttachment(InputStream inputStream, String fileName, String fileOrigin) {
-        fileName = fileName.replace("'", "_").replace(" ", "_")
-        Path tmp = Files.createTempFile("Att", fileOrigin)
-        Files.copy(inputStream, tmp)
-        File tmpFile = tmp.toFile()
-        makeAttachment(tmpFile, fileName, fileOrigin)
-    }
-
-    Attachment createAttachment(MultipartFile f, String fileOrigin, AttachmentType type = null) {
-        if (!f || f.empty) {
-            return null
-        }
-        Path tmp = Files.createTempFile("Att", fileOrigin)
-        f.transferTo(tmp)
-        File tmpFile = tmp.toFile()
-        makeAttachment(tmpFile, f.originalFilename, fileOrigin, type, f.contentType)
-    }
-
-    Attachment createAttachment(File f, String originalFilename, String fileOrigin, AttachmentType type = null, boolean useRequest = true) {
-        makeAttachment(f, originalFilename, fileOrigin, type, null, useRequest)
-    }
-
-    @Transactional
-    private Attachment makeAttachment(File tmpFile, String fileName,
-                                      String fileOrigin, AttachmentType type = null, String contentType = null, boolean useRequest = true) {
-        String contentShaOne = makeContentShaOne(tmpFile)
-        String extension = fileName.substring(fileName.lastIndexOf('.') + 1)
-        Attachment attachment = new Attachment()
-        attachment.userCreated = springSecurityService.currentUser as User ?: User.findByUsername('golgoth42')
-        attachment.fileSize = tmpFile.size()
-        attachment.originalName = fileName
-        attachment.filePath = contentShaOne + "." + extension
-        attachment.fileOrigin = fileOrigin
-        attachment.contentType = contentType ?: Files.probeContentType(tmpFile.toPath())
-        attachment.contentShaOne = contentShaOne
-        attachment.type = type
-
-        Files.move(tmpFile.toPath(), Paths.get(storePath + '/' + attachment.filePath), StandardCopyOption.REPLACE_EXISTING)
-
-        if (useRequest && params) {
-            params.attachmentGroup = params["attachmentGroup.id"]
-            params.dateEnd = params.dateEnd ? new SimpleDateFormat("yyyy-MM-dd").parse(params.dateEnd as String) : null
-            params.declaredLanguage = params.declaredLanguage ? (params.declaredLanguage as String).toUpperCase() as SupportedLanguage : null
-            bindData(attachment, params, [include: ['status', 'declaredLanguage', 'displayOrder', 'indexFile', 'dateEnd', 'active', "attachmentGroup", 'grantedRoles', 'grantedUsers', 'tags']])
-        }
-        postPrepareSave(attachment)
-        attachment.save(flush: true, failOnError: true)
-        if (attachment.hasErrors()) {
-            log.error "${attachment.errors}"
-            return null
-        }
-        return attachment
-    }
-
     File attachmentPreview(final Attachment attachment, PreviewFormat previewFormat = PreviewFormat.DEFAULT) {
         if (!attachment) return new File("${taackUiConfiguration.resources}/noPreview.${previewFormat.previewExtension}")
         final File preview = new File(attachmentPreviewPath(previewFormat, attachment))
@@ -380,108 +214,6 @@ class TaackSimpleAttachmentService implements WebAttributes, DataBinder {
         return new File("${taackUiConfiguration.resources}/noPreview.${previewFormat.previewExtension}")
     }
 
-
-    @Transactional
-    Attachment updateContent(Attachment attachment, File savedFile, String userFileName) {
-        String contentShaOne = makeContentShaOne(savedFile)
-        String extension = userFileName.substring(userFileName.lastIndexOf('.') + 1)
-        attachment.userCreated = springSecurityService?.currentUser as User ?: attachment.userCreated
-        attachment.fileSize = savedFile.size() as Integer
-        attachment.originalName = userFileName
-        attachment.filePath = contentShaOne + "." + extension
-        attachment.contentType = Files.probeContentType(savedFile.toPath())
-        attachment.contentShaOne = contentShaOne
-        attachment.active = true
-
-        if (attachment.validate()) {
-            attachment.save(flush: true)
-        } else {
-            log.error("${attachment.errors}")
-            throw new RuntimeException(attachment.errors.allErrors.first().getCode())
-        }
-
-        return attachment
-    }
-
-    void updateAttachment(File newContent, String fileName, Attachment attachmentToUpdate) {
-        while (attachmentToUpdate.nextVersion) {
-            attachmentToUpdate = attachmentToUpdate.nextVersion
-        }
-        if (!attachmentToUpdate.active || getAttachment(newContent, attachmentToUpdate.fileOrigin, attachmentToUpdate.type)) {
-            log.error "attachmentToUpdate already exist or is not active .."
-            return // See DocListController
-        }
-        try {
-            Attachment cloned = cloneAttachment(attachmentToUpdate)
-            attachmentToUpdate = updateContent(attachmentToUpdate, newContent, fileName)
-            insertBefore(cloned, attachmentToUpdate)
-        } catch (e) {
-            log.error "updateAttachment error ${e.toString()}"
-            e.printStackTrace()
-        }
-    }
-
-    @Transactional
-    Boolean insertBefore(Attachment newAtt, Attachment refAtt) {
-        if (!newAtt || !refAtt) {
-            throw new RuntimeException("attachment.isEmpty.error")
-        }
-        Attachment prevAtt = Attachment.findByNextVersion(refAtt)
-        if (prevAtt) {
-            prevAtt.nextVersion = newAtt
-            if (prevAtt.validate()) {
-                prevAtt.save(flush: true)
-            } else {
-                log.error "${prevAtt.errors}"
-                throw new RuntimeException(prevAtt.errors.allErrors.first().getCode())
-            }
-        }
-        newAtt.nextVersion = refAtt
-        newAtt.active = false
-        if (newAtt.validate()) {
-            newAtt.save(flush: true)
-        } else {
-            log.error "${newAtt.errors}"
-            throw new RuntimeException(newAtt.errors.allErrors.first().getCode())
-        }
-
-        log.info("Attachment ${newAtt.id} inserted before attachment ${refAtt.id}!")
-        return true
-    }
-
-    Attachment copyAttachment(Attachment src, Attachment dest, boolean forceInactive = false) {
-        dest.userCreated = src?.userCreated
-        dest.dateCreated = src.dateCreated
-        dest.type = src.type
-        dest.declaredLanguage = src.declaredLanguage
-        dest.fileOrigin = src.fileOrigin
-        dest.status = src.status
-        dest.filePath = src.filePath
-        dest.originalName = src.originalName
-        dest.publicName = src.publicName
-        dest.version = src.version
-        dest.contentType = src.contentType
-        dest.active = forceInactive ? false : src.active
-        dest.fileSize = src.fileSize
-        dest.contentShaOne = src.contentShaOne.strip()
-        dest.contentTypeCategoryEnum = src.contentTypeCategoryEnum
-        dest.contentTypeEnum = src.contentTypeEnum
-        if (!dest.validate()) {
-            log.error "${dest.errors}"
-            throw new RuntimeException(dest.errors.allErrors.first().getCode())
-        }
-        return dest
-    }
-
-    @Transactional
-    Attachment cloneAttachment(Attachment attachment) {
-        if (!attachment) {
-            throw new RuntimeException("attachment.isEmpty.error")
-        }
-        Attachment clone = new Attachment()
-        return copyAttachment(attachment, clone)
-    }
-
     static void registerPreviewConverter(IAttachmentPreviewConverter previewConverter) {
         for (String extension in previewConverter.previewManagedExtensions) {
             additionalPreviewConverter.put(extension, previewConverter)
@@ -523,11 +255,6 @@ class TaackSimpleAttachmentService implements WebAttributes, DataBinder {
         response.setContentType(attachment.contentType)
         response.setHeader("Content-disposition", "attachment;filename=\"${URLEncoder.encode(attachment.getName(), "UTF-8")}\"")
         response.outputStream << new File(attachmentPath(attachment)).bytes
-    }
-
-    void postPrepareSave(Attachment attachment) {
-        attachment.contentTypeEnum = AttachmentContentType.fromMimeType(attachment.contentType)
-        attachment.contentTypeCategoryEnum = attachment.contentTypeEnum?.category ?: AttachmentContentType.OTHER.category
     }
 
     String attachmentContent(Attachment attachment) {

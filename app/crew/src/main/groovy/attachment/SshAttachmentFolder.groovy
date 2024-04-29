@@ -5,7 +5,7 @@ import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.taack.Attachment
 import org.taack.User
-import taack.base.TaackSimpleAttachmentService
+import taack.domain.TaackAttachmentService
 import taack.ssh.vfs.FileCallback
 import taack.ssh.vfs.FileTree
 import taack.ssh.vfs.FolderCallback
@@ -23,14 +23,14 @@ import java.nio.file.StandardCopyOption
 abstract class SshAttachmentFolder implements FolderCallback, FileCallback {
     final String attachmentVfsUploadFolder
     final String storePath
-    final TaackSimpleAttachmentService taackSimpleAttachmentService
+    final TaackAttachmentService taackAttachmentService
 
     final User user
 
-    SshAttachmentFolder(TaackSimpleAttachmentService taackSimpleAttachmentService, User user, String storePath, String attachmentVfsUploadFolder) {
+    SshAttachmentFolder(TaackAttachmentService taackSimpleAttachmentService, User user, String storePath, String attachmentVfsUploadFolder) {
         this.attachmentVfsUploadFolder = attachmentVfsUploadFolder
         this.storePath = storePath
-        this.taackSimpleAttachmentService = taackSimpleAttachmentService
+        this.taackAttachmentService = taackSimpleAttachmentService
         this.user = user
     }
 
@@ -47,7 +47,7 @@ abstract class SshAttachmentFolder implements FolderCallback, FileCallback {
                 for (Pair<Long, String> an : attachmentAndNames) {
                     if (an && an.aValue && an.bValue) {
                         Attachment a = Attachment.read(an.aValue)
-                        b.addFile(this, an.bValue, isUpdatable(a), taackSimpleAttachmentService.attachmentPath(a), an.aValue)
+                        b.addFile(this, an.bValue, isUpdatable(a), taackAttachmentService.attachmentPath(a), an.aValue)
                     }
                 }
             } catch (e) {
@@ -139,7 +139,7 @@ abstract class SshAttachmentFolder implements FolderCallback, FileCallback {
                 }
                 Files.copy(new File(oldFile.realFilePath).toPath(), new File(newFile.realFilePath).toPath(), StandardCopyOption.REPLACE_EXISTING)
                 def newFileReplace = new File(newFile.realFilePath)
-                taackSimpleAttachmentService.updateAttachment(newFileReplace, newPath.fileName.toString(), a)
+// TODO                taackAttachmentService.updateAttachment(newFileReplace, newPath.fileName.toString(), a)
             }
 
         } catch (e) {
