@@ -139,12 +139,10 @@ final class AttachmentUiService implements WebAttributes {
                     }
         }
         BlockSpec.buildBlockSpec {
-            ajaxBlock "attachmentList", {
                 tableFilter "Filter", f, "Attachment", t, BlockSpec.Width.MAX, {
                     if (uploadAttachment)
-                        action "Upload New File", ActionIcon.CREATE, uploadAttachment, selectParams, true
+                        action ActionIcon.CREATE, uploadAttachment, selectParams
                 }
-            }
         }
     }
 
@@ -159,11 +157,11 @@ final class AttachmentUiService implements WebAttributes {
             }
             ajaxBlock "showAttachment${fieldName}", {
                 show "${attachment.originalName}", buildShowAttachment(attachment, iFrame == null), BlockSpec.Width.MAX, {
-                    action "Update", ActionIcon.EDIT, AttachmentController.&updateAttachment as MC, attachment.id, true
-                    if (attachmentSecurityService.canDownloadFile(attachment)) action "Download", ActionIcon.DOWNLOAD, AttachmentController.&downloadAttachment as MC, attachment.id, false
+                    action ActionIcon.EDIT, AttachmentController.&updateAttachment as MC, attachment.id
+                    if (attachmentSecurityService.canDownloadFile(attachment)) action ActionIcon.DOWNLOAD, AttachmentController.&downloadAttachment as MC, attachment.id
                     if (attachmentSecurityService.canDownloadFile(attachment) && converterExtensions) {
                         for (def ext in converterExtensions) {
-                            action "Download ${ext}", ext == 'pdf' ? ActionIcon.EXPORT_PDF : ActionIcon.EXPORT, AttachmentController.&extensionForAttachment as MC, [extension: ext, id: attachment.id], false
+                            action ext == 'pdf' ? ActionIcon.EXPORT_PDF : ActionIcon.EXPORT, AttachmentController.&extensionForAttachment as MC, [extension: ext, id: attachment.id]
                         }
                     }
                 }
@@ -235,7 +233,7 @@ final class AttachmentUiService implements WebAttributes {
                 field attachment.isRestrictedToMyManagers_
                 field attachment.isRestrictedToEmbeddingObjects_
             }
-            formAction "Save", returnMethod, attachment.id, other, true
+            formAction returnMethod, attachment.id, other
         }
     }
 
@@ -245,7 +243,7 @@ final class AttachmentUiService implements WebAttributes {
                 field attachment.filePath_
                 ajaxField attachment.attachmentDescriptor_, AttachmentController.&editAttachmentDescriptor as MC
             }
-            formAction "Save", returnMethod, attachment.id, other, true
+            formAction returnMethod, attachment.id, other
         }
     }
 
@@ -263,7 +261,7 @@ final class AttachmentUiService implements WebAttributes {
             }
             field term.display_
             field term.active_
-            formAction "Save", AttachmentController.&saveTerm as MC, term.id, true
+            formAction AttachmentController.&saveTerm as MC, term.id
         }
     }
 

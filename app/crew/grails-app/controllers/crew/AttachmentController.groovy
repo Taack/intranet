@@ -127,9 +127,7 @@ class AttachmentController {
     def uploadAttachment() {
         taackUiService.show(new UiBlockSpecifier().ui {
             modal {
-                ajaxBlock 'uploadAttachment', {
-                    form 'Upload a File', AttachmentUiService.buildAttachmentForm(new Attachment()), BlockSpec.Width.MAX
-                }
+                form AttachmentUiService.buildAttachmentForm(new Attachment()), BlockSpec.Width.MAX
             }
         })
     }
@@ -138,9 +136,7 @@ class AttachmentController {
         attachmentDescriptor ?= new AttachmentDescriptor()
         taackUiService.show(new UiBlockSpecifier().ui {
             modal {
-                ajaxBlock 'uploadAttachmentDescriptor', {
-                    form 'Edit File Metadata', AttachmentUiService.buildAttachmentDescriptorForm(attachmentDescriptor), BlockSpec.Width.MAX
-                }
+                form AttachmentUiService.buildAttachmentDescriptorForm(attachmentDescriptor), BlockSpec.Width.MAX
             }
         })
     }
@@ -158,9 +154,7 @@ class AttachmentController {
     def updateAttachment(Attachment attachment) {
         taackUiService.show(new UiBlockSpecifier().ui {
             modal {
-                ajaxBlock 'updateAttachment', {
-                    form 'Update a File', AttachmentUiService.buildAttachmentForm(attachment), BlockSpec.Width.MAX
-                }
+                form AttachmentUiService.buildAttachmentForm(attachment), BlockSpec.Width.MAX
             }
         })
     }
@@ -189,27 +183,25 @@ class AttachmentController {
         def objs = taackMetaModelService.listObjectsPointingTo(attachment)
         taackUiService.show(new UiBlockSpecifier().ui {
             modal {
-                ajaxBlock 'showLinkedData', {
-                    table "Object Referencing ${attachment.originalName}", new UiTableSpecifier().ui({
-                        for (def classNameField : objs.keySet()) {
-                            row {
-                                rowColumn 3, {
-                                    rowField "${classNameField.aValue}: ${classNameField.bValue}", Style.EMPHASIS + Style.BLUE
-                                }
-                                rowLink ActionIcon.GRAPH, this.&model as MethodClosure, [modelName: classNameField.aValue]
+                table "Object Referencing ${attachment.originalName}", new UiTableSpecifier().ui({
+                    for (def classNameField : objs.keySet()) {
+                        row {
+                            rowColumn 3, {
+                                rowField "${classNameField.aValue}: ${classNameField.bValue}", Style.EMPHASIS + Style.BLUE
                             }
-                            for (def obj : objs[classNameField]) {
-                                row {
-                                    rowField obj.toString()
-                                    rowField((obj.hasProperty('userCreated') ? obj['userCreated'] : '') as String)
-                                    rowField(((obj.hasProperty('dateCreated') ? obj['dateCreated'] : null) as Date)?.toString())
-                                    rowField((obj.hasProperty('version') ? obj['version'] : '??') as String)
-                                }
+                            rowLink ActionIcon.GRAPH, this.&model as MethodClosure, [modelName: classNameField.aValue]
+                        }
+                        for (def obj : objs[classNameField]) {
+                            row {
+                                rowField obj.toString()
+                                rowField((obj.hasProperty('userCreated') ? obj['userCreated'] : '') as String)
+                                rowField(((obj.hasProperty('dateCreated') ? obj['dateCreated'] : null) as Date)?.toString())
+                                rowField((obj.hasProperty('version') ? obj['version'] : '??') as String)
                             }
                         }
-                    }), BlockSpec.Width.MAX, {
-                        action 'Graph', ActionIcon.GRAPH, this.&model as MethodClosure, [modelName: Attachment.name], true
                     }
+                }), BlockSpec.Width.MAX, {
+                    action ActionIcon.GRAPH, this.&model as MethodClosure, [modelName: Attachment.name]
                 }
             }
         })
@@ -235,7 +227,7 @@ class AttachmentController {
         def f = TaackAttachmentService.convertExtension(attachment, ext)
         if (f?.exists()) {
             response.setContentType("application/${ext}")
-            response.setHeader('Content-disposition', "filename="+"${URLEncoder.encode('${attachment.originalNameWithoutExtension}.${ext}', 'UTF-8')}\"")
+            response.setHeader('Content-disposition', "filename=" + "${URLEncoder.encode('${attachment.originalNameWithoutExtension}.${ext}', 'UTF-8')}\"")
             response.outputStream << f.bytes
         } else return null
     }
@@ -412,24 +404,19 @@ class AttachmentController {
         UiFilterSpecifier f = attachmentUiService.buildTermFilter()
         UiTableSpecifier t = attachmentUiService.buildTermTable f
         b.ui {
-            ajaxBlock 'listTerm', {
                 tableFilter 'Filter', f, 'Terms', t, BlockSpec.Width.MAX, {
-                    action 'Create term', ActionIcon.CREATE, AttachmentController.&editTerm as MethodClosure, true
+                    action ActionIcon.CREATE, AttachmentController.&editTerm as MC
                 }
-            }
         }
         taackUiService.show(b, buildMenu())
     }
 
     @Secured(['ROLE_ADMIN', 'ROLE_TERM_ADMIN'])
     def editTerm(Term term) {
-        String title = term ? 'Edit term' : 'New term'
         term = term ?: new Term()
         UiBlockSpecifier b = new UiBlockSpecifier().ui {
             modal {
-                ajaxBlock 'editTerm', {
-                    form title, attachmentUiService.buildTermForm(term), BlockSpec.Width.MAX
-                }
+                    form attachmentUiService.buildTermForm(term), BlockSpec.Width.MAX
             }
         }
         taackUiService.show(b)
@@ -455,9 +442,7 @@ class AttachmentController {
         UiBlockSpecifier b = new UiBlockSpecifier()
         b.ui {
             modal {
-                ajaxBlock 'termListSelect', {
                     tableFilter 'Filter', f, 'Terms', t, BlockSpec.Width.MAX
-                }
             }
         }
         taackUiService.show(b)

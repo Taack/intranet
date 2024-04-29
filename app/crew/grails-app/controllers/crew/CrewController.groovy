@@ -144,7 +144,7 @@ class CrewController implements WebAttributes {
         b.ui {
 //            ajaxBlock 'userList', {
                 tableFilter 'Filter', f, 'Users', t, BlockSpec.Width.MAX, {
-                    action 'Create User', ActionIcon.CREATE, CrewController.&editUser as MC, true
+                    action ActionIcon.CREATE, CrewController.&editUser as MC
                 }
 //            }
         }
@@ -205,9 +205,7 @@ class CrewController implements WebAttributes {
     def updateUserMainPicture(User u) {
         taackUiService.show(new UiBlockSpecifier().ui {
             modal {
-                ajaxBlock 'updateUserMainPicture', {
-                    form 'Update a File', AttachmentUiService.buildAttachmentForm(Attachment.read(u.mainPictureId) ?: new Attachment(type: AttachmentType.mainPicture), this.&saveUserMainPicture as MethodClosure, [userId: u.id]), BlockSpec.Width.MAX
-                }
+                    form AttachmentUiService.buildAttachmentForm(Attachment.read(u.mainPictureId) ?: new Attachment(type: AttachmentType.mainPicture), this.&saveUserMainPicture as MethodClosure, [userId: u.id]), BlockSpec.Width.MAX
             }
         })
     }
@@ -257,13 +255,13 @@ class CrewController implements WebAttributes {
                 field user.accountLocked_
                 field user.passwordExpired_
             }
-            formAction "Save", this.&saveUser as MC, user.id, true
+            formAction this.&saveUser as MC, user.id
         }
 
         taackUiService.show new UiBlockSpecifier().ui {
             modal {
                 ajaxBlock "userForm", {
-                    form "User Form", f, BlockSpec.Width.MAX
+                    form f, BlockSpec.Width.MAX
                 }
             }
         }
@@ -373,7 +371,7 @@ class CrewController implements WebAttributes {
         UiBlockSpecifier b = new UiBlockSpecifier().ui {
            // ajaxBlock "blockList", {
                 table "Roles", t, BlockSpec.Width.MAX, {
-                    if (hasActions) action "Create Role", ActionIcon.CREATE, CrewController.&roleForm as MC, true
+                    if (hasActions) action ActionIcon.CREATE, CrewController.&roleForm as MC
                 }
             //}
         }
@@ -386,13 +384,13 @@ class CrewController implements WebAttributes {
         UiFormSpecifier f = new UiFormSpecifier()
         f.ui role, {
             field role.authority_
-            formAction "Save", this.&saveRole as MC, role.id, null, true
+            formAction this.&saveRole as MC, role.id
         }
         UiBlockSpecifier b = new UiBlockSpecifier()
         b.ui {
             modal {
 //                ajaxBlock "blockForm", {
-                    form "Role Form", f, BlockSpec.Width.MAX
+                    form f, BlockSpec.Width.MAX
 //                }
             }
         }
