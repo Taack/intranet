@@ -30,6 +30,7 @@ class Attachment implements IDomainHistory<Attachment> {
     AttachmentContentType contentTypeEnum
     AttachmentContentTypeCategory contentTypeCategoryEnum
 
+    Set<Term> tags
 
     static constraints = {
         userUpdated nullable: true
@@ -57,22 +58,17 @@ class Attachment implements IDomainHistory<Attachment> {
         originalName type: 'text'
     }
 
-    String getName() {
-        attachmentDescriptor.publicName ?: originalName
-    }
-
     String getExtension() {
         originalName.substring(originalName.lastIndexOf('.') + 1)
     }
 
-    String getOriginalNameWithoutExtension() {
-        if (originalName.contains('.')) originalName.substring(0, originalName.lastIndexOf('.'))
-        else originalName
+    String getName() {
+        originalName
     }
 
     @Override
     String toString() {
-        return getName() ?: "[$id]"
+        return filePath + "[$id]"
     }
 
     @Override
@@ -101,5 +97,9 @@ class Attachment implements IDomainHistory<Attachment> {
     List<Attachment> getHistory() {
         return null
     }
+
+    static hasMany = [
+            tags: Term
+    ]
 
 }

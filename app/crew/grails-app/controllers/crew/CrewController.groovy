@@ -11,6 +11,7 @@ import org.codehaus.groovy.runtime.MethodClosure
 import org.codehaus.groovy.runtime.MethodClosure as MC
 import org.springframework.transaction.TransactionStatus
 import org.taack.Attachment
+import org.taack.AttachmentDescriptor
 import org.taack.Role
 import org.taack.User
 import org.taack.UserRole
@@ -186,35 +187,8 @@ class CrewController implements WebAttributes {
     def showUserFromSearch() {
         User u = User.read(params.long('id'))
         taackUiService.show(new UiBlockSpecifier().ui {
-                show u.username, crewUiService.buildUserShow(u), BlockSpec.Width.MAX
+            show u.username, crewUiService.buildUserShow(u), BlockSpec.Width.MAX
         }, buildMenu())
-    }
-
-    def updateUserMainPicture(User u) {
-        taackUiService.show(new UiBlockSpecifier().ui {
-            modal {
-                form AttachmentUiService.buildAttachmentForm(Attachment.read(u.mainPictureId) ?: new Attachment(type: AttachmentType.mainPicture), this.&saveUserMainPicture as MethodClosure, [userId: u.id]), BlockSpec.Width.MAX
-            }
-        })
-    }
-
-    def saveUserMainPicture() {
-        def u = User.get(params.long("userId"))
-        if (crewSecurityService.canEdit(u)) {
-            Attachment a = null
-            Attachment.withTransaction { TransactionStatus status ->
-                a = taackSaveService.save(Attachment)
-                u.addToAttachments(a)
-                status.flush()
-            }
-            taackSaveService.displayBlockOrRenderErrors(a, new UiBlockSpecifier().ui {
-                closeModalAndUpdateBlock {
-                        show "${u.username} [Updated]", crewUiService.buildUserShow(u, true), BlockSpec.Width.MAX
-                }
-            })
-        } else {
-            render "Forbidden"
-        }
     }
 
     def editUser(User user) {
@@ -228,6 +202,7 @@ class CrewController implements WebAttributes {
                 field user.firstName_
                 field user.lastName_
                 ajaxField user.manager_, this.&selectUserM2O as MC
+                ajaxField user.mainPicture_, this.&selectUserMainPicture as MC
                 field user.password_
             }
             section "Coords", FormSpec.Width.ONE_THIRD, {
@@ -246,7 +221,7 @@ class CrewController implements WebAttributes {
 
         taackUiService.show new UiBlockSpecifier().ui {
             modal {
-                    form f, BlockSpec.Width.MAX
+                form f, BlockSpec.Width.MAX
             }
         }
     }
@@ -309,6 +284,29 @@ class CrewController implements WebAttributes {
     def removeRoleToUser() {
         UserRole.remove(User.read(params.long("userId")), Role.read(params.long("roleId")))
         chain(action: "editUserRoles", id: params.long("userId"), params: [refresh: true, isAjax: true, recordState: params['recordState']])
+    }
+
+    def selectUserMainPicture() {
+        def a = new Attachment(attachmentDescriptor: crewSecurityService.mainPictureAttachmentDescriptor)
+        taackUiService.show(new UiBlockSpecifier().ui {
+            modal {
+                form(
+                        new UiFormSpecifier().ui(a, {
+                            hiddenField a.attachmentDescriptor_
+                            field a.filePath_
+                            formAction(this.&selectUserMainPictureCloseModal as MC)
+                        })
+                )
+            }
+        })
+    }
+
+    @Transactional
+    def selectUserMainPictureCloseModal() {
+        def a = taackSaveService.save(Attachment)
+        taackSaveService.displayBlockOrRenderErrors(a, new UiBlockSpecifier().ui {
+            closeModal(a.id, a.toString())
+        })
     }
 
     def listRoles() {

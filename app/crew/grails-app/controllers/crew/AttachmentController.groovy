@@ -290,13 +290,11 @@ class AttachmentController {
                 }
                 column {
                     sortableFieldHeader a.originalName_
-                    sortableFieldHeader a.attachmentDescriptor_, ad.publicName_
                     sortableFieldHeader a.dateCreated_
                 }
                 column {
                     sortableFieldHeader a.fileSize_
                     sortableFieldHeader a.contentType_
-                    sortableFieldHeader a.attachmentDescriptor_, ad.fileOrigin_
                 }
                 column {
                     sortableFieldHeader a.userCreated_, u.username_
@@ -319,13 +317,11 @@ class AttachmentController {
                     }
                     rowColumn {
                         rowField aIt.originalName
-                        rowField aIt.attachmentDescriptor.publicName
                         rowField aIt.dateCreated_
                     }
                     rowColumn {
                         rowField aIt.fileSize_
                         rowField aIt.contentType
-                        rowField aIt.attachmentDescriptor.fileOrigin
                     }
                     rowColumn {
                         rowField aIt.userCreated.username

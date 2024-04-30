@@ -1,9 +1,10 @@
 package taack.domain
 
 import app.config.AttachmentContentType
-import grails.artefact.Controller
+import grails.artefact.controller.support.ResponseRenderer
 import grails.compiler.GrailsCompileStatic
 import grails.plugin.springsecurity.SpringSecurityService
+import grails.web.databinding.DataBinder
 import org.codehaus.groovy.runtime.MethodClosure
 import org.grails.datastore.gorm.GormEnhancer
 import org.grails.datastore.gorm.GormEntity
@@ -28,7 +29,7 @@ import javax.imageio.stream.ImageInputStream
 import java.security.MessageDigest
 
 @GrailsCompileStatic
-class TaackSaveService implements Controller {
+class TaackSaveService implements ResponseRenderer, DataBinder {
     SpringSecurityService springSecurityService
     TaackUiService taackUiService
 
@@ -197,7 +198,7 @@ class TaackSaveService implements Controller {
                 boolean hasFilePath = gormEntity.hasProperty("filePath")
 
                 if (hasFilePath) {
-                    final List<MultipartFile> mfl = (request as MultipartHttpServletRequest).getFiles("filePath")
+                    final List<MultipartFile> mfl = (webRequest as MultipartHttpServletRequest).getFiles("filePath")
                     final mf = mfl.first()
                     final String sha1ContentSum = MessageDigest.getInstance("SHA1").digest(mf.bytes).encodeHex().toString()
                     final String p = sha1ContentSum + fileExtension(mf.originalFilename)

@@ -161,6 +161,6 @@ exe:
   unzipPath: /usr/bin/unzip
 plm:
   freecadPath: /usr/bin/FreeCAD
-  singleInstance: false
+  singleInstance: true
   xvfbRun: false
   useWeston: true

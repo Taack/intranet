@@ -65,11 +65,10 @@ final class AttachmentUiService implements WebAttributes {
         f.ui Attachment, selectParams, {
             section "File Metadata Filter", {
                 filterField a.originalName_
-                filterField a.attachmentDescriptor_, ad.publicName_
                 filterField a.contentTypeCategoryEnum_
                 filterField a.contentTypeEnum_
                 filterField a.attachmentDescriptor_, ad.type_
-                filterField a.attachmentDescriptor_, ad.tags_, term.termGroupConfig_
+                filterField a.tags_, term.termGroupConfig_
                 filterFieldExpressionBool "Active", new FilterExpression(true, Operator.EQ, a.active_)
             }
             section "File Access Related Filter", {
@@ -77,7 +76,6 @@ final class AttachmentUiService implements WebAttributes {
                 filterField a.userCreated_, u.firstName_
                 filterField a.userCreated_, u.lastName_
                 filterField a.userCreated_, u.subsidiary_
-                filterField taackPluginService.enumOptions, a.attachmentDescriptor_, ad.fileOrigin_
             }
         }
 
@@ -89,13 +87,11 @@ final class AttachmentUiService implements WebAttributes {
                 }
                 column {
                     sortableFieldHeader a.originalName_
-                    sortableFieldHeader a.attachmentDescriptor_, ad.publicName_
                     sortableFieldHeader a.dateCreated_
                 }
                 column {
                     sortableFieldHeader a.fileSize_
                     sortableFieldHeader a.contentType_
-                    sortableFieldHeader a.attachmentDescriptor_, ad.fileOrigin_
                 }
                 column {
                     sortableFieldHeader a.userCreated_, u.username_
@@ -116,13 +112,11 @@ final class AttachmentUiService implements WebAttributes {
                     }
                     rowColumn {
                         rowField att.originalName
-                        rowField att.attachmentDescriptor.publicName
                         rowField att.dateCreated_
                     }
                     rowColumn {
                         rowField att.fileSize_
                         rowField att.contentType
-                        rowField att.attachmentDescriptor.fileOrigin
                     }
                     rowColumn {
                         rowField att.userCreated.username
@@ -190,9 +184,7 @@ final class AttachmentUiService implements WebAttributes {
             }
             section "Attachment Meta", {
                 fieldLabeled attachment.attachmentDescriptor_, ad.type_
-                fieldLabeled attachment.attachmentDescriptor_, ad.publicName_
                 fieldLabeled attachment.attachmentDescriptor_, ad.isInternal_
-                fieldLabeled attachment.attachmentDescriptor_, ad.declaredLanguage_
             }
             showAction AttachmentController.&showLinkedData as MC, attachment.id
         }
@@ -220,12 +212,8 @@ final class AttachmentUiService implements WebAttributes {
 
     static UiFormSpecifier buildAttachmentDescriptorForm(AttachmentDescriptor attachment, MC returnMethod = AttachmentController.&saveAttachmentDescriptor as MC, Map other = null) {
         new UiFormSpecifier().ui attachment, {
-            hiddenField attachment.fileOrigin_
             section "File Info", FormSpec.Width.DOUBLE_WIDTH, {
                 field attachment.type_
-                field attachment.status_
-                field attachment.declaredLanguage_
-                ajaxField attachment.tags_, AttachmentController.&selectTagsM2M as MC
             }
             section "Security", FormSpec.Width.DOUBLE_WIDTH, {
                 field attachment.isInternal_
