@@ -48,6 +48,7 @@ class User implements Serializable {
         language nullable: true
         subsidiary nullable: true
         manager nullable: true
+        mainPicture nullable: true
         mail nullable: true, email: true
         password nullable: false, blank: false, password: true
         username nullable: false, blank: false, unique: true

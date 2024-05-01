@@ -286,6 +286,7 @@ class CrewController implements WebAttributes {
         chain(action: "editUserRoles", id: params.long("userId"), params: [refresh: true, isAjax: true, recordState: params['recordState']])
     }
 
+    @Transactional
     def selectUserMainPicture() {
         def a = new Attachment(attachmentDescriptor: crewSecurityService.mainPictureAttachmentDescriptor)
         taackUiService.show(new UiBlockSpecifier().ui {

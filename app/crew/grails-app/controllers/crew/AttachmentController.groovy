@@ -162,21 +162,7 @@ class AttachmentController {
     @Transactional
     @Secured(['ROLE_ADMIN', 'ROLE_ATT_USER'])
     def saveAttachment() {
-
-        if (taackUiService.isProcessingForm()) {
-            Attachment a = taackSaveService.save(Attachment)
-            a.contentType = Files.probeContentType(taackAttachmentService.attachmentFile(a).toPath())
-            a.contentTypeEnum = AttachmentContentType.fromMimeType(a.contentType)
-
-            taackUiService.cleanForm()
-            taackSaveService.displayBlockOrRenderErrors(a, new UiBlockSpecifier().ui {
-                closeModalAndUpdateBlock attachmentUiService.buildAttachmentsBlock()
-            })
-        } else {
-            taackUiService.show(new UiBlockSpecifier().ui {
-                inline(attachmentUiService.buildAttachmentsBlock())
-            })
-        }
+        taackSaveService.saveThenReloadOrRenderErrors(Attachment)
     }
 
     def showLinkedData(Attachment attachment) {

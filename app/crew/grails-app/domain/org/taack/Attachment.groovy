@@ -39,7 +39,7 @@ class Attachment implements IDomainHistory<Attachment> {
         contentTypeCategoryEnum nullable: true
         filePath widget: "filePath"
         lastUpdated nullable: true
-        nextVersion nullable: true, unique: true
+        nextVersion nullable: true
         active validator: { boolean val, Attachment obj ->
             if (val && obj.nextVersion)
                 return "attachment.active.hasNextVersion.error"

@@ -229,7 +229,7 @@ final class AttachmentUiService implements WebAttributes {
         new UiFormSpecifier().ui attachment, {
             section "File Info", FormSpec.Width.DOUBLE_WIDTH, {
                 field attachment.filePath_
-                ajaxField attachment.attachmentDescriptor_, AttachmentController.&editAttachmentDescriptor as MC
+                ajaxField attachment.attachmentDescriptor_, AttachmentController.&editAttachmentDescriptor as MC, attachment.attachmentDescriptor?.id
             }
             formAction returnMethod, attachment.id, other
         }

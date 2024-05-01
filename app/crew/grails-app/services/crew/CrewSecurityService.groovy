@@ -73,6 +73,8 @@ class CrewSecurityService {
         )
         if (!descriptor.id) {
             descriptor.save(flush: true)
+            if (descriptor.hasErrors())
+                log.error("${descriptor.errors}")
         }
     }
 
