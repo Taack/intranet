@@ -288,7 +288,10 @@ class CrewController implements WebAttributes {
 
     @Transactional
     def selectUserMainPicture() {
-        def a = new Attachment(attachmentDescriptor: crewSecurityService.mainPictureAttachmentDescriptor)
+        def ad = crewSecurityService.mainPictureAttachmentDescriptor
+        def a = new Attachment()
+        a.attachmentDescriptor = ad
+
         taackUiService.show(new UiBlockSpecifier().ui {
             modal {
                 form(

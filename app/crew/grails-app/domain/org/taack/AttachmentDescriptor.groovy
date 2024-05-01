@@ -7,21 +7,16 @@ import taack.ast.annotation.TaackFieldEnum
 @TaackFieldEnum
 @GrailsCompileStatic
 class AttachmentDescriptor {
-    AttachmentType type
+    AttachmentType type = AttachmentType.noTypeSpecified
 
-    Boolean isInternal
-    Boolean isRestrictedToMyBusinessUnit
-    Boolean isRestrictedToMySubsidiary
-    Boolean isRestrictedToMyManagers
-    Boolean isRestrictedToEmbeddingObjects
+    Boolean isInternal = false
+    Boolean isRestrictedToMyBusinessUnit = false
+    Boolean isRestrictedToMySubsidiary = false
+    Boolean isRestrictedToMyManagers = false
+    Boolean isRestrictedToEmbeddingObjects = false
 
     static constraints = {
         type(unique: ['isInternal', 'isRestrictedToMyBusinessUnit', 'isRestrictedToMySubsidiary', 'isRestrictedToMyManagers', 'isRestrictedToEmbeddingObjects'])
-        isRestrictedToMyBusinessUnit nullable: true
-        isRestrictedToMySubsidiary nullable: true
-        isRestrictedToMyManagers nullable: true
-        isRestrictedToEmbeddingObjects nullable: true
-        isInternal nullable: true
     }
 
 }

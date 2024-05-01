@@ -63,7 +63,7 @@ class CrewSecurityService {
 
     @Transactional
     AttachmentDescriptor getMainPictureAttachmentDescriptor() {
-        AttachmentDescriptor descriptor = AttachmentDescriptor.findOrCreateWhere(
+        AttachmentDescriptor descriptor = AttachmentDescriptor.findOrSaveWhere(
                 type: AttachmentType.mainPicture,
                 isRestrictedToMyManagers: false,
                 isInternal: true,
@@ -76,6 +76,7 @@ class CrewSecurityService {
             if (descriptor.hasErrors())
                 log.error("${descriptor.errors}")
         }
+        descriptor
     }
 
 }
