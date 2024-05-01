@@ -47,9 +47,12 @@ class Attachment implements IDomainHistory<Attachment> {
     }
 
     def beforeValidate() {
-        if (isDirty("contentType")) {
-            this.contentTypeEnum = AttachmentContentType.fromMimeType(contentType)
-            this.contentTypeCategoryEnum = this.contentTypeEnum.category
+        if (isDirty("filePath")) {
+            if (filePath == null)  {
+                filePath = this.getPersistentValue("filePath")
+                contentTypeEnum = this.getPersistentValue("contentTypeEnum") as AttachmentContentType
+                contentTypeCategoryEnum = this.getPersistentValue("contentTypeCategoryEnum") as AttachmentContentTypeCategory
+            }
         }
     }
 

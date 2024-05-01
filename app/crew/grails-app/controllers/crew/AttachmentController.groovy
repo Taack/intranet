@@ -143,7 +143,17 @@ class AttachmentController {
 
     @Transactional
     def saveAttachmentDescriptor() {
-        AttachmentDescriptor ad = taackSaveService.save(AttachmentDescriptor)
+        AttachmentDescriptor ad = taackSaveService.save(AttachmentDescriptor, null, false)
+        ad = AttachmentDescriptor.findOrSaveWhere(
+                type: ad.type,
+                isInternal: ad.isInternal,
+                isRestrictedToMyBusinessUnit: ad.isRestrictedToMyBusinessUnit,
+                isRestrictedToMySubsidiary: ad.isRestrictedToMySubsidiary,
+                isRestrictedToMyManagers: ad.isRestrictedToMyManagers,
+                isRestrictedToEmbeddingObjects: ad.isRestrictedToEmbeddingObjects,
+        )
+        if (!ad.id)
+            ad.save(flush: true)
         taackSaveService.displayBlockOrRenderErrors(ad,
                 new UiBlockSpecifier().ui {
                     closeModal(ad.id, ad.toString())
@@ -322,7 +332,7 @@ class AttachmentController {
             }
         }
         taackUiService.show new UiBlockSpecifier().ui {
-                table "Files for ${term.name}", ts, BlockSpec.Width.TWO_THIRD
+            table "Files for ${term.name}", ts, BlockSpec.Width.TWO_THIRD
         }
     }
 
@@ -364,7 +374,7 @@ class AttachmentController {
         }
         taackUiService.show new UiBlockSpecifier().ui {
             modal {
-                    table 'Tags', ts, BlockSpec.Width.MAX
+                table 'Tags', ts, BlockSpec.Width.MAX
             }
         }
     }
