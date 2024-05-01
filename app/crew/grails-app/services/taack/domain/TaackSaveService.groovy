@@ -144,8 +144,8 @@ class TaackSaveService implements ResponseRenderer, ServletAttributes, DataBinde
 //        T oldEntity
         if (gormEntity instanceof IDomainHistory && gormEntity.ident() != null) {
 //            if (gormEntity.dirty) {
-                T oldEntity = (gormEntity as IDomainHistory<T>).cloneDirectObjectData()
-                save(oldEntity, lockedFields, doNotSave, true)
+            T oldEntity = (gormEntity as IDomainHistory<T>).cloneDirectObjectData()
+            save(oldEntity, lockedFields, doNotSave, true)
 //            } else return gormEntity
         }
 
@@ -201,53 +201,56 @@ class TaackSaveService implements ResponseRenderer, ServletAttributes, DataBinde
                 if (hasFilePath) {
                     final List<MultipartFile> mfl = (request as MultipartHttpServletRequest).getFiles("filePath")
                     final mf = mfl.first()
-                    final String sha1ContentSum = MessageDigest.getInstance("SHA1").digest(mf.bytes).encodeHex().toString()
-                    final String p = sha1ContentSum + fileExtension(mf.originalFilename)
-                    final String d = (filePaths.get(controllerName) ?: attachmentStorePath)
-                    File target = new File(d + "/" + p)
-                    mf.transferTo(target)
-                    gormEntity["filePath"] = p
-                    params.remove("filePath")
-                    if (gormEntity.hasProperty("contentType")) {
-                        gormEntity["contentType"] = mf.contentType
-                        if (gormEntity.hasProperty("contentTypeEnum")) {
-                            gormEntity["contentTypeEnum"] = AttachmentContentType.fromMimeType(mf.contentType)
-                        }
-                    }
-                    if (gormEntity.hasProperty("originalName")) {
-                        gormEntity["originalName"] = mf.originalFilename
-                    }
-                    if (gormEntity.hasProperty("md5sum")) {
-                        gormEntity["md5sum"] = MessageDigest.getInstance("MD5").digest(mf.bytes).encodeHex().toString()
-                    }
-                    if (gormEntity.hasProperty("contentShaOne")) {
-                        gormEntity["contentShaOne"] = sha1ContentSum
+                    if (mf.size > 0) {
+                        final String sha1ContentSum = MessageDigest.getInstance("SHA1").digest(mf.bytes).encodeHex().toString()
+                        final String p = sha1ContentSum + fileExtension(mf.originalFilename)
+                        final String d = (filePaths.get(controllerName) ?: attachmentStorePath)
+                        File target = new File(d + "/" + p)
+                        mf.transferTo(target)
+                        params.remove("filePath")
 
-                    }
-                    if (gormEntity.hasProperty("fileSize")) {
-                        gormEntity["fileSize"] = mf.size
-
-                    }
-                    if (gormEntity.hasProperty("width")) {
-                        final String suffix = mf.name.substring(mf.name.lastIndexOf('.') + 1)
-                        Iterator<ImageReader> iter = ImageIO.getImageReadersBySuffix(suffix)
-                        while (iter.hasNext()) {
-                            ImageReader reader = iter.next()
-                            try {
-                                ImageInputStream stream = new FileImageInputStream(target)
-                                reader.setInput(stream)
-                                int width = reader.getWidth(reader.getMinIndex())
-                                int height = reader.getHeight(reader.getMinIndex())
-                                gormEntity["width"] = width
-                                if (gormEntity.hasProperty("height")) gormEntity["height"] = height
-                                break
-                            } catch (IOException e) {
-                                log.warn "Error reading: " + mf.name, e
-                            } finally {
-                                reader.dispose()
+                        gormEntity["filePath"] = p
+                        if (gormEntity.hasProperty("contentType")) {
+                            gormEntity["contentType"] = mf.contentType
+                            if (gormEntity.hasProperty("contentTypeEnum")) {
+                                gormEntity["contentTypeEnum"] = AttachmentContentType.fromMimeType(mf.contentType)
                             }
                         }
+                        if (gormEntity.hasProperty("originalName")) {
+                            gormEntity["originalName"] = mf.originalFilename
+                        }
+                        if (gormEntity.hasProperty("md5sum")) {
+                            gormEntity["md5sum"] = MessageDigest.getInstance("MD5").digest(mf.bytes).encodeHex().toString()
+                        }
+                        if (gormEntity.hasProperty("contentShaOne")) {
+                            gormEntity["contentShaOne"] = sha1ContentSum
 
+                        }
+                        if (gormEntity.hasProperty("fileSize")) {
+                            gormEntity["fileSize"] = mf.size
+
+                        }
+                        if (gormEntity.hasProperty("width")) {
+                            final String suffix = mf.name.substring(mf.name.lastIndexOf('.') + 1)
+                            Iterator<ImageReader> iter = ImageIO.getImageReadersBySuffix(suffix)
+                            while (iter.hasNext()) {
+                                ImageReader reader = iter.next()
+                                try {
+                                    ImageInputStream stream = new FileImageInputStream(target)
+                                    reader.setInput(stream)
+                                    int width = reader.getWidth(reader.getMinIndex())
+                                    int height = reader.getHeight(reader.getMinIndex())
+                                    gormEntity["width"] = width
+                                    if (gormEntity.hasProperty("height")) gormEntity["height"] = height
+                                    break
+                                } catch (IOException e) {
+                                    log.warn "Error reading: " + mf.name, e
+                                } finally {
+                                    reader.dispose()
+                                }
+                            }
+
+                        }
                     }
                 }
                 if (includeOrExclude) bindData(gormEntity, params, includeOrExclude)
