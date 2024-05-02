@@ -38,6 +38,7 @@ class CrewController implements WebAttributes {
     CrewUiService crewUiService
     CrewSearchService crewSearchService
     CrewSecurityService crewSecurityService
+    CrewPdfService crewPdfService
 
     private UiMenuSpecifier buildMenu(String q = null) {
         UiMenuSpecifier m = new UiMenuSpecifier()
@@ -46,6 +47,7 @@ class CrewController implements WebAttributes {
             menu CrewController.&listRoles as MC
             menu CrewController.&hierarchy as MC
             menuIcon 'Config MySelf', ActionIcon.CONFIG_USER, this.&editUser as MC, [id: springSecurityService.currentUserId], true
+            menuIcon 'PDF', ActionIcon.EXPORT_PDF, this.&exportPdf as MC
             menuSearch this.&search as MethodClosure, q
         }
         m
@@ -196,7 +198,6 @@ class CrewController implements WebAttributes {
 
         UiFormSpecifier f = new UiFormSpecifier()
         f.ui user, {
-            hiddenField user.subsidiary_
             section "User", FormSpec.Width.ONE_THIRD, {
                 field user.username_
                 field user.firstName_
@@ -435,4 +436,16 @@ class CrewController implements WebAttributes {
         taackSaveService.saveThenRedirectOrRenderErrors(Role, this.&listRoles as MC)
     }
 
+    def exportPdf() {
+        Calendar cal = Calendar.getInstance()
+        int y = cal.get(Calendar.YEAR)
+        int m = cal.get(Calendar.MONTH)
+        int dm = cal.get(Calendar.DAY_OF_MONTH)
+        int hd = cal.get(Calendar.HOUR_OF_DAY)
+        int mn = cal.get(Calendar.MINUTE)
+        int sec = cal.get(Calendar.SECOND)
+        String date = "$y$m$dm$hd$mn$sec" // TODO add this in taackUiService
+
+        taackUiService.downloadPdf(crewPdfService.buildPdfHierarchy(), "UserHierarchy-${date}.pdf")
+    }
 }
