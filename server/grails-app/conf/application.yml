@@ -133,7 +133,7 @@ grails:
               secret: 'ChangeThisIfUsingSecurityRestGrailsPLugin'
 ---
 intranet.noSsh: true
-intranet.root: ${HOME}/intranetFiles
+intranet.root: ${HOME}/intranetFilesGH
 ---
 taack-ui:
   defaultTitle: Taack Framework

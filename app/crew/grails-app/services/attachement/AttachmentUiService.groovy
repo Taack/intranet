@@ -1,6 +1,5 @@
 package attachement
 
-
 import app.config.SupportedLanguage
 import crew.AttachmentController
 import grails.compiler.GrailsCompileStatic
@@ -16,7 +15,6 @@ import taack.ast.type.FieldInfo
 import taack.domain.TaackAttachmentService
 import taack.domain.TaackFilter
 import taack.domain.TaackFilterService
-import taack.ui.TaackPluginService
 import taack.ui.base.UiFilterSpecifier
 import taack.ui.base.UiFormSpecifier
 import taack.ui.base.UiShowSpecifier
@@ -33,7 +31,6 @@ final class AttachmentUiService implements WebAttributes {
     TaackAttachmentService taackAttachmentService
     TaackFilterService taackFilterService
     AttachmentSecurityService attachmentSecurityService
-    TaackPluginService taackPluginService
 
     @Autowired
     ApplicationTagLib applicationTagLib
@@ -46,7 +43,7 @@ final class AttachmentUiService implements WebAttributes {
 
     String preview(final Long id, TaackAttachmentService.PreviewFormat format) {
         if (!id) return "<span/>"
-        if (params.boolean("isPdf")) """<img style="max-height: 64px; max-width: 64px;" src="file://${taackAttachmentService.attachmentPreview(Attachment.get(id), format).path}">"""
+        if (format.isPdf) """<img style="max-height: 64px; max-width: 64px;" src="file://${taackAttachmentService.attachmentPreview(Attachment.get(id), format).path}">"""
         else """<div style="text-align: center;"><img style="max-height: ${format.pixelHeight}px; max-width: ${format.pixelWidth}px;" src="${applicationTagLib.createLink(controller: 'attachment', action: 'preview', id: id, params: [format: format.toString()])}"></div>"""
     }
 

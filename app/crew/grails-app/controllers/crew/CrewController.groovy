@@ -436,7 +436,7 @@ class CrewController implements WebAttributes {
         taackSaveService.saveThenRedirectOrRenderErrors(Role, this.&listRoles as MC)
     }
 
-    def exportPdf() {
+    def exportPdf(Boolean isHtml) {
         Calendar cal = Calendar.getInstance()
         int y = cal.get(Calendar.YEAR)
         int m = cal.get(Calendar.MONTH)
@@ -446,6 +446,6 @@ class CrewController implements WebAttributes {
         int sec = cal.get(Calendar.SECOND)
         String date = "$y$m$dm$hd$mn$sec" // TODO add this in taackUiService
 
-        taackUiService.downloadPdf(crewPdfService.buildPdfHierarchy(), "UserHierarchy-${date}.pdf")
+        taackUiService.downloadPdf(crewPdfService.buildPdfHierarchy(), "UserHierarchy-${date}.pdf", isHtml)
     }
 }
