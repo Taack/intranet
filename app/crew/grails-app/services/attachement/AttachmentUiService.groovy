@@ -122,8 +122,7 @@ final class AttachmentUiService implements WebAttributes {
                     rowColumn {
                         if (selectMC)
                             rowAction ActionIcon.SELECT, selectMC as MC, att.id, selectParams
-                        else if (attachmentSecurityService.canDownloadFile(att))
-                            rowAction ActionIcon.DOWNLOAD, AttachmentController.&downloadAttachment as MC, att.id
+                        rowAction ActionIcon.DOWNLOAD, AttachmentController.&downloadAttachment as MC, att.id
                         rowAction ActionIcon.SHOW, AttachmentController.&showAttachment as MC, att.id
                     }
                 }
@@ -149,7 +148,7 @@ final class AttachmentUiService implements WebAttributes {
             ajaxBlock "showAttachment${fieldName}", {
                 show "${attachment.originalName}", buildShowAttachment(attachment, iFrame == null), BlockSpec.Width.MAX, {
                     action ActionIcon.EDIT, AttachmentController.&updateAttachment as MC, attachment.id
-                    if (attachmentSecurityService.canDownloadFile(attachment)) action ActionIcon.DOWNLOAD, AttachmentController.&downloadAttachment as MC, attachment.id
+                    action ActionIcon.DOWNLOAD, AttachmentController.&downloadAttachment as MC, attachment.id
                     if (attachmentSecurityService.canDownloadFile(attachment) && converterExtensions) {
                         for (def ext in converterExtensions) {
                             action ext == 'pdf' ? ActionIcon.EXPORT_PDF : ActionIcon.EXPORT, AttachmentController.&extensionForAttachment as MC, [extension: ext, id: attachment.id]

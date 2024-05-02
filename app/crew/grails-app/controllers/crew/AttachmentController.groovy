@@ -109,11 +109,6 @@ class AttachmentController {
     }
 
     def downloadAttachment(Attachment attachment) {
-        // TODO: Add Simple Security Layer here..
-        if (!attachmentSecurityService.canDownloadFile(attachment, springSecurityService.currentUser as User)) {
-            taackUiService.show(CrewUiService.messageBlock('<p>Not Allowed ...</p>'))
-
-        }
         taackAttachmentService.downloadAttachment(attachment)
     }
 
@@ -215,10 +210,6 @@ class AttachmentController {
     }
 
     def extensionForAttachment(Attachment attachment) {
-        if (!attachmentSecurityService.canDownloadFile(attachment, springSecurityService.currentUser as User)) {
-            taackUiService.show(CrewUiService.messageBlock('<p>Not Allowed ...</p>'))
-            return
-        }
         String ext = (params['extension'] as String)?.toLowerCase()
         def f = TaackAttachmentService.convertExtension(attachment, ext)
         if (f?.exists()) {
@@ -324,8 +315,7 @@ class AttachmentController {
                         rowField aIt.userCreated.subsidiary.toString()
                     }
                     rowColumn {
-                        if (attachmentSecurityService.canDownloadFile(aIt))
-                            rowAction ActionIcon.DOWNLOAD, AttachmentController.&downloadAttachment as MC, aIt.id
+                        rowAction ActionIcon.DOWNLOAD, AttachmentController.&downloadAttachment as MC, aIt.id
                         rowAction ActionIcon.SHOW, AttachmentController.&showAttachment as MC, aIt.id
                     }
                 }
