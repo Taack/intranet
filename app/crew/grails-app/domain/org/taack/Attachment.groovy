@@ -30,6 +30,7 @@ class Attachment implements IDomainHistory<Attachment> {
     AttachmentContentType contentTypeEnum
     AttachmentContentTypeCategory contentTypeCategoryEnum
 
+    Set<Term> tags
 
     static constraints = {
         userUpdated nullable: true
@@ -38,7 +39,7 @@ class Attachment implements IDomainHistory<Attachment> {
         contentTypeCategoryEnum nullable: true
         filePath widget: "filePath"
         lastUpdated nullable: true
-        nextVersion nullable: true, unique: true
+        nextVersion nullable: true
         active validator: { boolean val, Attachment obj ->
             if (val && obj.nextVersion)
                 return "attachment.active.hasNextVersion.error"
@@ -46,9 +47,12 @@ class Attachment implements IDomainHistory<Attachment> {
     }
 
     def beforeValidate() {
-        if (isDirty("contentType")) {
-            this.contentTypeEnum = AttachmentContentType.fromMimeType(contentType)
-            this.contentTypeCategoryEnum = this.contentTypeEnum.category
+        if (isDirty("filePath")) {
+            if (filePath == null)  {
+                filePath = this.getPersistentValue("filePath")
+                contentTypeEnum = this.getPersistentValue("contentTypeEnum") as AttachmentContentType
+                contentTypeCategoryEnum = this.getPersistentValue("contentTypeCategoryEnum") as AttachmentContentTypeCategory
+            }
         }
     }
 
@@ -57,22 +61,17 @@ class Attachment implements IDomainHistory<Attachment> {
         originalName type: 'text'
     }
 
-    String getName() {
-        attachmentDescriptor.publicName ?: originalName
-    }
-
     String getExtension() {
         originalName.substring(originalName.lastIndexOf('.') + 1)
     }
 
-    String getOriginalNameWithoutExtension() {
-        if (originalName.contains('.')) originalName.substring(0, originalName.lastIndexOf('.'))
-        else originalName
+    String getName() {
+        originalName
     }
 
     @Override
     String toString() {
-        return getName() ?: "[$id]"
+        return filePath + "[$id]"
     }
 
     @Override
@@ -101,5 +100,9 @@ class Attachment implements IDomainHistory<Attachment> {
     List<Attachment> getHistory() {
         return null
     }
+
+    static hasMany = [
+            tags: Term
+    ]
 
 }

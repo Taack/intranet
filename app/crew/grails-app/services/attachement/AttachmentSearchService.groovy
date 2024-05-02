@@ -30,7 +30,6 @@ class AttachmentSearchService implements TaackSearchService.IIndexService {
             indexField "Original Name", SolrFieldType.TXT_GENERAL, a.originalName_
             if (content || !a.id)
                 indexField "File Content", SolrFieldType.TXT_GENERAL, "fileContent", content
-            indexField "File Origin", SolrFieldType.POINT_STRING, "fileOrigin", true, a.attachmentDescriptor.fileOrigin
             indexField "Content Type Cat.", SolrFieldType.POINT_STRING, "contentTypeCategoryEnum", true, a.contentTypeCategoryEnum?.toString()
             indexField "Date Created", SolrFieldType.DATE, 0.5f, true, a.dateCreated_
             indexField "User Created", SolrFieldType.POINT_STRING, "userCreated", 0.5f, true, a.userCreated?.username

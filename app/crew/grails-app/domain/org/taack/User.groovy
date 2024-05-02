@@ -1,6 +1,5 @@
 package org.taack
 
-import app.config.AttachmentType
 import app.config.BusinessUnit
 import app.config.Subsidiary
 import app.config.SupportedLanguage
@@ -30,7 +29,7 @@ class User implements Serializable {
 
     User manager
 
-    Set<Attachment> attachments
+    Attachment mainPicture
 
     Boolean enabled = true
     boolean accountExpired
@@ -41,12 +40,6 @@ class User implements Serializable {
         (UserRole.findAllByUser(this) as List<UserRole>)*.role as Set<Role>
     }
 
-    static hasMany = [
-            attachments: Attachment,
-    ]
-
-    static mappedBy = [attachments: 'none']
-
     static constraints = {
         userCreated nullable: true
         dateCreated nullable: true
@@ -55,6 +48,7 @@ class User implements Serializable {
         language nullable: true
         subsidiary nullable: true
         manager nullable: true
+        mainPicture nullable: true
         mail nullable: true, email: true
         password nullable: false, blank: false, password: true
         username nullable: false, blank: false, unique: true
@@ -63,10 +57,6 @@ class User implements Serializable {
     static mapping = {
         table name: 'taack_users'
         password column: '`password`'
-    }
-
-    Long getMainPictureId() {
-        this.attachments.find { it.attachmentDescriptor.type == AttachmentType.mainPicture && it.active }?.id
     }
 
     List<User> getManagedUsers() {

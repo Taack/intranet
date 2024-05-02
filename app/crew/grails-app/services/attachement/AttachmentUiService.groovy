@@ -1,6 +1,5 @@
 package attachement
 
-
 import app.config.SupportedLanguage
 import crew.AttachmentController
 import grails.compiler.GrailsCompileStatic
@@ -16,7 +15,6 @@ import taack.ast.type.FieldInfo
 import taack.domain.TaackAttachmentService
 import taack.domain.TaackFilter
 import taack.domain.TaackFilterService
-import taack.ui.TaackPluginService
 import taack.ui.base.UiFilterSpecifier
 import taack.ui.base.UiFormSpecifier
 import taack.ui.base.UiShowSpecifier
@@ -33,7 +31,6 @@ final class AttachmentUiService implements WebAttributes {
     TaackAttachmentService taackAttachmentService
     TaackFilterService taackFilterService
     AttachmentSecurityService attachmentSecurityService
-    TaackPluginService taackPluginService
 
     @Autowired
     ApplicationTagLib applicationTagLib
@@ -46,7 +43,7 @@ final class AttachmentUiService implements WebAttributes {
 
     String preview(final Long id, TaackAttachmentService.PreviewFormat format) {
         if (!id) return "<span/>"
-        if (params.boolean("isPdf")) """<img style="max-height: 64px; max-width: 64px;" src="file://${taackAttachmentService.attachmentPreview(Attachment.get(id), format).path}">"""
+        if (format.isPdf) """<img style="max-height: 64px; max-width: 64px;" src="file://${taackAttachmentService.attachmentPreview(Attachment.get(id), format).path}">"""
         else """<div style="text-align: center;"><img style="max-height: ${format.pixelHeight}px; max-width: ${format.pixelWidth}px;" src="${applicationTagLib.createLink(controller: 'attachment', action: 'preview', id: id, params: [format: format.toString()])}"></div>"""
     }
 
@@ -65,11 +62,10 @@ final class AttachmentUiService implements WebAttributes {
         f.ui Attachment, selectParams, {
             section "File Metadata Filter", {
                 filterField a.originalName_
-                filterField a.attachmentDescriptor_, ad.publicName_
                 filterField a.contentTypeCategoryEnum_
                 filterField a.contentTypeEnum_
                 filterField a.attachmentDescriptor_, ad.type_
-                filterField a.attachmentDescriptor_, ad.tags_, term.termGroupConfig_
+                filterField a.tags_, term.termGroupConfig_
                 filterFieldExpressionBool "Active", new FilterExpression(true, Operator.EQ, a.active_)
             }
             section "File Access Related Filter", {
@@ -77,7 +73,6 @@ final class AttachmentUiService implements WebAttributes {
                 filterField a.userCreated_, u.firstName_
                 filterField a.userCreated_, u.lastName_
                 filterField a.userCreated_, u.subsidiary_
-                filterField taackPluginService.enumOptions, a.attachmentDescriptor_, ad.fileOrigin_
             }
         }
 
@@ -89,13 +84,11 @@ final class AttachmentUiService implements WebAttributes {
                 }
                 column {
                     sortableFieldHeader a.originalName_
-                    sortableFieldHeader a.attachmentDescriptor_, ad.publicName_
                     sortableFieldHeader a.dateCreated_
                 }
                 column {
                     sortableFieldHeader a.fileSize_
                     sortableFieldHeader a.contentType_
-                    sortableFieldHeader a.attachmentDescriptor_, ad.fileOrigin_
                 }
                 column {
                     sortableFieldHeader a.userCreated_, u.username_
@@ -116,13 +109,11 @@ final class AttachmentUiService implements WebAttributes {
                     }
                     rowColumn {
                         rowField att.originalName
-                        rowField att.attachmentDescriptor.publicName
                         rowField att.dateCreated_
                     }
                     rowColumn {
                         rowField att.fileSize_
                         rowField att.contentType
-                        rowField att.attachmentDescriptor.fileOrigin
                     }
                     rowColumn {
                         rowField att.userCreated.username
@@ -190,9 +181,7 @@ final class AttachmentUiService implements WebAttributes {
             }
             section "Attachment Meta", {
                 fieldLabeled attachment.attachmentDescriptor_, ad.type_
-                fieldLabeled attachment.attachmentDescriptor_, ad.publicName_
                 fieldLabeled attachment.attachmentDescriptor_, ad.isInternal_
-                fieldLabeled attachment.attachmentDescriptor_, ad.declaredLanguage_
             }
             showAction AttachmentController.&showLinkedData as MC, attachment.id
         }
@@ -220,12 +209,8 @@ final class AttachmentUiService implements WebAttributes {
 
     static UiFormSpecifier buildAttachmentDescriptorForm(AttachmentDescriptor attachment, MC returnMethod = AttachmentController.&saveAttachmentDescriptor as MC, Map other = null) {
         new UiFormSpecifier().ui attachment, {
-            hiddenField attachment.fileOrigin_
             section "File Info", FormSpec.Width.DOUBLE_WIDTH, {
                 field attachment.type_
-                field attachment.status_
-                field attachment.declaredLanguage_
-                ajaxField attachment.tags_, AttachmentController.&selectTagsM2M as MC
             }
             section "Security", FormSpec.Width.DOUBLE_WIDTH, {
                 field attachment.isInternal_
@@ -241,7 +226,8 @@ final class AttachmentUiService implements WebAttributes {
         new UiFormSpecifier().ui attachment, {
             section "File Info", FormSpec.Width.DOUBLE_WIDTH, {
                 field attachment.filePath_
-                ajaxField attachment.attachmentDescriptor_, AttachmentController.&editAttachmentDescriptor as MC
+                ajaxField attachment.attachmentDescriptor_, AttachmentController.&editAttachmentDescriptor as MC, attachment.attachmentDescriptor?.id
+                ajaxField attachment.tags_, AttachmentController.&selectTagsM2M as MC
             }
             formAction returnMethod, attachment.id, other
         }

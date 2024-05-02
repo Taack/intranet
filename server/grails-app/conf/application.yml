@@ -133,7 +133,7 @@ grails:
               secret: 'ChangeThisIfUsingSecurityRestGrailsPLugin'
 ---
 intranet.noSsh: true
-intranet.root: ${HOME}/intranetFiles
+intranet.root: ${HOME}/intranetFilesGH
 ---
 taack-ui:
   defaultTitle: Taack Framework
@@ -161,6 +161,6 @@ exe:
   unzipPath: /usr/bin/unzip
 plm:
   freecadPath: /usr/bin/FreeCAD
-  singleInstance: false
+  singleInstance: true
   xvfbRun: false
   useWeston: true

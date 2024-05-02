@@ -11,6 +11,7 @@ import org.codehaus.groovy.runtime.MethodClosure
 import org.codehaus.groovy.runtime.MethodClosure as MC
 import org.springframework.transaction.TransactionStatus
 import org.taack.Attachment
+import org.taack.AttachmentDescriptor
 import org.taack.Role
 import org.taack.User
 import org.taack.UserRole
@@ -37,6 +38,7 @@ class CrewController implements WebAttributes {
     CrewUiService crewUiService
     CrewSearchService crewSearchService
     CrewSecurityService crewSecurityService
+    CrewPdfService crewPdfService
 
     private UiMenuSpecifier buildMenu(String q = null) {
         UiMenuSpecifier m = new UiMenuSpecifier()
@@ -45,6 +47,7 @@ class CrewController implements WebAttributes {
             menu CrewController.&listRoles as MC
             menu CrewController.&hierarchy as MC
             menuIcon 'Config MySelf', ActionIcon.CONFIG_USER, this.&editUser as MC, [id: springSecurityService.currentUserId], true
+            menuIcon 'PDF', ActionIcon.EXPORT_PDF, this.&exportPdf as MC
             menuSearch this.&search as MethodClosure, q
         }
         m
@@ -186,35 +189,8 @@ class CrewController implements WebAttributes {
     def showUserFromSearch() {
         User u = User.read(params.long('id'))
         taackUiService.show(new UiBlockSpecifier().ui {
-                show u.username, crewUiService.buildUserShow(u), BlockSpec.Width.MAX
+            show u.username, crewUiService.buildUserShow(u), BlockSpec.Width.MAX
         }, buildMenu())
-    }
-
-    def updateUserMainPicture(User u) {
-        taackUiService.show(new UiBlockSpecifier().ui {
-            modal {
-                form AttachmentUiService.buildAttachmentForm(Attachment.read(u.mainPictureId) ?: new Attachment(type: AttachmentType.mainPicture), this.&saveUserMainPicture as MethodClosure, [userId: u.id]), BlockSpec.Width.MAX
-            }
-        })
-    }
-
-    def saveUserMainPicture() {
-        def u = User.get(params.long("userId"))
-        if (crewSecurityService.canEdit(u)) {
-            Attachment a = null
-            Attachment.withTransaction { TransactionStatus status ->
-                a = taackSaveService.save(Attachment)
-                u.addToAttachments(a)
-                status.flush()
-            }
-            taackSaveService.displayBlockOrRenderErrors(a, new UiBlockSpecifier().ui {
-                closeModalAndUpdateBlock {
-                        show "${u.username} [Updated]", crewUiService.buildUserShow(u, true), BlockSpec.Width.MAX
-                }
-            })
-        } else {
-            render "Forbidden"
-        }
     }
 
     def editUser(User user) {
@@ -222,12 +198,12 @@ class CrewController implements WebAttributes {
 
         UiFormSpecifier f = new UiFormSpecifier()
         f.ui user, {
-            hiddenField user.subsidiary_
             section "User", FormSpec.Width.ONE_THIRD, {
                 field user.username_
                 field user.firstName_
                 field user.lastName_
                 ajaxField user.manager_, this.&selectUserM2O as MC
+                ajaxField user.mainPicture_, this.&selectUserMainPicture as MC
                 field user.password_
             }
             section "Coords", FormSpec.Width.ONE_THIRD, {
@@ -246,7 +222,7 @@ class CrewController implements WebAttributes {
 
         taackUiService.show new UiBlockSpecifier().ui {
             modal {
-                    form f, BlockSpec.Width.MAX
+                form f, BlockSpec.Width.MAX
             }
         }
     }
@@ -309,6 +285,33 @@ class CrewController implements WebAttributes {
     def removeRoleToUser() {
         UserRole.remove(User.read(params.long("userId")), Role.read(params.long("roleId")))
         chain(action: "editUserRoles", id: params.long("userId"), params: [refresh: true, isAjax: true, recordState: params['recordState']])
+    }
+
+    @Transactional
+    def selectUserMainPicture() {
+        def ad = crewSecurityService.mainPictureAttachmentDescriptor
+        def a = new Attachment()
+        a.attachmentDescriptor = ad
+
+        taackUiService.show(new UiBlockSpecifier().ui {
+            modal {
+                form(
+                        new UiFormSpecifier().ui(a, {
+                            hiddenField a.attachmentDescriptor_
+                            field a.filePath_
+                            formAction(this.&selectUserMainPictureCloseModal as MC)
+                        })
+                )
+            }
+        })
+    }
+
+    @Transactional
+    def selectUserMainPictureCloseModal() {
+        def a = taackSaveService.save(Attachment)
+        taackSaveService.displayBlockOrRenderErrors(a, new UiBlockSpecifier().ui {
+            closeModal(a.id, a.toString())
+        })
     }
 
     def listRoles() {
@@ -433,4 +436,16 @@ class CrewController implements WebAttributes {
         taackSaveService.saveThenRedirectOrRenderErrors(Role, this.&listRoles as MC)
     }
 
+    def exportPdf(Boolean isHtml) {
+        Calendar cal = Calendar.getInstance()
+        int y = cal.get(Calendar.YEAR)
+        int m = cal.get(Calendar.MONTH)
+        int dm = cal.get(Calendar.DAY_OF_MONTH)
+        int hd = cal.get(Calendar.HOUR_OF_DAY)
+        int mn = cal.get(Calendar.MINUTE)
+        int sec = cal.get(Calendar.SECOND)
+        String date = "$y$m$dm$hd$mn$sec" // TODO add this in taackUiService
+
+        taackUiService.downloadPdf(crewPdfService.buildPdfHierarchy(), "UserHierarchy-${date}.pdf", isHtml)
+    }
 }

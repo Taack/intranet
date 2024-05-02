@@ -24,6 +24,7 @@ import static taack.render.TaackUiService.tr
 
 @GrailsCompileStatic
 class CrewUiService implements WebAttributes {
+
     TaackFilterService taackFilterService
     AttachmentUiService attachmentUiService
     CrewSecurityService crewSecurityService
@@ -118,9 +119,8 @@ class CrewUiService implements WebAttributes {
                 row {
                     boolean hasActions = crewSecurityService.canEdit(ru)
                     if (!hasSelect) {
-                        Attachment picture = ru.attachments.find { it.attachmentDescriptor.type == AttachmentType.mainPicture }
                         rowColumn {
-                            rowField attachmentUiService.preview(picture?.id)
+                            rowField attachmentUiService.preview(ru.mainPicture?.id)
                         }
                     }
                     rowColumn {
@@ -168,8 +168,7 @@ class CrewUiService implements WebAttributes {
 
     UiShowSpecifier buildUserShow(User u, boolean update = false) {
         new UiShowSpecifier().ui(u, {
-            field "Picture", attachmentUiService.previewFull(u.mainPictureId, update ? "${System.currentTimeMillis()}" : null)
-            showAction CrewController.&updateUserMainPicture as MC, u.id
+            field "Picture", attachmentUiService.previewFull(u.mainPicture?.id, update ? "${System.currentTimeMillis()}" : null)
             fieldLabeled u.username_
             fieldLabeled u.firstName_
             fieldLabeled u.lastName_

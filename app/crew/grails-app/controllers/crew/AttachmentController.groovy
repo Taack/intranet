@@ -143,7 +143,17 @@ class AttachmentController {
 
     @Transactional
     def saveAttachmentDescriptor() {
-        AttachmentDescriptor ad = taackSaveService.save(AttachmentDescriptor)
+        AttachmentDescriptor ad = taackSaveService.save(AttachmentDescriptor, null, false)
+        ad = AttachmentDescriptor.findOrSaveWhere(
+                type: ad.type,
+                isInternal: ad.isInternal,
+                isRestrictedToMyBusinessUnit: ad.isRestrictedToMyBusinessUnit,
+                isRestrictedToMySubsidiary: ad.isRestrictedToMySubsidiary,
+                isRestrictedToMyManagers: ad.isRestrictedToMyManagers,
+                isRestrictedToEmbeddingObjects: ad.isRestrictedToEmbeddingObjects,
+        )
+        if (!ad.id)
+            ad.save(flush: true)
         taackSaveService.displayBlockOrRenderErrors(ad,
                 new UiBlockSpecifier().ui {
                     closeModal(ad.id, ad.toString())
@@ -162,21 +172,7 @@ class AttachmentController {
     @Transactional
     @Secured(['ROLE_ADMIN', 'ROLE_ATT_USER'])
     def saveAttachment() {
-
-        if (taackUiService.isProcessingForm()) {
-            Attachment a = taackSaveService.save(Attachment)
-            a.contentType = Files.probeContentType(taackAttachmentService.attachmentFile(a).toPath())
-            a.contentTypeEnum = AttachmentContentType.fromMimeType(a.contentType)
-
-            taackUiService.cleanForm()
-            taackSaveService.displayBlockOrRenderErrors(a, new UiBlockSpecifier().ui {
-                closeModalAndUpdateBlock attachmentUiService.buildAttachmentsBlock()
-            })
-        } else {
-            taackUiService.show(new UiBlockSpecifier().ui {
-                inline(attachmentUiService.buildAttachmentsBlock())
-            })
-        }
+        taackSaveService.saveThenReloadOrRenderErrors(Attachment)
     }
 
     def showLinkedData(Attachment attachment) {
@@ -290,13 +286,11 @@ class AttachmentController {
                 }
                 column {
                     sortableFieldHeader a.originalName_
-                    sortableFieldHeader a.attachmentDescriptor_, ad.publicName_
                     sortableFieldHeader a.dateCreated_
                 }
                 column {
                     sortableFieldHeader a.fileSize_
                     sortableFieldHeader a.contentType_
-                    sortableFieldHeader a.attachmentDescriptor_, ad.fileOrigin_
                 }
                 column {
                     sortableFieldHeader a.userCreated_, u.username_
@@ -319,13 +313,11 @@ class AttachmentController {
                     }
                     rowColumn {
                         rowField aIt.originalName
-                        rowField aIt.attachmentDescriptor.publicName
                         rowField aIt.dateCreated_
                     }
                     rowColumn {
                         rowField aIt.fileSize_
                         rowField aIt.contentType
-                        rowField aIt.attachmentDescriptor.fileOrigin
                     }
                     rowColumn {
                         rowField aIt.userCreated.username
@@ -340,7 +332,7 @@ class AttachmentController {
             }
         }
         taackUiService.show new UiBlockSpecifier().ui {
-                table "Files for ${term.name}", ts, BlockSpec.Width.TWO_THIRD
+            table "Files for ${term.name}", ts, BlockSpec.Width.TWO_THIRD
         }
     }
 
@@ -382,7 +374,7 @@ class AttachmentController {
         }
         taackUiService.show new UiBlockSpecifier().ui {
             modal {
-                    table 'Tags', ts, BlockSpec.Width.MAX
+                table 'Tags', ts, BlockSpec.Width.MAX
             }
         }
     }
