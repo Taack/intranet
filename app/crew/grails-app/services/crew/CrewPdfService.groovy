@@ -92,7 +92,7 @@ class CrewPdfService implements WebAttributes {
                 show new UiShowSpecifier().ui {
                     field """\
                         <div style="height: 2cm; text-align: center;align-content: center; width: 100%;margin-left: 1cm;">
-                            ${taackUiService.dumpAsset("logo_taack2.svg")}
+                            ${taackUiService.dumpAsset("logo-taack-web.svg")}
                         </div>
                     """.stripIndent()
                 }, BlockSpec.Width.THIRD
