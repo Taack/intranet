@@ -1,6 +1,7 @@
 package crew
 
 import app.config.AttachmentType
+import app.config.SupportedLanguage
 import attachement.AttachmentUiService
 import grails.compiler.GrailsCompileStatic
 import grails.gorm.transactions.Transactional
@@ -49,6 +50,7 @@ class CrewController implements WebAttributes {
             menuIcon 'Config MySelf', ActionIcon.CONFIG_USER, this.&editUser as MC, [id: springSecurityService.currentUserId], true
             menuIcon 'PDF', ActionIcon.EXPORT_PDF, this.&exportPdf as MC
             menuSearch this.&search as MethodClosure, q
+            menuOptions(SupportedLanguage.enumOptions)
         }
         m
     }

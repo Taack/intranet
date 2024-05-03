@@ -13,7 +13,6 @@ import taack.ui.base.UiBlockSpecifier
 import taack.ui.base.UiMenuSpecifier
 import taack.ui.base.UiShowSpecifier
 import taack.ui.base.block.BlockSpec
-import taack.ui.config.Language
 /*
 TODO: Add an infrastructure to list new stuffs from a user and a timestamp
  */
@@ -42,14 +41,7 @@ class RootController {
     }
 
     def index(Boolean taackReset) {
-        Language language = Language.EN
-        try {
-            language = LocaleContextHolder.locale.language.split("_")[0]?.toUpperCase()?.replace("ZH", "CN") as Language
-        } catch (ignored) {
-        }
-
         render view: "root", model: [taackPluginService: taackPluginService,
-                                     language: language,
                                      conf    : taackUiPluginConfiguration,
                                      menu: taackUiService.visitMenu(buildMenu(params["q"] as String))]
     }
