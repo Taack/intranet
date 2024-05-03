@@ -3,7 +3,8 @@ package app.config
 
 import groovy.transform.CompileStatic
 import org.springframework.context.i18n.LocaleContextHolder
-import taack.ui.EnumOption
+import taack.ui.IEnumOption
+import taack.ui.IEnumOptions
 import taack.ui.base.common.IStyled
 import taack.ui.base.common.Style
 import taack.ui.config.Country
@@ -22,13 +23,45 @@ final enum SupportedCurrency {
 
     final int precision
 
-    static EnumOption[] getEnumOptions() {
-        EnumOption[] res = new EnumOption[values().length]
-        int i = 0
-        for (def c in values()) {
-            res[i++] = new EnumOption(c.toString(), c.toString())
+    static IEnumOptions getEnumOptions() {
+        new IEnumOptions() {
+
+            @Override
+            IEnumOption[] getOptions() {
+                IEnumOption[] res = new IEnumOption[values().length]
+                int i = 0
+                for (def c in values()) {
+                    res[i++] = new IEnumOption() {
+
+                        @Override
+                        String getKey() {
+                            return c.toString()
+                        }
+
+                        @Override
+                        String getValue() {
+                            return c.toString()
+                        }
+
+                        @Override
+                        String getAsset() {
+                            return null
+                        }
+
+                        @Override
+                        Boolean isSection() {
+                            return false
+                        }
+                    }
+                }
+                return res
+            }
+
+            @Override
+            String getParamKey() {
+                return 'currencyOption'
+            }
         }
-        return res
     }
 }
 
@@ -56,13 +89,44 @@ enum SupportedLanguage {
         values().find { it.iso2 == iso2 } ?: EN
     }
 
-    static EnumOption[] getEnumOptions() {
-        EnumOption[] res = new EnumOption[values().length]
-        int i = 0
-        for (def c in values()) {
-            res[i++] = new EnumOption(c.iso2, c.label)
+    static IEnumOptions getEnumOptions() {
+        new IEnumOptions() {
+
+            @Override
+            IEnumOption[] getOptions() {
+                IEnumOption[] res = new IEnumOption[values().length]
+                int i = 0
+                for (def c in values()) {
+                    res[i++] = new IEnumOption() {
+                        @Override
+                        String getKey() {
+                            return c.iso2
+                        }
+
+                        @Override
+                        String getValue() {
+                            return c.label
+                        }
+
+                        @Override
+                        String getAsset() {
+                            return "/assets/icons/countries/${c.iso2}.webp"
+                        }
+
+                        @Override
+                        Boolean isSection() {
+                            return false
+                        }
+                    }//(c.iso2, c.label)
+                }
+                return res
+            }
+
+            @Override
+            String getParamKey() {
+                return 'langOption'
+            }
         }
-        return res
     }
 
     static SupportedLanguage fromContext() {

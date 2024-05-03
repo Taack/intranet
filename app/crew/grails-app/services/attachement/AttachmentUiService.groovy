@@ -121,9 +121,9 @@ final class AttachmentUiService implements WebAttributes {
                     }
                     rowColumn {
                         if (selectMC)
-                            rowAction ActionIcon.SELECT, selectMC as MC, att.id, selectParams
-                        rowAction ActionIcon.DOWNLOAD, AttachmentController.&downloadAttachment as MC, att.id
-                        rowAction ActionIcon.SHOW, AttachmentController.&showAttachment as MC, att.id
+                            rowAction ActionIcon.SELECT * IconStyle.SCALE_DOWN, selectMC as MC, att.id, selectParams
+                        rowAction ActionIcon.DOWNLOAD * IconStyle.SCALE_DOWN, AttachmentController.&downloadAttachment as MC, att.id
+                        rowAction ActionIcon.SHOW * IconStyle.SCALE_DOWN, AttachmentController.&showAttachment as MC, att.id
                     }
                 }
             }
