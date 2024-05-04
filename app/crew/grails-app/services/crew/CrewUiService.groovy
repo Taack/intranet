@@ -1,11 +1,10 @@
 package crew
 
-import app.config.AttachmentType
+
 import attachement.AttachmentUiService
 import grails.compiler.GrailsCompileStatic
 import grails.web.api.WebAttributes
 import org.codehaus.groovy.runtime.MethodClosure as MC
-import org.taack.Attachment
 import org.taack.Role
 import org.taack.User
 import org.taack.UserRole

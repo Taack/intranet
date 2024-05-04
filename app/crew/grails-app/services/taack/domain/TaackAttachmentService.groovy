@@ -291,4 +291,18 @@ class TaackAttachmentService implements WebAttributes, DataBinder {
         }
         null
     }
+
+    String fileContentToStringWithoutOcr(InputStream stream) {
+        AutoDetectParser parser = new AutoDetectParser()
+        BodyContentHandler handler = new BodyContentHandler(500_000)
+        Metadata metadata = new Metadata()
+
+        TesseractOCRConfig config = new TesseractOCRConfig()
+        config.setSkipOcr(true)
+        ParseContext context = new ParseContext()
+        context.set(TesseractOCRConfig.class, config)
+        parser.parse(stream, handler, metadata, context)
+        handler.toString()
+    }
+
 }
