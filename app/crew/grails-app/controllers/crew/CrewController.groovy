@@ -48,8 +48,8 @@ class CrewController implements WebAttributes {
             menu CrewController.&index as MC
             menu CrewController.&listRoles as MC
             menu CrewController.&hierarchy as MC
-            menuIcon 'Config MySelf', ActionIcon.CONFIG_USER, this.&editUser as MC, [id: springSecurityService.currentUserId], true
-            menuIcon 'PDF', ActionIcon.EXPORT_PDF, this.&exportPdf as MC
+            menuIcon ActionIcon.CONFIG_USER, this.&editUser as MC
+            menuIcon ActionIcon.EXPORT_PDF, this.&exportPdf as MC
             menuSearch this.&search as MethodClosure, q
             menuOptions(SupportedLanguage.fromContext())
         }
