@@ -10,7 +10,7 @@ import taack.ui.base.common.Style
 import taack.ui.config.Country
 
 @CompileStatic
-final enum SupportedCurrency {
+final enum SupportedCurrency implements IEnumOptions {
     EUR(2),
     USD(2),
     INR(0),
@@ -23,50 +23,39 @@ final enum SupportedCurrency {
 
     final int precision
 
-    static IEnumOptions getEnumOptions() {
-        new IEnumOptions() {
+    @Override
+    IEnumOption[] getOptions() {
+        return values()
+    }
 
-            @Override
-            IEnumOption[] getOptions() {
-                IEnumOption[] res = new IEnumOption[values().length]
-                int i = 0
-                for (def c in values()) {
-                    res[i++] = new IEnumOption() {
+    @Override
+    String getParamKey() {
+        return 'currency'
+    }
 
-                        @Override
-                        String getKey() {
-                            return c.toString()
-                        }
+    @Override
+    String getKey() {
+        return toString()
+    }
 
-                        @Override
-                        String getValue() {
-                            return c.toString()
-                        }
+    @Override
+    String getValue() {
+        return toString()
+    }
 
-                        @Override
-                        String getAsset() {
-                            return null
-                        }
+    @Override
+    String getAsset() {
+        return null
+    }
 
-                        @Override
-                        Boolean isSection() {
-                            return false
-                        }
-                    }
-                }
-                return res
-            }
-
-            @Override
-            String getParamKey() {
-                return 'currencyOption'
-            }
-        }
+    @Override
+    Boolean isSection() {
+        return null
     }
 }
 
 @CompileStatic
-enum SupportedLanguage {
+enum SupportedLanguage implements IEnumOptions {
     FR('fr', 'Français'),
     EN('en', 'English'),
     ES('es', 'Lengua española'),
@@ -89,52 +78,43 @@ enum SupportedLanguage {
         values().find { it.iso2 == iso2 } ?: EN
     }
 
-    static IEnumOptions getEnumOptions() {
-        new IEnumOptions() {
-
-            @Override
-            IEnumOption[] getOptions() {
-                IEnumOption[] res = new IEnumOption[values().length]
-                int i = 0
-                for (def c in values()) {
-                    res[i++] = new IEnumOption() {
-                        @Override
-                        String getKey() {
-                            return c.iso2
-                        }
-
-                        @Override
-                        String getValue() {
-                            return c.label
-                        }
-
-                        @Override
-                        String getAsset() {
-                            return "/assets/icons/countries/${c.iso2}.webp"
-                        }
-
-                        @Override
-                        Boolean isSection() {
-                            return false
-                        }
-                    }//(c.iso2, c.label)
-                }
-                return res
-            }
-
-            @Override
-            String getParamKey() {
-                return 'langOption'
-            }
-        }
-    }
-
     static SupportedLanguage fromContext() {
         SupportedLanguage language = EN
         try {
             language = LocaleContextHolder.locale.language.split("_")[0]?.toUpperCase()?.replace("ZH", "CN") as SupportedLanguage
         } catch (ignored) {
         }
+        language
+    }
+
+    @Override
+    IEnumOption[] getOptions() {
+        return values()
+    }
+
+    @Override
+    String getParamKey() {
+        return 'lang'
+    }
+
+    @Override
+    String getKey() {
+        return iso2
+    }
+
+    @Override
+    String getValue() {
+        return label
+    }
+
+    @Override
+    String getAsset() {
+        return "taack/icons/countries/4x3/${iso2}.webp"
+    }
+
+    @Override
+    Boolean isSection() {
+        return null
     }
 }
 
@@ -160,6 +140,7 @@ enum Address {
 @CompileStatic
 final enum AdministrativeTax {
     YOUR_TAX('TAX LABEL', 'TAX CODE')
+
     AdministrativeTax(final String taxLabel, final String taxCode) {
         this.taxCode = taxCode
         this.taxLabel = taxLabel
@@ -181,6 +162,7 @@ final enum AdministrativeIdentifier {
     final String idCode
     final String idLabel
 }
+
 @CompileStatic
 final enum Subsidiary implements IStyled {
     YOUR_COMPANY(null, 'Your Company', Address.YOUR_ADDRESS, SupportedCurrency.USD, SupportedLanguage.EN)

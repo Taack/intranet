@@ -21,6 +21,7 @@ import taack.domain.TaackFilter
 import taack.domain.TaackFilterService
 import taack.domain.TaackMetaModelService
 import taack.render.TaackUiService
+import taack.ui.IEnumOptions
 import taack.ui.base.*
 import taack.ui.base.block.BlockSpec
 import taack.ui.base.common.ActionIcon
@@ -50,7 +51,7 @@ class CrewController implements WebAttributes {
             menuIcon 'Config MySelf', ActionIcon.CONFIG_USER, this.&editUser as MC, [id: springSecurityService.currentUserId], true
             menuIcon 'PDF', ActionIcon.EXPORT_PDF, this.&exportPdf as MC
             menuSearch this.&search as MethodClosure, q
-            menuOptions(SupportedLanguage.enumOptions)
+            menuOptions(SupportedLanguage.fromContext())
         }
         m
     }

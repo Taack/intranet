@@ -4,7 +4,7 @@ plugins {
 }
 
 dependencies {
-    implementation("com.bertramlabs.plugins:asset-pipeline-grails:${assetPipelineGrails}")
+    runtimeOnly("com.bertramlabs.plugins:asset-pipeline-grails:${assetPipelineGrails}")
 }
 
 assets {

@@ -1,6 +1,7 @@
 package crew
 
-import app.config.AttachmentContentType
+
+import app.config.SupportedLanguage
 import app.config.TermGroupConfig
 import attachement.AttachmentSearchService
 import attachement.AttachmentSecurityService
@@ -16,11 +17,7 @@ import org.taack.Attachment
 import org.taack.AttachmentDescriptor
 import org.taack.Term
 import org.taack.User
-import taack.domain.TaackAttachmentService
-import taack.domain.TaackSaveService
-import taack.domain.TaackFilter
-import taack.domain.TaackFilterService
-import taack.domain.TaackMetaModelService
+import taack.domain.*
 import taack.render.TaackUiService
 import taack.ui.base.*
 import taack.ui.base.block.BlockSpec
@@ -28,8 +25,6 @@ import taack.ui.base.common.ActionIcon
 import taack.ui.base.common.IconStyle
 import taack.ui.base.common.Style
 import taack.ui.utils.Markdown
-
-import java.nio.file.Files
 
 @GrailsCompileStatic
 @Secured(['IS_AUTHENTICATED_REMEMBERED'])
@@ -51,14 +46,15 @@ class AttachmentController {
         UiMenuSpecifier m = new UiMenuSpecifier()
 
         m.ui {
-            menu 'List Files', AttachmentController.&index as MC
+            menu AttachmentController.&index as MC
             menu 'Tagged', {
                 for (def tagGroup : TermGroupConfig.values().findAll { it.active }) {
                     menu tagGroup.toString(), AttachmentController.&showTermGroup as MC, [group: tagGroup.toString()]
                 }
             }
-            menu 'Terms', AttachmentController.&listTerm as MC
+            menu AttachmentController.&listTerm as MC
             menuSearch this.&search as MC, q
+            menuOptions(SupportedLanguage.fromContext())
         }
         m
     }
