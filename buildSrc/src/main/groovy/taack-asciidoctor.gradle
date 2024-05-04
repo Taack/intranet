@@ -1,14 +1,14 @@
 dependencies {
     implementation 'commons-io:commons-io:2.11.0'
     implementation 'org.jruby:jruby-complete:9.4.5.0'
-    implementation('org.asciidoctor:asciidoctorj:2.5.11') {
+    implementation('org.asciidoctor:asciidoctorj:2.5.12') {
         exclude group: 'org.jruby', module: 'jruby'
     }
 
-    implementation 'org.asciidoctor:asciidoctorj-api:2.5.11'
-    implementation 'org.asciidoctor:asciidoctorj-pdf:2.3.12'
-    implementation 'org.asciidoctor:asciidoctorj-diagram:2.2.17'
-    implementation 'org.asciidoctor:asciidoctorj-diagram-plantuml:1.2023.13'
+    implementation 'org.asciidoctor:asciidoctorj-api:2.5.12'
+    implementation 'org.asciidoctor:asciidoctorj-pdf:2.3.15'
+    implementation 'org.asciidoctor:asciidoctorj-diagram:2.3.0'
+    implementation 'org.asciidoctor:asciidoctorj-diagram-plantuml:1.2024.3'
     implementation 'org.asciidoctor:asciidoctorj-revealjs:5.1.0'
 }
 
