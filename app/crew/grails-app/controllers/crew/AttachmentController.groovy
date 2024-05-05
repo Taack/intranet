@@ -1,14 +1,11 @@
 package crew
 
-
 import app.config.SupportedLanguage
 import app.config.TermGroupConfig
 import attachement.AttachmentSearchService
-import attachement.AttachmentSecurityService
 import attachement.AttachmentUiService
 import grails.compiler.GrailsCompileStatic
 import grails.gorm.transactions.Transactional
-import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.annotation.Secured
 import org.codehaus.groovy.runtime.MethodClosure
 import org.codehaus.groovy.runtime.MethodClosure as MC
@@ -34,9 +31,7 @@ class AttachmentController {
     TaackMetaModelService taackMetaModelService
     AttachmentUiService attachmentUiService
     AttachmentSearchService attachmentSearchService
-    AttachmentSecurityService attachmentSecurityService
     TaackSaveService taackSaveService
-    SpringSecurityService springSecurityService
     TaackFilterService taackFilterService
 
     @Value('${intranet.root}')

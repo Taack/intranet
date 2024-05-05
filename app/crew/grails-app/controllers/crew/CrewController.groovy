@@ -1,8 +1,7 @@
 package crew
 
-import app.config.AttachmentType
+
 import app.config.SupportedLanguage
-import attachement.AttachmentUiService
 import grails.compiler.GrailsCompileStatic
 import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.SpringSecurityService
@@ -10,18 +9,15 @@ import grails.plugin.springsecurity.annotation.Secured
 import grails.web.api.WebAttributes
 import org.codehaus.groovy.runtime.MethodClosure
 import org.codehaus.groovy.runtime.MethodClosure as MC
-import org.springframework.transaction.TransactionStatus
 import org.taack.Attachment
-import org.taack.AttachmentDescriptor
 import org.taack.Role
 import org.taack.User
 import org.taack.UserRole
-import taack.domain.TaackSaveService
 import taack.domain.TaackFilter
 import taack.domain.TaackFilterService
 import taack.domain.TaackMetaModelService
+import taack.domain.TaackSaveService
 import taack.render.TaackUiService
-import taack.ui.IEnumOptions
 import taack.ui.base.*
 import taack.ui.base.block.BlockSpec
 import taack.ui.base.common.ActionIcon

@@ -61,7 +61,6 @@ enum SupportedLanguage implements IEnumOptions {
     ES('es', 'Lengua española'),
     DE('de', 'Deutsche Sprache'),
     RU('ru', 'Русский язык'),
-    IN('hi', 'Hindi'),
     PT('pt', 'Português'),
     PL('pl', 'Polski'),
     IT('it', 'Italiano'),
