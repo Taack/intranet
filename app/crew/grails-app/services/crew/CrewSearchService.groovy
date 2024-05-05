@@ -23,14 +23,14 @@ class CrewSearchService implements TaackSearchService.IIndexService {
     private void init() {
         taackSearchService.registerSolrSpecifier(this, new SolrSpecifier(User, CrewController.&showUserFromSearch as MethodClosure, this.&labeling as MethodClosure, { User u ->
             u ?= new User()
-            indexField "User Name (without Accents)", SolrFieldType.TXT_NO_ACCENT, u.username_
-            indexField "User Name", SolrFieldType.TXT_GENERAL, u.username_
-            indexField "First Name", SolrFieldType.TXT_NO_ACCENT, u.firstName_
-            indexField "Last Name", SolrFieldType.TXT_NO_ACCENT, u.lastName_
-            indexField "Subsidiary", SolrFieldType.POINT_STRING, "mainSubsidiary", true, u.subsidiary?.toString()
-            indexField "Business Unit", SolrFieldType.POINT_STRING, "businessUnit", true, u.businessUnit?.toString()
-            indexField "Date Created", SolrFieldType.DATE, 0.5f, true, u.dateCreated_
-            indexField "User Created", SolrFieldType.POINT_STRING, "userCreated", 0.5f, true, u.userCreated?.username
+            indexField SolrFieldType.TXT_NO_ACCENT, u.username_
+            indexField SolrFieldType.TXT_GENERAL, u.username_
+            indexField SolrFieldType.TXT_NO_ACCENT, u.firstName_
+            indexField SolrFieldType.TXT_NO_ACCENT, u.lastName_
+            indexField SolrFieldType.POINT_STRING, "mainSubsidiary", true, u.subsidiary?.toString()
+            indexField SolrFieldType.POINT_STRING, "businessUnit", true, u.businessUnit?.toString()
+            indexField SolrFieldType.DATE, 0.5f, true, u.dateCreated_
+            indexField SolrFieldType.POINT_STRING, "userCreated", 0.5f, true, u.userCreated?.username
         }))
     }
 

@@ -27,12 +27,12 @@ class AttachmentSearchService implements TaackSearchService.IIndexService {
         taackSearchService.registerSolrSpecifier(this, new SolrSpecifier(Attachment, AttachmentController.&showAttachment as MethodClosure, this.&labeling as MethodClosure, { Attachment a ->
             a ?= new Attachment()
             String content = taackAttachmentService.attachmentContent(a)
-            indexField "Original Name", SolrFieldType.TXT_GENERAL, a.originalName_
+            indexField SolrFieldType.TXT_GENERAL, a.originalName_
             if (content || !a.id)
-                indexField "File Content", SolrFieldType.TXT_GENERAL, "fileContent", content
-            indexField "Content Type Cat.", SolrFieldType.POINT_STRING, "contentTypeCategoryEnum", true, a.contentTypeCategoryEnum?.toString()
-            indexField "Date Created", SolrFieldType.DATE, 0.5f, true, a.dateCreated_
-            indexField "User Created", SolrFieldType.POINT_STRING, "userCreated", 0.5f, true, a.userCreated?.username
+                indexField SolrFieldType.TXT_GENERAL, "fileContent", content
+            indexField SolrFieldType.POINT_STRING, "contentTypeCategoryEnum", true, a.contentTypeCategoryEnum?.toString()
+            indexField SolrFieldType.DATE, 0.5f, true, a.dateCreated_
+            indexField SolrFieldType.POINT_STRING, "userCreated", 0.5f, true, a.userCreated?.username
         }))
     }
 

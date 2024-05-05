@@ -2,9 +2,8 @@ package taack.website
 
 import grails.compiler.GrailsCompileStatic
 import grails.plugin.springsecurity.annotation.Secured
-import org.codehaus.groovy.runtime.MethodClosure
+import org.codehaus.groovy.runtime.MethodClosure as MC
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.i18n.LocaleContextHolder
 import taack.render.TaackUiService
 import taack.ui.TaackPluginConfiguration
 import taack.ui.TaackPluginService
@@ -34,8 +33,8 @@ class RootController {
     private static UiMenuSpecifier buildMenu(String q = null) {
         UiMenuSpecifier m = new UiMenuSpecifier()
         m.ui {
-            menu "Home auo", this.&index as MethodClosure
-            menuSearch RootController.&search as MethodClosure, q
+            menu 'Home', this.&index as MC
+            menuSearch RootController.&search as MC, q
         }
         m
     }
@@ -89,5 +88,11 @@ class RootController {
                 }, BlockSpec.Width.MAX)
             }
         }, buildMenu())
+    }
+
+    @Secured(["ROLE_ADMIN"])
+    def solrIndexAll() {
+        rootSearchService.taackSearchService.indexAll()
+        render 'Done !'
     }
 }
