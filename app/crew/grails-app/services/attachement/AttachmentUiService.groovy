@@ -52,9 +52,9 @@ final class AttachmentUiService implements WebAttributes {
         """<div style="text-align: center;"><img src="${applicationTagLib.createLink(controller: 'attachment', action: 'previewFull', id: id)}${p ? "?$p" : ""}"></div>"""
     }
 
-    Closure<BlockSpec> buildAttachmentsBlock(final MC selectMC = null, final Map selectParams = null, final MC uploadAttachment = AttachmentController.&uploadAttachment as MC, String fileOrigin = null) {
-        Attachment a = new Attachment(fileOrigin: fileOrigin)
-        AttachmentDescriptor ad = new AttachmentDescriptor()
+    Closure<BlockSpec> buildAttachmentsBlock(final MC selectMC = null, final Map selectParams = null, final MC uploadAttachment = AttachmentController.&uploadAttachment as MC) {
+        Attachment a = new Attachment()
+        AttachmentDescriptor ad = new AttachmentDescriptor(type: null)
         Term term = new Term()
         User u = new User()
 
@@ -100,7 +100,6 @@ final class AttachmentUiService implements WebAttributes {
             }
             iterate(taackFilterService.getBuilder(Attachment)
                     .setMaxNumberOfLine(8)
-                    .addFilter(f)
                     .setSortOrder(TaackFilter.Order.DESC, a.dateCreated_)
                     .build()) { Attachment att ->
                 row att, {
