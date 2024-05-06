@@ -45,7 +45,7 @@ class CrewController implements WebAttributes {
             menu CrewController.&listRoles as MC
             menu CrewController.&hierarchy as MC
             menuIcon ActionIcon.CONFIG_USER, this.&editUser as MC
-            menuIcon ActionIcon.EXPORT_PDF, this.&exportPdf as MC
+            menuIcon ActionIcon.EXPORT_PDF, this.&downloadBinPdf as MC
             menuSearch this.&search as MethodClosure, q
             menuOptions(SupportedLanguage.fromContext())
         }
@@ -435,7 +435,7 @@ class CrewController implements WebAttributes {
         taackSaveService.saveThenRedirectOrRenderErrors(Role, this.&listRoles as MC)
     }
 
-    def exportPdf(Boolean isHtml) {
+    def downloadBinPdf(Boolean isHtml) {
         taackUiService.downloadPdf(crewPdfService.buildPdfHierarchy(), 'UserHierarchy', isHtml)
     }
 }
