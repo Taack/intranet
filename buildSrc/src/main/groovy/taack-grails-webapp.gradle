@@ -15,8 +15,8 @@ configurations {
 
 dependencies {
     if (Os.isFamily(Os.FAMILY_MAC)) {
-        runtimeOnly 'net.java.dev.jna:jna:5.12.1'
-        implementation 'io.methvin:directory-watcher:0.17.1'
+        runtimeOnly 'net.java.dev.jna:jna:5.14.0'
+        implementation 'io.methvin:directory-watcher:0.18.0'
     }
 
     developmentOnly('org.springframework.boot:spring-boot-devtools')
