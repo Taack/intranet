@@ -1,0 +1,175 @@
+---
+grails:
+  profile: web
+  codegen:
+    defaultPackage: taack.website
+  gorm:
+    reactor:
+      # Whether to translate GORM events into Reactor events
+      # Disabled by default for performance reasons
+      events: false
+info:
+  app:
+    name: '@info.app.name@'
+    version: '@info.app.version@'
+    grailsVersion: '@info.app.grailsVersion@'
+spring:
+  jmx:
+    unique-names: true
+  main:
+    banner-mode: "off"
+  groovy:
+    template:
+      check-template-location: false
+  devtools:
+    restart:
+      additional-exclude:
+        - '*.gsp'
+        - '**/*.gsp'
+        - '*.gson'
+        - '**/*.gson'
+        - 'logback.groovy'
+        - '*.properties'
+management:
+  endpoints:
+    enabled-by-default: false
+
+---
+grails:
+  mime:
+    disable:
+      accept:
+        header:
+          userAgents:
+            - Gecko
+            - WebKit
+            - Presto
+            - Trident
+    types:
+      all: '*/*'
+      atom: application/atom+xml
+      css: text/css
+      csv: text/csv
+      form: application/x-www-form-urlencoded
+      html:
+        - text/html
+        - application/xhtml+xml
+      js: text/javascript
+      json:
+        - application/json
+        - text/json
+      multipartForm: multipart/form-data
+      pdf: application/pdf
+      rss: application/rss+xml
+      text: text/plain
+      hal:
+        - application/hal+json
+        - application/hal+xml
+      xml:
+        - text/xml
+        - application/xml
+  urlmapping:
+    cache:
+      maxsize: 1000
+  controllers:
+    defaultScope: singleton
+
+  converters:
+    encoding: UTF-8
+  views:
+    default:
+      codec: html
+    gsp:
+      encoding: UTF-8
+      htmlcodec: xml
+      codecs:
+        expression: html
+        scriptlet: html
+        taglib: none
+        staticparts: none
+
+---
+server:
+  port: 9442                                            # The port to listen on
+---
+hibernate:
+  cache:
+    queries: false
+    use_second_level_cache: false
+    use_query_cache: false
+dataSource:
+  pooled: true
+  jmxExport: true
+  driverClassName: org.h2.Driver
+  username: sa
+  password: ''
+
+environments:
+  development:
+    dataSource:
+      dbCreate: update
+      url: jdbc:h2:./intranetDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
+  test:
+    dataSource:
+      dbCreate: update
+      url: jdbc:h2:mem:testDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
+  production:
+    dataSource:
+      dbCreate: update
+      url: jdbc:h2:./prodDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
+---
+taack.admin.password: ChangeIt
+grails:
+  controllers:
+    upload:
+      maxFileSize: 536870912
+      maxRequestSize: 536870912
+  plugin:
+    springsecurity:
+      rest:
+        token:
+          storage:
+            jwt:
+              secret: 'ChangeThisIfUsingSecurityRestGrailsPLugin'
+---
+intranet.noSsh: true
+intranet.root: ${HOME}/intranetFilesGH
+---
+taack-ui:
+  defaultTitle: Taack Framework
+  root: ${HOME}/taack
+  resources: ${HOME}/taack/resources
+  #  logoFileName: logo-colored.webp
+  logoFileName: logo-taack-web.svg
+  logoWidth: 70
+  logoHeight: 60
+  hasMenuLogin: true
+  outlineContainer: false
+  bgColor: '#1d5858'
+  fgColor: '#eeeeee'
+  bodyBgColor: '#fff'
+  javaPath: /usr/bin/java
+  plantUmlPath: ${HOME}/plantuml-1.2022.7.jar
+  solrUrl: 'http://localhost:8983/solr/taack'
+---
+intercom:
+  vegaPath: ${HOME}/dev/yarn/vega/packages/vega-cli/bin/
+---
+exe:
+  dot.path: /opt/homebrew/bin/dot # Used by Taack-ui to display some graphs
+  convertPath: /opt/homebrew/bin/convert
+  unzipPath: /usr/bin/unzip
+plm:
+  freecadPath: /Applications/FreeCAD.app/Contents/Resources/bin/freecad
+  singleInstance: true
+  xvfbRun: false
+  useWeston: false
+
+client.js.path: ''
+#client.js.path: 'http://localhost:8080/client.js'
+
+# MACOSX
+# brew install imagemagick
+# brew install gnuplot
+# brew install graphviz
+# brew install FreeCAD
