@@ -26,6 +26,8 @@ import taack.ui.base.filter.expression.FilterExpression
 import taack.ui.base.filter.expression.Operator
 import taack.ui.base.form.FormSpec
 
+import static taack.render.TaackUiService.tr
+
 @GrailsCompileStatic
 final class AttachmentUiService implements WebAttributes {
     TaackAttachmentService taackAttachmentService
@@ -60,7 +62,7 @@ final class AttachmentUiService implements WebAttributes {
 
         UiFilterSpecifier f = new UiFilterSpecifier()
         f.ui Attachment, selectParams, {
-            section "File Metadata Filter", {
+            section tr('file.metadata.label'), {
                 filterField a.originalName_
                 filterField a.contentTypeCategoryEnum_
                 filterField a.contentTypeEnum_
@@ -68,7 +70,7 @@ final class AttachmentUiService implements WebAttributes {
                 filterField a.tags_, term.termGroupConfig_
                 filterFieldExpressionBool "Active", new FilterExpression(true, Operator.EQ, a.active_)
             }
-            section "File Access Related Filter", {
+            section tr('file.access.label'), {
                 filterField a.userCreated_, u.username_
                 filterField a.userCreated_, u.firstName_
                 filterField a.userCreated_, u.lastName_
@@ -128,7 +130,7 @@ final class AttachmentUiService implements WebAttributes {
             }
         }
         BlockSpec.buildBlockSpec {
-            tableFilter "Filter", f, "Attachment", t, BlockSpec.Width.MAX, {
+            tableFilter tr('default.filter.label'), f, tr('default.attachment.label'), t, BlockSpec.Width.MAX, {
                 if (uploadAttachment)
                     action ActionIcon.CREATE, uploadAttachment, selectParams
             }

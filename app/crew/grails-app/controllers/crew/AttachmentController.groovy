@@ -23,6 +23,8 @@ import taack.ui.base.common.IconStyle
 import taack.ui.base.common.Style
 import taack.ui.utils.Markdown
 
+import static taack.render.TaackUiService.tr
+
 @GrailsCompileStatic
 @Secured(['IS_AUTHENTICATED_REMEMBERED'])
 class AttachmentController {
@@ -369,7 +371,7 @@ class AttachmentController {
         UiFilterSpecifier f = attachmentUiService.buildTermFilter()
         UiTableSpecifier t = attachmentUiService.buildTermTable f
         b.ui {
-            tableFilter 'Filter', f, 'Terms', t, BlockSpec.Width.MAX, {
+            tableFilter tr('default.filter.label'), f, tr('default.term.label'), t, BlockSpec.Width.MAX, {
                 action ActionIcon.CREATE, AttachmentController.&editTerm as MC
             }
         }
@@ -407,7 +409,7 @@ class AttachmentController {
         UiBlockSpecifier b = new UiBlockSpecifier()
         b.ui {
             modal {
-                tableFilter 'Filter', f, 'Terms', t, BlockSpec.Width.MAX
+                tableFilter tr('default.filter.label'), f, tr('default.term.label'), t, BlockSpec.Width.MAX
             }
         }
         taackUiService.show(b)
