@@ -39,8 +39,7 @@ class CrewController implements WebAttributes {
     CrewPdfService crewPdfService
 
     private UiMenuSpecifier buildMenu(String q = null) {
-        UiMenuSpecifier m = new UiMenuSpecifier()
-        m.ui {
+        new UiMenuSpecifier().ui {
             menu CrewController.&index as MC
             menu CrewController.&listRoles as MC
             menu CrewController.&hierarchy as MC
@@ -49,7 +48,6 @@ class CrewController implements WebAttributes {
             menuSearch this.&search as MethodClosure, q
             menuOptions(SupportedLanguage.fromContext())
         }
-        m
     }
 
     private UiTableSpecifier buildUserTableHierarchy(final User u) {
