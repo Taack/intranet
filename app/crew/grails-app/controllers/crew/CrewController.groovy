@@ -106,7 +106,7 @@ class CrewController implements WebAttributes {
                 User filterUser = new User(enabled: true)
                 for (def g : groups) {
                     int oldCount = count
-                    rowGroupHeader g
+                    rowGroupHeader g as String
                     rec(taackFilterService.getBuilder(User).build().listInGroup(g, new UiFilterSpecifier().ui(User, {
                         filterFieldExpressionBool new FilterExpression(true, Operator.EQ, filterUser.enabled_)
                     })).aValue, 0)

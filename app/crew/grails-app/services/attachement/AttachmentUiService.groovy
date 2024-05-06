@@ -104,7 +104,7 @@ final class AttachmentUiService implements WebAttributes {
                     .setMaxNumberOfLine(8)
                     .setSortOrder(TaackFilter.Order.DESC, a.dateCreated_)
                     .build()) { Attachment att ->
-                row att, {
+                row {
                     rowColumn {
                         rowField preview(att.id)
                     }
