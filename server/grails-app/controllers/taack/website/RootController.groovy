@@ -2,9 +2,8 @@ package taack.website
 
 import grails.compiler.GrailsCompileStatic
 import grails.plugin.springsecurity.annotation.Secured
-import org.codehaus.groovy.runtime.MethodClosure
+import org.codehaus.groovy.runtime.MethodClosure as MC
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.i18n.LocaleContextHolder
 import taack.render.TaackUiService
 import taack.ui.TaackPluginConfiguration
 import taack.ui.TaackPluginService
@@ -13,7 +12,6 @@ import taack.ui.base.UiBlockSpecifier
 import taack.ui.base.UiMenuSpecifier
 import taack.ui.base.UiShowSpecifier
 import taack.ui.base.block.BlockSpec
-import taack.ui.config.Language
 /*
 TODO: Add an infrastructure to list new stuffs from a user and a timestamp
  */
@@ -35,21 +33,14 @@ class RootController {
     private static UiMenuSpecifier buildMenu(String q = null) {
         UiMenuSpecifier m = new UiMenuSpecifier()
         m.ui {
-            menu "Home auo", this.&index as MethodClosure
-            menuSearch RootController.&search as MethodClosure, q
+            menu 'Home', this.&index as MC
+            menuSearch RootController.&search as MC, q
         }
         m
     }
 
     def index(Boolean taackReset) {
-        Language language = Language.EN
-        try {
-            language = LocaleContextHolder.locale.language.split("_")[0]?.toUpperCase()?.replace("ZH", "CN") as Language
-        } catch (ignored) {
-        }
-
         render view: "root", model: [taackPluginService: taackPluginService,
-                                     language: language,
                                      conf    : taackUiPluginConfiguration,
                                      menu: taackUiService.visitMenu(buildMenu(params["q"] as String))]
     }
@@ -97,5 +88,11 @@ class RootController {
                 }, BlockSpec.Width.MAX)
             }
         }, buildMenu())
+    }
+
+    @Secured(["ROLE_ADMIN"])
+    def solrIndexAll() {
+        rootSearchService.taackSearchService.indexAll()
+        render 'Done !'
     }
 }

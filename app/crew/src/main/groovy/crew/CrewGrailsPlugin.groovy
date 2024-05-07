@@ -6,7 +6,6 @@ import org.codehaus.groovy.runtime.MethodClosure
 import org.taack.Attachment
 import taack.ui.TaackPlugin
 import taack.ui.TaackPluginConfiguration
-import taack.ui.config.Language
 
 /*
 TODO: put user extra configuration accessible to server to centralize configuration
@@ -76,7 +75,7 @@ class CrewGrailsPlugin extends Plugin implements TaackPlugin {
     ]
 
     static final TaackPluginConfiguration crewPluginConfiguration = new TaackPluginConfiguration("Crew",
-            "/crew/crew.svg", "crew", Language.values() as List,
+            "/crew/crew.svg", "crew",
             new TaackPluginConfiguration.IPluginRole() {
                 @Override
                 List<TaackPluginConfiguration.PluginRole> getPluginRoles() {
@@ -91,7 +90,7 @@ class CrewGrailsPlugin extends Plugin implements TaackPlugin {
     ]
 
     static final TaackPluginConfiguration attPluginConfiguration = new TaackPluginConfiguration("Attachment",
-            "/att/att.svg", "attachment", Language.values() as List,
+            "/att/att.svg", "attachment",
             new TaackPluginConfiguration.IPluginRole() {
                 @Override
                 List<TaackPluginConfiguration.PluginRole> getPluginRoles() {

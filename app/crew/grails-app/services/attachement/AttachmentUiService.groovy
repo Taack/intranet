@@ -26,6 +26,8 @@ import taack.ui.base.filter.expression.FilterExpression
 import taack.ui.base.filter.expression.Operator
 import taack.ui.base.form.FormSpec
 
+import static taack.render.TaackUiService.tr
+
 @GrailsCompileStatic
 final class AttachmentUiService implements WebAttributes {
     TaackAttachmentService taackAttachmentService
@@ -52,15 +54,15 @@ final class AttachmentUiService implements WebAttributes {
         """<div style="text-align: center;"><img src="${applicationTagLib.createLink(controller: 'attachment', action: 'previewFull', id: id)}${p ? "?$p" : ""}"></div>"""
     }
 
-    Closure<BlockSpec> buildAttachmentsBlock(final MC selectMC = null, final Map selectParams = null, final MC uploadAttachment = AttachmentController.&uploadAttachment as MC, String fileOrigin = null) {
-        Attachment a = new Attachment(fileOrigin: fileOrigin)
-        AttachmentDescriptor ad = new AttachmentDescriptor()
+    Closure<BlockSpec> buildAttachmentsBlock(final MC selectMC = null, final Map selectParams = null, final MC uploadAttachment = AttachmentController.&uploadAttachment as MC) {
+        Attachment a = new Attachment()
+        AttachmentDescriptor ad = new AttachmentDescriptor(type: null)
         Term term = new Term()
         User u = new User()
 
         UiFilterSpecifier f = new UiFilterSpecifier()
         f.ui Attachment, selectParams, {
-            section "File Metadata Filter", {
+            section tr('file.metadata.label'), {
                 filterField a.originalName_
                 filterField a.contentTypeCategoryEnum_
                 filterField a.contentTypeEnum_
@@ -68,7 +70,7 @@ final class AttachmentUiService implements WebAttributes {
                 filterField a.tags_, term.termGroupConfig_
                 filterFieldExpressionBool "Active", new FilterExpression(true, Operator.EQ, a.active_)
             }
-            section "File Access Related Filter", {
+            section tr('file.access.label'), {
                 filterField a.userCreated_, u.username_
                 filterField a.userCreated_, u.firstName_
                 filterField a.userCreated_, u.lastName_
@@ -100,10 +102,9 @@ final class AttachmentUiService implements WebAttributes {
             }
             iterate(taackFilterService.getBuilder(Attachment)
                     .setMaxNumberOfLine(8)
-                    .addFilter(f)
                     .setSortOrder(TaackFilter.Order.DESC, a.dateCreated_)
                     .build()) { Attachment att ->
-                row att, {
+                row {
                     rowColumn {
                         rowField preview(att.id)
                     }
@@ -121,15 +122,15 @@ final class AttachmentUiService implements WebAttributes {
                     }
                     rowColumn {
                         if (selectMC)
-                            rowAction ActionIcon.SELECT, selectMC as MC, att.id, selectParams
-                        rowAction ActionIcon.DOWNLOAD, AttachmentController.&downloadAttachment as MC, att.id
-                        rowAction ActionIcon.SHOW, AttachmentController.&showAttachment as MC, att.id
+                            rowAction ActionIcon.SELECT * IconStyle.SCALE_DOWN, selectMC as MC, att.id, selectParams
+                        rowAction ActionIcon.DOWNLOAD * IconStyle.SCALE_DOWN, AttachmentController.&downloadAttachment as MC, att.id
+                        rowAction ActionIcon.SHOW * IconStyle.SCALE_DOWN, AttachmentController.&showAttachment as MC, att.id
                     }
                 }
             }
         }
         BlockSpec.buildBlockSpec {
-            tableFilter "Filter", f, "Attachment", t, BlockSpec.Width.MAX, {
+            tableFilter tr('default.filter.label'), f, tr('default.attachment.label'), t, BlockSpec.Width.MAX, {
                 if (uploadAttachment)
                     action ActionIcon.CREATE, uploadAttachment, selectParams
             }

@@ -156,14 +156,20 @@ intercom:
   vegaPath: ${HOME}/dev/yarn/vega/packages/vega-cli/bin/
 ---
 exe:
-  dot.path: /usr/bin/dot # Used by Taack-ui to display some graphs
-  convertPath: /usr/bin/convert
+  dot.path: /opt/homebrew/bin/dot # Used by Taack-ui to display some graphs
+  convertPath: /opt/homebrew/bin/convert
   unzipPath: /usr/bin/unzip
 plm:
-  freecadPath: /usr/bin/FreeCAD
+  freecadPath: /Applications/FreeCAD.app/Contents/Resources/bin/freecad
   singleInstance: true
   xvfbRun: false
-  useWeston: true
+  useWeston: false
 
 client.js.path: ''
 #client.js.path: 'http://localhost:8080/client.js'
+
+# MACOSX
+# brew install imagemagick
+# brew install gnuplot
+# brew install graphviz
+# brew install FreeCAD

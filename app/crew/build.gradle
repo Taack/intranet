@@ -2,14 +2,7 @@ plugins {
     id 'taack-grails-plugin'
 }
 
-dependencies {
-    implementation "org.grails:grails-plugin-rest"
-    // implementation project(':infra:taack-jdbc-common')
-}
-
 grails {
     // should use gradle -Dgrails.run.active=true bootRun
     exploded = true
-    plugins {
-    }
 }

@@ -1,13 +1,11 @@
 package crew
 
-import app.config.AttachmentContentType
+import app.config.SupportedLanguage
 import app.config.TermGroupConfig
 import attachement.AttachmentSearchService
-import attachement.AttachmentSecurityService
 import attachement.AttachmentUiService
 import grails.compiler.GrailsCompileStatic
 import grails.gorm.transactions.Transactional
-import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.annotation.Secured
 import org.codehaus.groovy.runtime.MethodClosure
 import org.codehaus.groovy.runtime.MethodClosure as MC
@@ -16,11 +14,7 @@ import org.taack.Attachment
 import org.taack.AttachmentDescriptor
 import org.taack.Term
 import org.taack.User
-import taack.domain.TaackAttachmentService
-import taack.domain.TaackSaveService
-import taack.domain.TaackFilter
-import taack.domain.TaackFilterService
-import taack.domain.TaackMetaModelService
+import taack.domain.*
 import taack.render.TaackUiService
 import taack.ui.base.*
 import taack.ui.base.block.BlockSpec
@@ -29,7 +23,7 @@ import taack.ui.base.common.IconStyle
 import taack.ui.base.common.Style
 import taack.ui.utils.Markdown
 
-import java.nio.file.Files
+import static taack.render.TaackUiService.tr
 
 @GrailsCompileStatic
 @Secured(['IS_AUTHENTICATED_REMEMBERED'])
@@ -39,9 +33,7 @@ class AttachmentController {
     TaackMetaModelService taackMetaModelService
     AttachmentUiService attachmentUiService
     AttachmentSearchService attachmentSearchService
-    AttachmentSecurityService attachmentSecurityService
     TaackSaveService taackSaveService
-    SpringSecurityService springSecurityService
     TaackFilterService taackFilterService
 
     @Value('${intranet.root}')
@@ -51,14 +43,15 @@ class AttachmentController {
         UiMenuSpecifier m = new UiMenuSpecifier()
 
         m.ui {
-            menu 'List Files', AttachmentController.&index as MC
+            menu AttachmentController.&index as MC
             menu 'Tagged', {
                 for (def tagGroup : TermGroupConfig.values().findAll { it.active }) {
                     menu tagGroup.toString(), AttachmentController.&showTermGroup as MC, [group: tagGroup.toString()]
                 }
             }
-            menu 'Terms', AttachmentController.&listTerm as MC
+            menu AttachmentController.&listTerm as MC
             menuSearch this.&search as MC, q
+            menuOptions(SupportedLanguage.fromContext())
         }
         m
     }
@@ -378,7 +371,7 @@ class AttachmentController {
         UiFilterSpecifier f = attachmentUiService.buildTermFilter()
         UiTableSpecifier t = attachmentUiService.buildTermTable f
         b.ui {
-            tableFilter 'Filter', f, 'Terms', t, BlockSpec.Width.MAX, {
+            tableFilter tr('default.filter.label'), f, tr('default.term.label'), t, BlockSpec.Width.MAX, {
                 action ActionIcon.CREATE, AttachmentController.&editTerm as MC
             }
         }
@@ -416,7 +409,7 @@ class AttachmentController {
         UiBlockSpecifier b = new UiBlockSpecifier()
         b.ui {
             modal {
-                tableFilter 'Filter', f, 'Terms', t, BlockSpec.Width.MAX
+                tableFilter tr('default.filter.label'), f, tr('default.term.label'), t, BlockSpec.Width.MAX
             }
         }
         taackUiService.show(b)

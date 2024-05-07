@@ -1,7 +1,7 @@
 package crew
 
-import app.config.AttachmentType
-import attachement.AttachmentUiService
+
+import app.config.SupportedLanguage
 import grails.compiler.GrailsCompileStatic
 import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.SpringSecurityService
@@ -9,16 +9,14 @@ import grails.plugin.springsecurity.annotation.Secured
 import grails.web.api.WebAttributes
 import org.codehaus.groovy.runtime.MethodClosure
 import org.codehaus.groovy.runtime.MethodClosure as MC
-import org.springframework.transaction.TransactionStatus
 import org.taack.Attachment
-import org.taack.AttachmentDescriptor
 import org.taack.Role
 import org.taack.User
 import org.taack.UserRole
-import taack.domain.TaackSaveService
 import taack.domain.TaackFilter
 import taack.domain.TaackFilterService
 import taack.domain.TaackMetaModelService
+import taack.domain.TaackSaveService
 import taack.render.TaackUiService
 import taack.ui.base.*
 import taack.ui.base.block.BlockSpec
@@ -41,16 +39,15 @@ class CrewController implements WebAttributes {
     CrewPdfService crewPdfService
 
     private UiMenuSpecifier buildMenu(String q = null) {
-        UiMenuSpecifier m = new UiMenuSpecifier()
-        m.ui {
+        new UiMenuSpecifier().ui {
             menu CrewController.&index as MC
             menu CrewController.&listRoles as MC
             menu CrewController.&hierarchy as MC
-            menuIcon 'Config MySelf', ActionIcon.CONFIG_USER, this.&editUser as MC, [id: springSecurityService.currentUserId], true
-            menuIcon 'PDF', ActionIcon.EXPORT_PDF, this.&exportPdf as MC
+            menuIcon ActionIcon.CONFIG_USER, this.&editUser as MC
+            menuIcon ActionIcon.EXPORT_PDF, this.&downloadBinPdf as MC
             menuSearch this.&search as MethodClosure, q
+            menuOptions(SupportedLanguage.fromContext())
         }
-        m
     }
 
     private UiTableSpecifier buildUserTableHierarchy(final User u) {
@@ -109,7 +106,7 @@ class CrewController implements WebAttributes {
                 User filterUser = new User(enabled: true)
                 for (def g : groups) {
                     int oldCount = count
-                    rowGroupHeader g
+                    rowGroupHeader g as String
                     rec(taackFilterService.getBuilder(User).build().listInGroup(g, new UiFilterSpecifier().ui(User, {
                         filterFieldExpressionBool new FilterExpression(true, Operator.EQ, filterUser.enabled_)
                     })).aValue, 0)
@@ -436,16 +433,7 @@ class CrewController implements WebAttributes {
         taackSaveService.saveThenRedirectOrRenderErrors(Role, this.&listRoles as MC)
     }
 
-    def exportPdf(Boolean isHtml) {
-        Calendar cal = Calendar.getInstance()
-        int y = cal.get(Calendar.YEAR)
-        int m = cal.get(Calendar.MONTH)
-        int dm = cal.get(Calendar.DAY_OF_MONTH)
-        int hd = cal.get(Calendar.HOUR_OF_DAY)
-        int mn = cal.get(Calendar.MINUTE)
-        int sec = cal.get(Calendar.SECOND)
-        String date = "$y$m$dm$hd$mn$sec" // TODO add this in taackUiService
-
-        taackUiService.downloadPdf(crewPdfService.buildPdfHierarchy(), "UserHierarchy-${date}.pdf", isHtml)
+    def downloadBinPdf(Boolean isHtml) {
+        taackUiService.downloadPdf(crewPdfService.buildPdfHierarchy(), 'UserHierarchy', isHtml)
     }
 }
