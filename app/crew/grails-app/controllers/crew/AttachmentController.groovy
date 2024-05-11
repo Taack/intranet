@@ -291,26 +291,24 @@ class AttachmentController {
                     .addRestrictedIds(attachments*.id as Long[])
                     .build()) { Attachment aIt, Long counter ->
 
-                row {
-                    rowColumn {
-                        rowField attachmentUiService.preview(aIt.id)
-                    }
-                    rowColumn {
-                        rowField aIt.originalName
-                        rowField aIt.dateCreated_
-                    }
-                    rowColumn {
-                        rowField aIt.fileSize_
-                        rowField aIt.contentType
-                    }
-                    rowColumn {
-                        rowField aIt.userCreated.username
-                        rowField aIt.userCreated.subsidiary.toString()
-                    }
-                    rowColumn {
-                        rowAction ActionIcon.DOWNLOAD, AttachmentController.&downloadAttachment as MC, aIt.id
-                        rowAction ActionIcon.SHOW, AttachmentController.&showAttachment as MC, aIt.id
-                    }
+                rowColumn {
+                    rowField attachmentUiService.preview(aIt.id)
+                }
+                rowColumn {
+                    rowField aIt.originalName
+                    rowField aIt.dateCreated_
+                }
+                rowColumn {
+                    rowField aIt.fileSize_
+                    rowField aIt.contentType
+                }
+                rowColumn {
+                    rowField aIt.userCreated.username
+                    rowField aIt.userCreated.subsidiary.toString()
+                }
+                rowColumn {
+                    rowAction ActionIcon.DOWNLOAD, AttachmentController.&downloadAttachment as MC, aIt.id
+                    rowAction ActionIcon.SHOW, AttachmentController.&showAttachment as MC, aIt.id
                 }
             }
         }

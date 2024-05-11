@@ -104,28 +104,26 @@ final class AttachmentUiService implements WebAttributes {
                     .setMaxNumberOfLine(8)
                     .setSortOrder(TaackFilter.Order.DESC, a.dateCreated_)
                     .build()) { Attachment att ->
-                row {
-                    rowColumn {
-                        rowField preview(att.id)
-                    }
-                    rowColumn {
-                        rowField att.originalName
-                        rowField att.dateCreated_
-                    }
-                    rowColumn {
-                        rowField att.fileSize_
-                        rowField att.contentType
-                    }
-                    rowColumn {
-                        rowField att.userCreated.username
-                        rowField att.userCreated.subsidiary?.toString()
-                    }
-                    rowColumn {
-                        if (selectMC)
-                            rowAction ActionIcon.SELECT * IconStyle.SCALE_DOWN, selectMC as MC, att.id, selectParams
-                        rowAction ActionIcon.DOWNLOAD * IconStyle.SCALE_DOWN, AttachmentController.&downloadAttachment as MC, att.id
-                        rowAction ActionIcon.SHOW * IconStyle.SCALE_DOWN, AttachmentController.&showAttachment as MC, att.id
-                    }
+                rowColumn {
+                    rowField preview(att.id)
+                }
+                rowColumn {
+                    rowField att.originalName
+                    rowField att.dateCreated_
+                }
+                rowColumn {
+                    rowField att.fileSize_
+                    rowField att.contentType
+                }
+                rowColumn {
+                    rowField att.userCreated.username
+                    rowField att.userCreated.subsidiary?.toString()
+                }
+                rowColumn {
+                    if (selectMC)
+                        rowAction ActionIcon.SELECT * IconStyle.SCALE_DOWN, selectMC as MC, att.id, selectParams
+                    rowAction ActionIcon.DOWNLOAD * IconStyle.SCALE_DOWN, AttachmentController.&downloadAttachment as MC, att.id
+                    rowAction ActionIcon.SHOW * IconStyle.SCALE_DOWN, AttachmentController.&showAttachment as MC, att.id
                 }
             }
         }
@@ -282,20 +280,18 @@ final class AttachmentUiService implements WebAttributes {
                         .addFilter(f)
                         .setSortOrder(TaackFilter.Order.ASC, ti.name_)
                         .build()) { Term term ->
-                    row {
-                        rowField term.name
-                        rowField term.termGroupConfig?.toString()
-                        rowField term.parent?.name
-                        rowField term.display.toString()
-                        rowField term.active.toString()
-                        rowColumn {
-                            if (selectMode)
-                                rowAction ActionIcon.SELECT * IconStyle.SCALE_DOWN, AttachmentController.&selectTermM2OCloseModal as MC, term.id
-                            else {
-                                if (term.active)
-                                    rowAction ActionIcon.DELETE * IconStyle.SCALE_DOWN, AttachmentController.&deleteTerm as MC, term.id
-                                rowAction ActionIcon.EDIT * IconStyle.SCALE_DOWN, AttachmentController.&editTerm as MC, term.id
-                            }
+                    rowField term.name
+                    rowField term.termGroupConfig?.toString()
+                    rowField term.parent?.name
+                    rowField term.display.toString()
+                    rowField term.active.toString()
+                    rowColumn {
+                        if (selectMode)
+                            rowAction ActionIcon.SELECT * IconStyle.SCALE_DOWN, AttachmentController.&selectTermM2OCloseModal as MC, term.id
+                        else {
+                            if (term.active)
+                                rowAction ActionIcon.DELETE * IconStyle.SCALE_DOWN, AttachmentController.&deleteTerm as MC, term.id
+                            rowAction ActionIcon.EDIT * IconStyle.SCALE_DOWN, AttachmentController.&editTerm as MC, term.id
                         }
                     }
                 }

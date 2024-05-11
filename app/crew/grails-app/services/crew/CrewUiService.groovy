@@ -72,12 +72,10 @@ class CrewUiService implements WebAttributes {
                     .setMaxNumberOfLine(20)
                     .setSortOrder(TaackFilter.Order.DESC, u.authority_)
                     .build()) { Role r, Long counter ->
-                row {
-                    rowColumn {
-                        rowField r.authority
-                        if (hasSelect)
-                            rowAction tr('default.role.label'), ActionIcon.SELECT * IconStyle.SCALE_DOWN, r.id, r.toString()
-                    }
+                rowColumn {
+                    rowField r.authority
+                    if (hasSelect)
+                        rowAction tr('default.role.label'), ActionIcon.SELECT * IconStyle.SCALE_DOWN, r.id, r.toString()
                 }
             }
         }
@@ -114,44 +112,42 @@ class CrewUiService implements WebAttributes {
             TaackFilter tf = taackFilterService.getBuilder(User).setSortOrder(TaackFilter.Order.DESC, u.dateCreated_)
                     .setMaxNumberOfLine(20).addFilter(f).build()
 
-            iterate(tf) { User ru ->
-                row {
-                    boolean hasActions = crewSecurityService.canEdit(ru)
-                    if (!hasSelect) {
-                        rowColumn {
-                            rowField attachmentUiService.preview(ru.mainPicture?.id)
+            iterate tf, { User ru ->
+                boolean hasActions = crewSecurityService.canEdit(ru)
+                if (!hasSelect) {
+                    rowColumn {
+                        rowField attachmentUiService.preview(ru.mainPicture?.id)
+                    }
+                }
+                rowColumn {
+                    rowAction ActionIcon.SHOW * IconStyle.SCALE_DOWN, CrewController.&showUser as MC, ru.id
+                    if (hasSelect)
+                        rowAction "Select User", ActionIcon.SELECT * IconStyle.SCALE_DOWN, ru.id, ru.toString()
+                    else if (hasActions) {
+                        rowAction ActionIcon.EDIT * IconStyle.SCALE_DOWN, CrewController.&editUser as MC, ru.id
+                        if (canSwitchUser && ru.enabled)
+                            rowAction ActionIcon.SHOW * IconStyle.SCALE_DOWN, CrewController.&switchUser as MC, ru.id
+                        else if (canSwitchUser && !ru.enabled) {
+                            rowAction ActionIcon.MERGE * IconStyle.SCALE_DOWN, CrewController.&replaceUser as MC, ru.id
+                            rowAction ActionIcon.DELETE * IconStyle.SCALE_DOWN, CrewController.&deleteUser as MC, ru.id
                         }
                     }
-                    rowColumn {
-                        rowAction ActionIcon.SHOW * IconStyle.SCALE_DOWN, CrewController.&showUser as MC, ru.id
-                        if (hasSelect)
-                            rowAction "Select User", ActionIcon.SELECT * IconStyle.SCALE_DOWN, ru.id, ru.toString()
-                        else if (hasActions) {
-                            rowAction ActionIcon.EDIT * IconStyle.SCALE_DOWN, CrewController.&editUser as MC, ru.id
-                            if (canSwitchUser && ru.enabled)
-                                rowAction ActionIcon.SHOW * IconStyle.SCALE_DOWN, CrewController.&switchUser as MC, ru.id
-                            else if (canSwitchUser && !ru.enabled) {
-                                rowAction ActionIcon.MERGE * IconStyle.SCALE_DOWN, CrewController.&replaceUser as MC, ru.id
-                                rowAction ActionIcon.DELETE * IconStyle.SCALE_DOWN, CrewController.&deleteUser as MC, ru.id
-                            }
-                        }
 
-                        rowField ru.username_
-                        rowField ru.dateCreated_
-                    }
-                    rowColumn {
-                        rowField ru.subsidiary_
-                        rowField ru.manager?.username
-                    }
-                    rowColumn {
-                        rowField ru.lastName_
-                        rowField ru.firstName_
-                    }
-                    rowColumn {
-                        if (hasActions && !hasSelect)
-                            rowAction ActionIcon.EDIT * IconStyle.SCALE_DOWN, CrewController.&editUserRoles as MC, ru.id
-                        rowField ru.authorities*.authority.join(', ')
-                    }
+                    rowField ru.username_
+                    rowField ru.dateCreated_
+                }
+                rowColumn {
+                    rowField ru.subsidiary_
+                    rowField ru.manager?.username
+                }
+                rowColumn {
+                    rowField ru.lastName_
+                    rowField ru.firstName_
+                }
+                rowColumn {
+                    if (hasActions && !hasSelect)
+                        rowAction ActionIcon.EDIT * IconStyle.SCALE_DOWN, CrewController.&editUserRoles as MC, ru.id
+                    rowField ru.authorities*.authority.join(', ')
                 }
             }
         }

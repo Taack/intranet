@@ -107,7 +107,7 @@ class CrewController implements WebAttributes {
                 for (def g : groups) {
                     int oldCount = count
                     rowGroupHeader g as String
-                    rec(taackFilterService.getBuilder(User).build().listInGroup(g, new UiFilterSpecifier().ui(User, {
+                    rec(taackFilterService.getBuilder(User).build().listInGroup(g, new UiFilterSpecifier().sec(User, {
                         filterFieldExpressionBool new FilterExpression(true, Operator.EQ, filterUser.enabled_)
                     })).aValue, 0)
                     rowGroupFooter "Count: ${count - oldCount}"
@@ -247,16 +247,14 @@ class CrewController implements WebAttributes {
             iterate(taackFilterService.getBuilder(Role)
                     .setMaxNumberOfLine(20)
                     .setSortOrder(TaackFilter.Order.DESC, role.authority_).build()) { Role r ->
-                row {
-                    rowColumn {
-                        rowField r.authority
-                    }
-                    rowColumn {
-                        if (!UserRole.exists(user.id, r.id)) {
-                            rowAction ActionIcon.ADD, this.&addRoleToUser as MC, [userId: user.id, roleId: r.id]
-                        } else {
-                            rowAction ActionIcon.DELETE, this.&removeRoleToUser as MC, [userId: user.id, roleId: r.id]
-                        }
+                rowColumn {
+                    rowField r.authority
+                }
+                rowColumn {
+                    if (!UserRole.exists(user.id, r.id)) {
+                        rowAction ActionIcon.ADD, this.&addRoleToUser as MC, [userId: user.id, roleId: r.id]
+                    } else {
+                        rowAction ActionIcon.DELETE, this.&removeRoleToUser as MC, [userId: user.id, roleId: r.id]
                     }
                 }
             }
@@ -334,18 +332,16 @@ class CrewController implements WebAttributes {
                     .setMaxNumberOfLine(20)
                     .setSortOrder(TaackFilter.Order.DESC, new Role().authority_)
                     .build()) { Role r ->
-                row {
+                rowColumn {
+                    rowField r.authority_
+                }
+                rowColumn {
+                    String userList = (UserRole.findAllByRole(r) as List<UserRole>)*.user.username.join(', ')
+                    rowField userList
+                }
+                if (hasActions) {
                     rowColumn {
-                        rowField r.authority_
-                    }
-                    rowColumn {
-                        String userList = (UserRole.findAllByRole(r) as List<UserRole>)*.user.username.join(', ')
-                        rowField userList
-                    }
-                    if (hasActions) {
-                        rowColumn {
-                            rowAction ActionIcon.EDIT * IconStyle.SCALE_DOWN, this.&roleForm as MC, r.id
-                        }
+                        rowAction ActionIcon.EDIT * IconStyle.SCALE_DOWN, this.&roleForm as MC, r.id
                     }
                 }
             }
