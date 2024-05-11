@@ -171,10 +171,10 @@ final class AttachmentUiService implements WebAttributes {
                     field previewFull(attachment.id)
                 }
             section "File Meta", {
-                field "Name", attachment.originalName_
-                field "Size", attachment.fileSize_
-                field "Date Created", attachment.dateCreated_
-                field "Content Type", attachment.contentType_
+                fieldLabeled attachment.originalName_
+                fieldLabeled attachment.fileSize_
+                fieldLabeled attachment.dateCreated_
+                fieldLabeled attachment.contentType_
 
             }
             section "Attachment Meta", {
@@ -236,9 +236,9 @@ final class AttachmentUiService implements WebAttributes {
             field term.name_
             field term.termGroupConfig_
             ajaxField term.parent_, AttachmentController.&selectTermM2O as MC
-            sectionTabs FormSpec.Width.FULL_WIDTH, {
+            tabs FormSpec.Width.FULL_WIDTH, {
                 for (SupportedLanguage language : SupportedLanguage.values()) {
-                    sectionTab "Translation ${language.label}", {
+                    tab "Translation ${language.label}", {
                         fieldFromMap "Translation ${language.toString().toLowerCase()}", term.translations_, language.toString().toLowerCase()
                     }
                 }
