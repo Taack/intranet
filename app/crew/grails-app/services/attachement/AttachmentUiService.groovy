@@ -142,18 +142,14 @@ final class AttachmentUiService implements WebAttributes {
         def converterExtensions = TaackAttachmentService.converterExtensions(attachment)
         BlockSpec.buildBlockSpec {
             if (iFrame) {
-                ajaxBlock "showAttachment${fieldName}IFrame", {
-                    custom iFrame
-                }
+                custom iFrame
             }
-            ajaxBlock "showAttachment${fieldName}", {
-                show "${attachment.originalName}", buildShowAttachment(attachment, iFrame == null), BlockSpec.Width.MAX, {
-                    action ActionIcon.EDIT, AttachmentController.&updateAttachment as MC, attachment.id
-                    action ActionIcon.DOWNLOAD, AttachmentController.&downloadAttachment as MC, attachment.id
-                    if (attachmentSecurityService.canDownloadFile(attachment) && converterExtensions) {
-                        for (def ext in converterExtensions) {
-                            action ext == 'pdf' ? ActionIcon.EXPORT_PDF : ActionIcon.EXPORT, AttachmentController.&extensionForAttachment as MC, [extension: ext, id: attachment.id]
-                        }
+            show "${attachment.originalName}", buildShowAttachment(attachment, iFrame == null), BlockSpec.Width.MAX, {
+                action ActionIcon.EDIT, AttachmentController.&updateAttachment as MC, attachment.id
+                action ActionIcon.DOWNLOAD, AttachmentController.&downloadAttachment as MC, attachment.id
+                if (attachmentSecurityService.canDownloadFile(attachment) && converterExtensions) {
+                    for (def ext in converterExtensions) {
+                        action ext == 'pdf' ? ActionIcon.EXPORT_PDF : ActionIcon.EXPORT, AttachmentController.&extensionForAttachment as MC, [extension: ext, id: attachment.id]
                     }
                 }
             }
@@ -260,9 +256,7 @@ final class AttachmentUiService implements WebAttributes {
             section "Term", {
                 filterField t.name_
                 filterField t.termGroupConfig_
-                section "Parent", {
-                    filterField t.parent_, t.parent.name_
-                }
+                filterField t.parent_, t.parent.name_
                 filterFieldExpressionBool "Display", new FilterExpression(true, Operator.EQ, t.display_)
                 filterFieldExpressionBool "Active", new FilterExpression(true, Operator.EQ, t.active_)
             }
