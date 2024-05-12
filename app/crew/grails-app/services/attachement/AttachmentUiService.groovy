@@ -59,7 +59,6 @@ final class AttachmentUiService implements WebAttributes {
         AttachmentDescriptor ad = new AttachmentDescriptor(type: null)
         Term term = new Term()
         User u = new User()
-        MC closurePreview = this.&preview as MC
 
         UiFilterSpecifier f = new UiFilterSpecifier()
         f.ui Attachment, selectParams, {
@@ -105,7 +104,7 @@ final class AttachmentUiService implements WebAttributes {
                     .setMaxNumberOfLine(8)
                     .setSortOrder(TaackFilter.Order.DESC, a.dateCreated_)
                     .build()) { Attachment att ->
-                String aPreview = closurePreview(att.id)
+                String aPreview = this.preview(att.id)
                 rowColumn {
                     rowField aPreview
                 }
@@ -166,7 +165,7 @@ final class AttachmentUiService implements WebAttributes {
         new UiShowSpecifier().ui attachment, {
             if (hasPreview)
                 section "Preview", {
-                    field previewFull(attachment.id)
+                    field this.previewFull(attachment.id)
                 }
             section "File Meta", {
                 fieldLabeled attachment.originalName_
@@ -184,13 +183,10 @@ final class AttachmentUiService implements WebAttributes {
     }
 
     UiTableSpecifier buildAttachmentsTable(final Collection<Attachment> attachments, final String fieldName = null, final boolean hasUpload = false) {
-        MC closurePreview = this.&preview as MC
         new UiTableSpecifier().ui {
             for (Attachment a : attachments.sort { a1, a2 -> a2.dateCreated <=> a1.dateCreated }) {
-                String aPreview = closurePreview(a.id)
-
                 row {
-                    rowField aPreview
+                    rowField this.preview(a.id)
                     rowColumn {
                         rowField a.userCreated.username
                         rowField a.dateCreated_
