@@ -59,6 +59,7 @@ final class AttachmentUiService implements WebAttributes {
         AttachmentDescriptor ad = new AttachmentDescriptor(type: null)
         Term term = new Term()
         User u = new User()
+        MC closurePreview = this.&preview as MC
 
         UiFilterSpecifier f = new UiFilterSpecifier()
         f.ui Attachment, selectParams, {
@@ -104,8 +105,9 @@ final class AttachmentUiService implements WebAttributes {
                     .setMaxNumberOfLine(8)
                     .setSortOrder(TaackFilter.Order.DESC, a.dateCreated_)
                     .build()) { Attachment att ->
+                String aPreview = closurePreview(att.id)
                 rowColumn {
-                    rowField preview(att.id)
+                    rowField aPreview
                 }
                 rowColumn {
                     rowField att.originalName
@@ -186,10 +188,13 @@ final class AttachmentUiService implements WebAttributes {
     }
 
     UiTableSpecifier buildAttachmentsTable(final Collection<Attachment> attachments, final String fieldName = null, final boolean hasUpload = false) {
+        MC closurePreview = this.&preview as MC
         new UiTableSpecifier().ui {
             for (Attachment a : attachments.sort { a1, a2 -> a2.dateCreated <=> a1.dateCreated }) {
+                String aPreview = closurePreview(a.id)
+
                 row {
-                    rowField preview(a.id)
+                    rowField aPreview
                     rowColumn {
                         rowField a.userCreated.username
                         rowField a.dateCreated_
@@ -274,28 +279,29 @@ final class AttachmentUiService implements WebAttributes {
                 sortableFieldHeader ti.display_
                 sortableFieldHeader ti.active_
                 fieldHeader "Actions"
+            }
 
-                iterate(taackFilterService.getBuilder(Term)
-                        .setMaxNumberOfLine(30)
-                        .addFilter(f)
-                        .setSortOrder(TaackFilter.Order.ASC, ti.name_)
-                        .build()) { Term term ->
-                    rowField term.name
-                    rowField term.termGroupConfig?.toString()
-                    rowField term.parent?.name
-                    rowField term.display.toString()
-                    rowField term.active.toString()
-                    rowColumn {
-                        if (selectMode)
-                            rowAction ActionIcon.SELECT * IconStyle.SCALE_DOWN, AttachmentController.&selectTermM2OCloseModal as MC, term.id
-                        else {
-                            if (term.active)
-                                rowAction ActionIcon.DELETE * IconStyle.SCALE_DOWN, AttachmentController.&deleteTerm as MC, term.id
-                            rowAction ActionIcon.EDIT * IconStyle.SCALE_DOWN, AttachmentController.&editTerm as MC, term.id
-                        }
+            iterate(taackFilterService.getBuilder(Term)
+                    .setMaxNumberOfLine(30)
+                    .addFilter(f)
+                    .setSortOrder(TaackFilter.Order.ASC, ti.name_)
+                    .build()) { Term term ->
+                rowField term.name
+                rowField term.termGroupConfig?.toString()
+                rowField term.parent?.name
+                rowField term.display.toString()
+                rowField term.active.toString()
+                rowColumn {
+                    if (selectMode)
+                        rowAction ActionIcon.SELECT * IconStyle.SCALE_DOWN, AttachmentController.&selectTermM2OCloseModal as MC, term.id
+                    else {
+                        if (term.active)
+                            rowAction ActionIcon.DELETE * IconStyle.SCALE_DOWN, AttachmentController.&deleteTerm as MC, term.id
+                        rowAction ActionIcon.EDIT * IconStyle.SCALE_DOWN, AttachmentController.&editTerm as MC, term.id
                     }
                 }
             }
         }
     }
 }
+

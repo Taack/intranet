@@ -33,7 +33,6 @@ class CrewPdfService implements WebAttributes {
 
     private UiTableSpecifier buildUserPdfTableHierarchy(Subsidiary subsidiary) {
         new UiTableSpecifier().ui {
-
             header {
                 User u = new User()
                 column {
@@ -52,7 +51,7 @@ class CrewPdfService implements WebAttributes {
             int count = 0
             Closure rec
             rec = { List<User> mus, int level ->
-//                rowIndent({
+                rowIndent({
                     level++
                     for (def mu : mus) {
                         count++
@@ -74,7 +73,7 @@ class CrewPdfService implements WebAttributes {
                             rec(mu.managedUsers, level)
                         }
                     }
-//                })
+                })
             }
             rec(User.findAllByManagerIsNullAndEnabledAndSubsidiary(true, subsidiary), 0)
         }
