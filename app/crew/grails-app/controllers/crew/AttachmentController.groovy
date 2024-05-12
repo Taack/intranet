@@ -46,7 +46,7 @@ class AttachmentController {
             menu AttachmentController.&index as MC
             menu 'Tagged', {
                 for (def tagGroup : TermGroupConfig.values().findAll { it.active }) {
-                    menu tagGroup.toString(), AttachmentController.&showTermGroup as MC, [group: tagGroup.toString()]
+                    subMenu tagGroup.toString(), AttachmentController.&showTermGroup as MC, [group: tagGroup.toString()]
                 }
             }
             menu AttachmentController.&listTerm as MC
