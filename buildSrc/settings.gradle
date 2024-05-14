@@ -17,6 +17,7 @@ pluginManagement {
         id "org.grails.grails-web" version "${grailsGradlePluginVersion}"
         id "com.bertramlabs.asset-pipeline" version "${assetPipeline}"
         id "org.grails.grails-gsp" version "${grailsGradlePluginVersion}"
+        id 'org.taack.commands.generateTaackApp'
     }
 }
 

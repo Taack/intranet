@@ -26,6 +26,12 @@ bootJar {
     }
 }
 
+tasks.register('generateTaackAppTask', org.taack.commands.generateTaackApp.GenerateTaackAppTask) {
+    group = 'help'
+    description = 'Create a Taack app module'
+    outputDirectory = file('../app')
+    appName = modName
+}
 
 grails {
     exploded = true
