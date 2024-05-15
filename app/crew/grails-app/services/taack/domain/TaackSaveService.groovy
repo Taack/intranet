@@ -53,6 +53,7 @@ class TaackSaveService implements ResponseRenderer, ServletAttributes, DataBinde
         if (isAjax && params && !params.containsKey('isAjax')) {
             p = new HashMap<String, Object>()
             p.putAll(params)
+            p.remove('recordState')
             p.put('isAjax', true)
         }
         grailsApplication.mainContext.getBean(ApplicationTagLib).createLink(controller: controller, action: action, params: p)
@@ -63,6 +64,7 @@ class TaackSaveService implements ResponseRenderer, ServletAttributes, DataBinde
         if (isAjax && params && !params.containsKey('isAjax')) {
             p = new HashMap<String, Object>()
             p.putAll(params)
+            p.remove('recordState')
             p.put('isAjax', true)
         }
         grailsApplication.mainContext.getBean(ApplicationTagLib).createLink(controller: controller, action: action, params: p, id: id)
@@ -292,6 +294,8 @@ class TaackSaveService implements ResponseRenderer, ServletAttributes, DataBinde
     }
 
     def redirectOrRenderErrors(final GormEntity gormEntity, final MethodClosure redirectAction = null) {
+        println params['recordState']
+        println params.containsKey('recordState')
         if (gormEntity.hasErrors()) {
             Errors errors = gormEntity.errors
 
@@ -307,8 +311,12 @@ class TaackSaveService implements ResponseRenderer, ServletAttributes, DataBinde
                 render """__ErrorKeyStart__${it.key}:<ul class="errorKey">${it.value.collect { """<li class="errorEntry">$it</li>""" }.join('')}</ul>__ErrorKeyEnd__"""
             }.join('')
         } else {
-            if (redirectAction) render """__redirect__${urlMapped(Utils.getControllerName(redirectAction), redirectAction.method)}/${params.id ?: gormEntity.ident() ?: ''}?recordState=${params['recordState']}"""
-            else render """__reload__"""
+            String rs = params.containsKey('recordState') && params['recordState'] ? '?recordState=' + params['recordState'] : ''
+            println rs
+
+            if (redirectAction) {
+                render """__redirect__${urlMapped(Utils.getControllerName(redirectAction), redirectAction.method)}/${params.id ?: gormEntity.ident() ?: ''}$rs"""
+            } else render """__reload__"""
         }
     }
 
