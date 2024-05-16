@@ -165,5 +165,5 @@ plm:
   xvfbRun: false
   useWeston: true
 
-#client.js.path: ''
-client.js.path: 'http://localhost:8080/client.js'
+client.js.path: ''
+#client.js.path: 'http://localhost:8080/client.js'
