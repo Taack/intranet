@@ -1,4 +1,6 @@
-# POST Post 3.9
+# Intranet TODO and DONE. 
+
+Should be commited separately to have a clean history
 
 ## Attachment
 
@@ -14,8 +16,6 @@
   - QCad / libreCAD 2D Drawing
 * Fix the file path when updating. The same way as for O2M, with preview
 
-
-
 ## Crew
 
 * ~~Improve picture management~~
@@ -27,6 +27,7 @@
 
 * Editable File template
 * Addons
+* Use attachment Meta data for security
 
 ## Stats
 
