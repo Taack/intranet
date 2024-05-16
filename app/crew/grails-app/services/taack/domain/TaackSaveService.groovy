@@ -294,8 +294,6 @@ class TaackSaveService implements ResponseRenderer, ServletAttributes, DataBinde
     }
 
     def redirectOrRenderErrors(final GormEntity gormEntity, final MethodClosure redirectAction = null) {
-        println params['recordState']
-        println params.containsKey('recordState')
         if (gormEntity.hasErrors()) {
             Errors errors = gormEntity.errors
 
@@ -312,7 +310,6 @@ class TaackSaveService implements ResponseRenderer, ServletAttributes, DataBinde
             }.join('')
         } else {
             String rs = params.containsKey('recordState') && params['recordState'] ? '?recordState=' + params['recordState'] : ''
-            println rs
 
             if (redirectAction) {
                 render """__redirect__${urlMapped(Utils.getControllerName(redirectAction), redirectAction.method)}/${params.id ?: gormEntity.ident() ?: ''}$rs"""
