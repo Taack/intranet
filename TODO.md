@@ -20,18 +20,29 @@ Should be commited separately to have a clean history
 
 * ~~Improve picture management~~
 * ~~Security via closures~~
-* Improve grouping
+* Improve grouping, tree when paginates
 * ~~PDF organization chart with photographs~~
+
+## PLM
+
+* Use Attachment Metadata
+* Steps 3D preview
+* Search fulltext
+* Start 3D DSL / Sketcher / OCCT binding
+* Specify local agent for data exchange
+* (Maybe!) store files as attachments
+  * API to manage Attachment as PLM files
+  * **OR** API to manage PLM files as Attachments
 
 ## Intercom
 
-* Editable File template
-* Addons
+* Editable File templates
+* Support for asciidoc Addons (Stats3 charts, Forms and lists of objects)
 * Use attachment Meta data for security
 
 ## Stats
 
 * manage external DS
-* grouping
-* operation on string and BigDecimal
-* Cross tables
+* support groups, complex sorts
+* operations on string and BigDecimal
+* Cross-tables
