@@ -46,3 +46,9 @@ Should be commited separately to have a clean history
 * support groups, complex sorts
 * operations on string and BigDecimal
 * Cross-tables
+
+## Edges
+
+* Infra to upload sets of files
+* Attach those files to other objects
+* Local agents on edge computers

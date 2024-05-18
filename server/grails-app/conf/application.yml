@@ -164,6 +164,8 @@ plm:
   singleInstance: true
   xvfbRun: false
   useWeston: true
+edges:
+  storePassword: ChangeIt
 
 client.js.path: ''
 #client.js.path: 'http://localhost:8080/client.js'
