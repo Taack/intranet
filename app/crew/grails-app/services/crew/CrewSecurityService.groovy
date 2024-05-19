@@ -60,20 +60,20 @@ class CrewSecurityService {
     }
 
     @Transactional
-    DocumentAccess getMainPictureAttachmentDescriptor() {
-        DocumentAccess descriptor = DocumentAccess.findOrSaveWhere(
+    DocumentAccess getMainPictureDocumentAccess() {
+        DocumentAccess documentAccess = DocumentAccess.findOrSaveWhere(
                 isRestrictedToMyManagers: false,
                 isInternal: true,
                 isRestrictedToMyBusinessUnit: false,
                 isRestrictedToMySubsidiary: false,
                 isRestrictedToEmbeddingObjects: false
         )
-        if (!descriptor.id) {
-            descriptor.save(flush: true)
-            if (descriptor.hasErrors())
-                log.error("${descriptor.errors}")
+        if (!documentAccess.id) {
+            documentAccess.save(flush: true)
+            if (documentAccess.hasErrors())
+                log.error("${documentAccess.errors}")
         }
-        descriptor
+        documentAccess
     }
 
 }

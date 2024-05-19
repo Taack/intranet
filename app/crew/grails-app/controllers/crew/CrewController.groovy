@@ -1,6 +1,7 @@
 package crew
 
-
+import attachment.DocumentCategory
+import attachment.config.DocumentCategoryEnum
 import crew.config.SupportedLanguage
 import grails.compiler.GrailsCompileStatic
 import grails.gorm.transactions.Transactional
@@ -281,9 +282,12 @@ class CrewController implements WebAttributes {
 
     @Transactional
     def selectUserMainPicture() {
-        def ad = crewSecurityService.mainPictureAttachmentDescriptor
-        def a = new Attachment()
+        def ad = crewSecurityService.mainPictureDocumentAccess
+        def dc = DocumentCategory.findOrSaveByCategory(DocumentCategoryEnum.OTHER)
+        if (!dc.id) dc.save(flush: true)
+        def a = new Attachment(documentCategory: dc)
         a.documentAccess = ad
+        a.documentCategory = dc
 
         taackUiService.show(new UiBlockSpecifier().ui {
             modal {
