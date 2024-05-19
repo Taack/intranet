@@ -1,10 +1,10 @@
 
 
 // Added by the Spring Security Core plugin:
-grails.plugin.springsecurity.userLookup.userDomainClassName = 'org.taack.User'
+grails.plugin.springsecurity.userLookup.userDomainClassName = 'crew.User'
 grails.plugin.springsecurity.logout.postOnly = false
-grails.plugin.springsecurity.userLookup.authorityJoinClassName = 'org.taack.UserRole'
-grails.plugin.springsecurity.authority.className = 'org.taack.Role'
+grails.plugin.springsecurity.userLookup.authorityJoinClassName = 'crew.UserRole'
+grails.plugin.springsecurity.authority.className = 'crew.Role'
 grails.plugin.springsecurity.controllerAnnotations.staticRules = [
 	[pattern: '/',               access: ['permitAll']],
 	[pattern: '/error',          access: ['permitAll']],
@@ -29,9 +29,9 @@ grails.plugin.springsecurity.filterChain.chainMap = [
 
 
 grails.plugin.springsecurity.rememberMe.persistent = true
-grails.plugin.springsecurity.rememberMe.persistentToken.domainClassName = 'org.taack.PersistentLogin'
+grails.plugin.springsecurity.rememberMe.persistentToken.domainClassName = 'crew.PersistentLogin'
 
 
-grails.plugin.springsecurity.roleHierarchyEntryClassName = 'org.taack.RoleHierarchyEntry'
+grails.plugin.springsecurity.roleHierarchyEntryClassName = 'crew.RoleHierarchyEntry'
 
 HOME = userHome
