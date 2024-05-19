@@ -5,9 +5,6 @@ Should be commited separately to have a clean history
 ## Attachment
 
 * ~~Separate Attachment from Attachment Meta data~~
-* Make Attachment related service compatible with other data source
-  * Asciidoc
-  * Edge upload
 * Batch processing (index, distribute)
 * Manage file history
 * Manage **fine-grained** file update (binary diff, text diff, compression)
@@ -15,6 +12,7 @@ Should be commited separately to have a clean history
   - WebGL STEP via FreeCAD
   - QCad / libreCAD 2D Drawing
 * Fix the file path when updating. The same way as for O2M, with preview
+* Folders (file group associated with an object, hierarchical)
 
 ## Crew
 
@@ -38,7 +36,7 @@ Should be commited separately to have a clean history
 
 * Editable File templates
 * Support for asciidoc Addons (Stats3 charts, Forms and lists of objects)
-* Use attachment Meta data for security
+* ~~Use attachment Meta data for security~~
 
 ## Stats
 
@@ -52,3 +50,4 @@ Should be commited separately to have a clean history
 * Infra to upload sets of files
 * Attach those files to other objects
 * Local agents on edge computers
+* Make Attachment related service compatible with edge data

@@ -1,6 +1,6 @@
 package taack.domain
 
-import app.config.AttachmentContentTypeCategory
+import attachment.config.AttachmentContentTypeCategory
 import grails.compiler.GrailsCompileStatic
 import grails.util.Pair
 import grails.web.api.WebAttributes
@@ -13,7 +13,7 @@ import org.apache.tika.parser.ocr.TesseractOCRConfig
 import org.apache.tika.sax.BodyContentHandler
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.taack.Attachment
+import attachment.Attachment
 import org.taack.IAttachmentConverter
 import org.taack.IAttachmentPreviewConverter
 import org.taack.IAttachmentShowIFrame

@@ -1,6 +1,7 @@
 package taack.domain
 
-import app.config.AttachmentContentType
+import attachment.config.AttachmentContentType
+import crew.User
 import grails.artefact.controller.support.ResponseRenderer
 import grails.compiler.GrailsCompileStatic
 import grails.plugin.springsecurity.SpringSecurityService
@@ -17,7 +18,6 @@ import org.springframework.context.i18n.LocaleContextHolder
 import org.springframework.validation.Errors
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.multipart.MultipartHttpServletRequest
-import org.taack.User
 import taack.ast.type.FieldInfo
 import taack.render.TaackUiService
 import taack.ui.base.UiBlockSpecifier
@@ -346,8 +346,4 @@ class TaackSaveService implements ResponseRenderer, ServletAttributes, DataBinde
         }
     }
 
-    // TODO: Implement cases where formSpecifier is not null
-    void saveThenDisplayBlockOrRenderErrors(final Class<? extends GormEntity> aClass, final UiBlockSpecifier blockSpecifier, final FieldInfo lockedFields = null) {
-        displayBlockOrRenderErrors(save(aClass, lockedFields), blockSpecifier)
-    }
 }

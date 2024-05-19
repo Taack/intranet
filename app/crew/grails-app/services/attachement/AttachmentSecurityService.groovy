@@ -1,12 +1,11 @@
 package attachement
 
 import crew.AttachmentController
-import crew.CrewController
 import grails.compiler.GrailsCompileStatic
 import grails.plugin.springsecurity.SpringSecurityService
 import org.codehaus.groovy.runtime.MethodClosure as MC
-import org.taack.Attachment
-import org.taack.User
+import attachment.Attachment
+import crew.User
 import taack.render.TaackUiEnablerService
 
 import javax.annotation.PostConstruct
@@ -38,10 +37,10 @@ class AttachmentSecurityService {
 
     boolean canDownloadFile(Attachment attachment, User user) {
         if (user == attachment.userCreated) return true
-        if (attachment.attachmentDescriptor.isRestrictedToMyBusinessUnit && !attachment.attachmentDescriptor.isRestrictedToMySubsidiary && attachment.userCreated.businessUnit == user.businessUnit) return true
-        if (attachment.attachmentDescriptor.isRestrictedToMySubsidiary && !attachment.attachmentDescriptor.isRestrictedToMySubsidiary && attachment.userCreated.subsidiary == user.subsidiary) return true
-        if (attachment.attachmentDescriptor.isRestrictedToMySubsidiary && attachment.attachmentDescriptor.isRestrictedToMyBusinessUnit && attachment.userCreated.businessUnit == user.businessUnit && attachment.userCreated.subsidiary == user.subsidiary) return true
-        if (attachment.attachmentDescriptor.isRestrictedToMyManagers && user.managedUsers.contains(attachment.userCreated)) return true
-        return !attachment.attachmentDescriptor.isRestrictedToMyBusinessUnit && !attachment.attachmentDescriptor.isRestrictedToMySubsidiary && !attachment.attachmentDescriptor.isRestrictedToMyManagers
+        if (attachment.documentAccess.isRestrictedToMyBusinessUnit && !attachment.documentAccess.isRestrictedToMySubsidiary && attachment.userCreated.businessUnit == user.businessUnit) return true
+        if (attachment.documentAccess.isRestrictedToMySubsidiary && !attachment.documentAccess.isRestrictedToMySubsidiary && attachment.userCreated.subsidiary == user.subsidiary) return true
+        if (attachment.documentAccess.isRestrictedToMySubsidiary && attachment.documentAccess.isRestrictedToMyBusinessUnit && attachment.userCreated.businessUnit == user.businessUnit && attachment.userCreated.subsidiary == user.subsidiary) return true
+        if (attachment.documentAccess.isRestrictedToMyManagers && user.managedUsers.contains(attachment.userCreated)) return true
+        return !attachment.documentAccess.isRestrictedToMyBusinessUnit && !attachment.documentAccess.isRestrictedToMySubsidiary && !attachment.documentAccess.isRestrictedToMyManagers
     }
 }

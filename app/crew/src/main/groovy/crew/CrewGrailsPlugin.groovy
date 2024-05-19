@@ -3,7 +3,7 @@ package crew
 import grails.compiler.GrailsCompileStatic
 import grails.plugins.Plugin
 import org.codehaus.groovy.runtime.MethodClosure
-import org.taack.Attachment
+import attachment.Attachment
 import taack.ui.TaackPlugin
 import taack.ui.TaackPluginConfiguration
 

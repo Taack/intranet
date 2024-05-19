@@ -1,12 +1,11 @@
 package crew
 
 
-import app.config.Subsidiary
+import crew.config.Subsidiary
 import attachement.AttachmentUiService
 import grails.compiler.GrailsCompileStatic
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.web.api.WebAttributes
-import org.taack.User
 import taack.domain.TaackAttachmentService
 import taack.render.TaackUiService
 import taack.ui.base.UiPrintableSpecifier

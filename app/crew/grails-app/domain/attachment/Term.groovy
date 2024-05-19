@@ -1,6 +1,6 @@
-package org.taack
+package attachment
 
-import app.config.TermGroupConfig
+import attachment.config.TermGroupConfig
 import grails.compiler.GrailsCompileStatic
 import org.springframework.context.i18n.LocaleContextHolder
 import taack.ast.annotation.TaackFieldEnum

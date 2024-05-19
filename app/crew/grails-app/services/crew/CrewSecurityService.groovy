@@ -1,12 +1,10 @@
 package crew
 
-import app.config.AttachmentType
 import grails.compiler.GrailsCompileStatic
 import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.SpringSecurityService
 import org.codehaus.groovy.runtime.MethodClosure as MC
-import org.taack.AttachmentDescriptor
-import org.taack.User
+import attachment.DocumentAccess
 import taack.render.TaackUiEnablerService
 
 import javax.annotation.PostConstruct
@@ -62,9 +60,8 @@ class CrewSecurityService {
     }
 
     @Transactional
-    AttachmentDescriptor getMainPictureAttachmentDescriptor() {
-        AttachmentDescriptor descriptor = AttachmentDescriptor.findOrSaveWhere(
-                type: AttachmentType.mainPicture,
+    DocumentAccess getMainPictureAttachmentDescriptor() {
+        DocumentAccess descriptor = DocumentAccess.findOrSaveWhere(
                 isRestrictedToMyManagers: false,
                 isInternal: true,
                 isRestrictedToMyBusinessUnit: false,

@@ -1,7 +1,7 @@
 package crew
 
 
-import app.config.SupportedLanguage
+import crew.config.SupportedLanguage
 import grails.compiler.GrailsCompileStatic
 import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.SpringSecurityService
@@ -9,10 +9,7 @@ import grails.plugin.springsecurity.annotation.Secured
 import grails.web.api.WebAttributes
 import org.codehaus.groovy.runtime.MethodClosure
 import org.codehaus.groovy.runtime.MethodClosure as MC
-import org.taack.Attachment
-import org.taack.Role
-import org.taack.User
-import org.taack.UserRole
+import attachment.Attachment
 import taack.domain.TaackFilter
 import taack.domain.TaackFilterService
 import taack.domain.TaackMetaModelService
@@ -286,13 +283,14 @@ class CrewController implements WebAttributes {
     def selectUserMainPicture() {
         def ad = crewSecurityService.mainPictureAttachmentDescriptor
         def a = new Attachment()
-        a.attachmentDescriptor = ad
+        a.documentAccess = ad
 
         taackUiService.show(new UiBlockSpecifier().ui {
             modal {
                 form(
                         new UiFormSpecifier().ui(a, {
-                            hiddenField a.attachmentDescriptor_
+                            hiddenField a.documentAccess_
+                            hiddenField a.documentCategory_
                             field a.filePath_
                             formAction(this.&selectUserMainPictureCloseModal as MC)
                         })

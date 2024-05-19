@@ -1,7 +1,6 @@
 package crew
 
 import grails.compiler.GrailsCompileStatic
-import org.taack.User
 import taack.domain.TaackJdbcService
 
 import javax.annotation.PostConstruct

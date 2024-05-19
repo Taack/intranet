@@ -1,14 +1,12 @@
-package org.taack
+package attachment
 
-import app.config.AttachmentType
+
 import grails.compiler.GrailsCompileStatic
 import taack.ast.annotation.TaackFieldEnum
 
 @TaackFieldEnum
 @GrailsCompileStatic
-class AttachmentDescriptor {
-    AttachmentType type = AttachmentType.noTypeSpecified
-
+class DocumentAccess {
     Boolean isInternal = false
     Boolean isRestrictedToMyBusinessUnit = false
     Boolean isRestrictedToMySubsidiary = false
@@ -16,7 +14,7 @@ class AttachmentDescriptor {
     Boolean isRestrictedToEmbeddingObjects = false
 
     static constraints = {
-        type(unique: ['isInternal', 'isRestrictedToMyBusinessUnit', 'isRestrictedToMySubsidiary', 'isRestrictedToMyManagers', 'isRestrictedToEmbeddingObjects'])
+        isInternal(unique: ['isRestrictedToMyBusinessUnit', 'isRestrictedToMySubsidiary', 'isRestrictedToMyManagers', 'isRestrictedToEmbeddingObjects'])
     }
 
 }

@@ -1,4 +1,4 @@
-package app.config
+package attachment.config
 
 import groovy.transform.CompileStatic
 

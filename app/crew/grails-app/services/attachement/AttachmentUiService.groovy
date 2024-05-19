@@ -1,16 +1,17 @@
 package attachement
 
-import app.config.SupportedLanguage
+import attachment.DocumentCategory
+import crew.config.SupportedLanguage
 import crew.AttachmentController
 import grails.compiler.GrailsCompileStatic
 import grails.web.api.WebAttributes
 import org.codehaus.groovy.runtime.MethodClosure as MC
 import org.grails.plugins.web.taglib.ApplicationTagLib
 import org.springframework.beans.factory.annotation.Autowired
-import org.taack.Attachment
-import org.taack.AttachmentDescriptor
-import org.taack.Term
-import org.taack.User
+import attachment.Attachment
+import attachment.DocumentAccess
+import attachment.Term
+import crew.User
 import taack.ast.type.FieldInfo
 import taack.domain.TaackAttachmentService
 import taack.domain.TaackFilter
@@ -56,7 +57,7 @@ final class AttachmentUiService implements WebAttributes {
 
     Closure<BlockSpec> buildAttachmentsBlock(final MC selectMC = null, final Map selectParams = null, final MC uploadAttachment = AttachmentController.&uploadAttachment as MC) {
         Attachment a = new Attachment()
-        AttachmentDescriptor ad = new AttachmentDescriptor(type: null)
+        DocumentCategory dc = new DocumentCategory(category: null)
         Term term = new Term()
         User u = new User()
 
@@ -66,8 +67,8 @@ final class AttachmentUiService implements WebAttributes {
                 filterField a.originalName_
                 filterField a.contentTypeCategoryEnum_
                 filterField a.contentTypeEnum_
-                filterField a.attachmentDescriptor_, ad.type_
-                filterField a.tags_, term.termGroupConfig_
+                filterField a.documentCategory_, dc.category_
+                filterField a.documentCategory_, dc.tags_, term.termGroupConfig_
                 filterFieldExpressionBool "Active", new FilterExpression(true, Operator.EQ, a.active_)
             }
             section tr('file.access.label'), {
@@ -161,7 +162,8 @@ final class AttachmentUiService implements WebAttributes {
     }
 
     UiShowSpecifier buildShowAttachment(final Attachment attachment, boolean hasPreview = true) {
-        AttachmentDescriptor ad = new AttachmentDescriptor()
+        DocumentAccess da = new DocumentAccess()
+        DocumentCategory dc = new DocumentCategory()
         new UiShowSpecifier().ui attachment, {
             if (hasPreview)
                 section "Preview", {
@@ -175,8 +177,8 @@ final class AttachmentUiService implements WebAttributes {
 
             }
             section "Attachment Meta", {
-                fieldLabeled attachment.attachmentDescriptor_, ad.type_
-                fieldLabeled attachment.attachmentDescriptor_, ad.isInternal_
+                fieldLabeled attachment.documentCategory_, dc.category_
+                fieldLabeled attachment.documentAccess_, da.isInternal_
             }
             showAction AttachmentController.&showLinkedData as MC, attachment.id
         }
@@ -195,25 +197,32 @@ final class AttachmentUiService implements WebAttributes {
                         rowField a.getName()
                         rowField a.fileSize_
                     }
-                    if (attachmentSecurityService.canDownloadFile(a))
+                    if (this.attachmentSecurityService.canDownloadFile(a))
                         rowAction ActionIcon.DOWNLOAD, AttachmentController.&downloadAttachment as MC, a.id
                 }
             }
         }
     }
 
-    static UiFormSpecifier buildAttachmentDescriptorForm(AttachmentDescriptor attachment, MC returnMethod = AttachmentController.&saveAttachmentDescriptor as MC, Map other = null) {
-        new UiFormSpecifier().ui attachment, {
-            section "File Info", FormSpec.Width.DOUBLE_WIDTH, {
-                field attachment.type_
-            }
+    static UiFormSpecifier buildDocumentAccessForm(DocumentAccess docAccess, MC returnMethod = AttachmentController.&saveDocAccess as MC, Map other = null) {
+        new UiFormSpecifier().ui docAccess, {
             section "Security", FormSpec.Width.DOUBLE_WIDTH, {
-                field attachment.isInternal_
-                field attachment.isRestrictedToMyBusinessUnit_
-                field attachment.isRestrictedToMyManagers_
-                field attachment.isRestrictedToEmbeddingObjects_
+                field docAccess.isInternal_
+                field docAccess.isRestrictedToMyBusinessUnit_
+                field docAccess.isRestrictedToMyManagers_
+                field docAccess.isRestrictedToEmbeddingObjects_
             }
-            formAction returnMethod, attachment.id, other
+            formAction returnMethod, docAccess.id, other
+        }
+    }
+
+    static UiFormSpecifier buildDocumentDescriptorForm(DocumentCategory docCat, MC returnMethod = AttachmentController.&saveDocDesc as MC, Map other = null) {
+        new UiFormSpecifier().ui docCat, {
+            section "Category", FormSpec.Width.DOUBLE_WIDTH, {
+                field docCat.category_
+                ajaxField docCat.tags_, AttachmentController.&selectTagsM2M as MC
+            }
+            formAction returnMethod, docCat.id, other
         }
     }
 
@@ -221,8 +230,6 @@ final class AttachmentUiService implements WebAttributes {
         new UiFormSpecifier().ui attachment, {
             section "File Info", FormSpec.Width.DOUBLE_WIDTH, {
                 field attachment.filePath_
-                ajaxField attachment.attachmentDescriptor_, AttachmentController.&editAttachmentDescriptor as MC, attachment.attachmentDescriptor?.id
-                ajaxField attachment.tags_, AttachmentController.&selectTagsM2M as MC
             }
             formAction returnMethod, attachment.id, other
         }

@@ -1,8 +1,9 @@
-package org.taack
+package crew
 
-import app.config.BusinessUnit
-import app.config.Subsidiary
-import app.config.SupportedLanguage
+import crew.config.BusinessUnit
+import crew.config.Subsidiary
+import crew.config.SupportedLanguage
+import attachment.Attachment
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import grails.compiler.GrailsCompileStatic

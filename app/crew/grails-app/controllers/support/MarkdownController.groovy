@@ -5,7 +5,7 @@ import grails.compiler.GrailsCompileStatic
 import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.annotation.Secured
 import org.codehaus.groovy.runtime.MethodClosure
-import org.taack.Attachment
+import attachment.Attachment
 import taack.domain.TaackSaveService
 import taack.render.TaackUiService
 import taack.ui.base.UiBlockSpecifier

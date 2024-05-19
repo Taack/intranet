@@ -1,40 +1,32 @@
-package org.taack
+package attachment
 
-import app.config.AttachmentContentType
-import app.config.AttachmentContentTypeCategory
+import attachment.config.AttachmentContentType
+import attachment.config.AttachmentContentTypeCategory
 import grails.compiler.GrailsCompileStatic
 import taack.ast.annotation.TaackFieldEnum
 import taack.domain.IDomainHistory
 
 @TaackFieldEnum
 @GrailsCompileStatic
-class Attachment implements IDomainHistory<Attachment> {
-
-    User userCreated
-    Date dateCreated
-    User userUpdated
-    Date lastUpdated
+class Attachment extends TaackDocument implements IDomainHistory<Attachment> {
 
     String filePath
-    String originalName
-    Integer version
-    String contentType
 
+    String originalName
+    Long version
+    String contentType
     Boolean active = true
 
     Long fileSize = 0
 
     String contentShaOne
     Attachment nextVersion
-    AttachmentDescriptor attachmentDescriptor
     AttachmentContentType contentTypeEnum
     AttachmentContentTypeCategory contentTypeCategoryEnum
 
-    Set<Term> tags
-
     static constraints = {
         userUpdated nullable: true
-        attachmentDescriptor nullable: true
+        documentAccess nullable: true
         contentTypeEnum nullable: true
         contentTypeCategoryEnum nullable: true
         filePath widget: "filePath"
@@ -100,9 +92,5 @@ class Attachment implements IDomainHistory<Attachment> {
     List<Attachment> getHistory() {
         return null
     }
-
-    static hasMany = [
-            tags: Term
-    ]
 
 }

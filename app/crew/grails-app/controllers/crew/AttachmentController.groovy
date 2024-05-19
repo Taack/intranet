@@ -1,7 +1,8 @@
 package crew
 
-import app.config.SupportedLanguage
-import app.config.TermGroupConfig
+import attachment.DocumentCategory
+import crew.config.SupportedLanguage
+import attachment.config.TermGroupConfig
 import attachement.AttachmentSearchService
 import attachement.AttachmentUiService
 import grails.compiler.GrailsCompileStatic
@@ -10,10 +11,9 @@ import grails.plugin.springsecurity.annotation.Secured
 import org.codehaus.groovy.runtime.MethodClosure
 import org.codehaus.groovy.runtime.MethodClosure as MC
 import org.springframework.beans.factory.annotation.Value
-import org.taack.Attachment
-import org.taack.AttachmentDescriptor
-import org.taack.Term
-import org.taack.User
+import attachment.Attachment
+import attachment.DocumentAccess
+import attachment.Term
 import taack.domain.*
 import taack.render.TaackUiService
 import taack.ui.base.*
@@ -120,20 +120,19 @@ class AttachmentController {
         })
     }
 
-    def editAttachmentDescriptor(AttachmentDescriptor attachmentDescriptor) {
-        attachmentDescriptor ?= new AttachmentDescriptor()
+    def editAttachmentDescriptor(DocumentAccess attachmentDescriptor) {
+        attachmentDescriptor ?= new DocumentAccess()
         taackUiService.show(new UiBlockSpecifier().ui {
             modal {
-                form AttachmentUiService.buildAttachmentDescriptorForm(attachmentDescriptor), BlockSpec.Width.MAX
+                form AttachmentUiService.buildDocumentAccessForm(attachmentDescriptor), BlockSpec.Width.MAX
             }
         })
     }
 
     @Transactional
-    def saveAttachmentDescriptor() {
-        AttachmentDescriptor ad = taackSaveService.save(AttachmentDescriptor, null, false)
-        ad = AttachmentDescriptor.findOrSaveWhere(
-                type: ad.type,
+    def saveDocAccess() {
+        DocumentAccess ad = taackSaveService.save(DocumentAccess, null, false)
+        ad = DocumentAccess.findOrSaveWhere(
                 isInternal: ad.isInternal,
                 isRestrictedToMyBusinessUnit: ad.isRestrictedToMyBusinessUnit,
                 isRestrictedToMySubsidiary: ad.isRestrictedToMySubsidiary,
@@ -148,6 +147,19 @@ class AttachmentController {
                 }
         )
     }
+
+    @Transactional
+    def saveDocDesc() {
+        DocumentCategory dc = taackSaveService.save(DocumentCategory, null, false)
+        dc.save(flush: true)
+        taackSaveService.displayBlockOrRenderErrors(
+                dc,
+                new UiBlockSpecifier().ui {
+                    closeModal(dc.id, dc.toString())
+                }
+        )
+    }
+
 
     def updateAttachment(Attachment attachment) {
         taackUiService.show(new UiBlockSpecifier().ui {
@@ -260,7 +272,7 @@ class AttachmentController {
 
     def showTermAttachments(Term term) {
         Attachment a = new Attachment()
-        AttachmentDescriptor ad = new AttachmentDescriptor()
+        DocumentAccess ad = new DocumentAccess()
         User u = new User()
         def attachments = Attachment.executeQuery('from Attachment a where a.active = true and ?0 in elements(a.tags)', term) as List<Attachment>
         def ts = new UiTableSpecifier().ui {
@@ -421,4 +433,5 @@ class AttachmentController {
         }
         taackUiService.show(block)
     }
+
 }

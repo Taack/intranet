@@ -5,9 +5,6 @@ import attachement.AttachmentUiService
 import grails.compiler.GrailsCompileStatic
 import grails.web.api.WebAttributes
 import org.codehaus.groovy.runtime.MethodClosure as MC
-import org.taack.Role
-import org.taack.User
-import org.taack.UserRole
 import taack.domain.TaackFilter
 import taack.domain.TaackFilterService
 import taack.ui.base.UiBlockSpecifier

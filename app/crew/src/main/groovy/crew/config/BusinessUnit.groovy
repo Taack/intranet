@@ -1,4 +1,4 @@
-package app.config
+package crew.config
 
 enum BusinessUnit {
     DIRECTION,

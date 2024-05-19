@@ -1,4 +1,4 @@
-package app.config
+package crew.config
 
 
 import groovy.transform.CompileStatic
