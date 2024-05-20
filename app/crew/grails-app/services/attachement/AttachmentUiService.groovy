@@ -1,21 +1,23 @@
 package attachement
 
+import attachment.Attachment
+import attachment.DocumentAccess
 import attachment.DocumentCategory
-import crew.config.SupportedLanguage
+import attachment.Term
 import crew.AttachmentController
+import crew.User
+import crew.config.SupportedLanguage
 import grails.compiler.GrailsCompileStatic
 import grails.web.api.WebAttributes
 import org.codehaus.groovy.runtime.MethodClosure as MC
 import org.grails.plugins.web.taglib.ApplicationTagLib
 import org.springframework.beans.factory.annotation.Autowired
-import attachment.Attachment
-import attachment.DocumentAccess
-import attachment.Term
-import crew.User
 import taack.ast.type.FieldInfo
 import taack.domain.TaackAttachmentService
 import taack.domain.TaackFilter
 import taack.domain.TaackFilterService
+import taack.render.IFormInputOverrider
+import taack.render.TaackUiOverriderService
 import taack.ui.base.UiFilterSpecifier
 import taack.ui.base.UiFormSpecifier
 import taack.ui.base.UiShowSpecifier
@@ -27,6 +29,8 @@ import taack.ui.base.filter.expression.FilterExpression
 import taack.ui.base.filter.expression.Operator
 import taack.ui.base.form.FormSpec
 
+import javax.annotation.PostConstruct
+
 import static taack.render.TaackUiService.tr
 
 @GrailsCompileStatic
@@ -37,6 +41,30 @@ final class AttachmentUiService implements WebAttributes {
 
     @Autowired
     ApplicationTagLib applicationTagLib
+
+    @PostConstruct
+    void init() {
+        Attachment a = new Attachment()
+        IFormInputOverrider formInputOverrider = new IFormInputOverrider<Attachment>() {
+            @Override
+            String getValue(Attachment attachment, FieldInfo fieldInfo) {
+                return attachment.filePath
+            }
+
+            @Override
+            String getImagePreview(Attachment attachment, FieldInfo fieldInfo) {
+                return applicationTagLib.createLink(controller: 'attachment', action: 'preview', id: attachment.id)
+            }
+
+            @Override
+            String getTextSnippet(Attachment attachment, FieldInfo fieldInfo) {
+                return attachment.originalName
+            }
+        }
+        TaackUiOverriderService.addInputToOverride(formInputOverrider, a.filePath_)
+        TaackUiOverriderService.addInputToOverride(formInputOverrider, Attachment)
+    }
+
 
     String preview(final Long id) {
         if (!id) return "<span/>"
