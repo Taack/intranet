@@ -6,7 +6,8 @@ import taack.ast.annotation.TaackFieldEnum
 
 @TaackFieldEnum
 @GrailsCompileStatic
-abstract class TaackDocument {
+class TaackDocument {
+
     User userCreated
     Date dateCreated
     User userUpdated
@@ -14,5 +15,9 @@ abstract class TaackDocument {
 
     DocumentAccess documentAccess
     DocumentCategory documentCategory
+
+    static mapping = {
+        tablePerSubclass true
+    }
 
 }

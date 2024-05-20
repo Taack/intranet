@@ -206,11 +206,19 @@ final class AttachmentUiService implements WebAttributes {
 
     static UiFormSpecifier buildDocumentAccessForm(DocumentAccess docAccess, MC returnMethod = AttachmentController.&saveDocAccess as MC, Map other = null) {
         new UiFormSpecifier().ui docAccess, {
-            section "Security", FormSpec.Width.DOUBLE_WIDTH, {
-                field docAccess.isInternal_
-                field docAccess.isRestrictedToMyBusinessUnit_
-                field docAccess.isRestrictedToMyManagers_
-                field docAccess.isRestrictedToEmbeddingObjects_
+            section "Security", FormSpec.Width.FULL_WIDTH, {
+                col {
+                    field docAccess.isInternal_
+                }
+                col {
+                    field docAccess.isRestrictedToMyBusinessUnit_
+                }
+                col {
+                    field docAccess.isRestrictedToMyManagers_
+                }
+                col {
+                    field docAccess.isRestrictedToEmbeddingObjects_
+                }
             }
             formAction returnMethod, docAccess.id, other
         }
@@ -230,6 +238,8 @@ final class AttachmentUiService implements WebAttributes {
         new UiFormSpecifier().ui attachment, {
             section "File Info", FormSpec.Width.DOUBLE_WIDTH, {
                 field attachment.filePath_
+                ajaxField attachment.documentCategory_, AttachmentController.&selectDocumentCategory as MC, attachment.documentCategory?.id
+                ajaxField attachment.documentAccess_, AttachmentController.&selectDocumentAccess as MC, attachment.documentAccess_
             }
             formAction returnMethod, attachment.id, other
         }

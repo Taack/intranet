@@ -1,6 +1,7 @@
 package crew
 
 import attachment.DocumentCategory
+import attachment.TaackDocument
 import crew.config.SupportedLanguage
 import attachment.config.TermGroupConfig
 import attachement.AttachmentSearchService
@@ -131,8 +132,9 @@ class AttachmentController {
 
     @Transactional
     def saveDocAccess() {
+        params['id'] = null
         DocumentAccess ad = taackSaveService.save(DocumentAccess, null, false)
-        ad = DocumentAccess.findOrSaveWhere(
+        ad = DocumentAccess.findOrCreateWhere(
                 isInternal: ad.isInternal,
                 isRestrictedToMyBusinessUnit: ad.isRestrictedToMyBusinessUnit,
                 isRestrictedToMySubsidiary: ad.isRestrictedToMySubsidiary,
@@ -329,12 +331,61 @@ class AttachmentController {
         }
     }
 
+    def selectDocumentAccess() {
+        TaackDocument td = taackUiService.ajaxBind(TaackDocument)
+        DocumentAccess documentAccess = td.documentAccess ?: new DocumentAccess()
+        taackUiService.show(new UiBlockSpecifier().ui {
+            modal {
+                ajaxBlock 'selectDocumentAccessTable', {
+                    table 'Security Spec', new UiTableSpecifier().ui({
+                        header {
+                            fieldHeader documentAccess.isInternal_
+                            fieldHeader documentAccess.isRestrictedToMyManagers_
+                            fieldHeader documentAccess.isRestrictedToMyBusinessUnit_
+                            fieldHeader documentAccess.isRestrictedToMySubsidiary_
+                            fieldHeader documentAccess.isRestrictedToEmbeddingObjects_
+                        }
+                        for (DocumentAccess da in DocumentAccess.list()) {
+                            row {
+                                rowColumn {
+                                    rowAction ActionIcon.SELECT * IconStyle.SCALE_DOWN, this.&selectDocumentAccessCloseModal as MC, da.id
+                                    rowField da.isInternal_
+                                }
+                                rowField da.isRestrictedToMyManagers_
+                                rowField da.isRestrictedToMyBusinessUnit_
+                                rowField da.isRestrictedToMySubsidiary_
+                                rowField da.isRestrictedToEmbeddingObjects_
+                            }
+                        }
+                    })
+                }
+                ajaxBlock 'selectDocumentAccessForm', {
+                    form AttachmentUiService.buildDocumentAccessForm(documentAccess)
+                }
+            }
+        })
+    }
+
+    def selectDocumentAccessCloseModal(DocumentAccess documentAccess) {
+        taackUiService.closeModal(documentAccess.id, documentAccess.toString())
+    }
+
+    def selectDocumentCategory() {
+        TaackDocument td = taackUiService.ajaxBind(TaackDocument)
+        DocumentCategory documentCategory = td.documentCategory ?: new DocumentCategory()
+
+        taackUiService.show(new UiBlockSpecifier().ui {
+            modal {
+                form AttachmentUiService.buildDocumentDescriptorForm(documentCategory)
+            }
+        })
+    }
+
     def selectTagsM2M() {
-        UiTableSpecifier ts = new UiTableSpecifier()
         List<Term> parentTerms = Term.findAllByActiveAndParentIsNull(true)
         Term t = new Term()
 
-        ts.ui {
+        UiTableSpecifier ts = new UiTableSpecifier().ui {
             header {
                 fieldHeader t.name_
                 fieldHeader t.termGroupConfig_

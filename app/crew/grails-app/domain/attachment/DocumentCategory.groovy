@@ -16,4 +16,10 @@ class DocumentCategory {
     static hasMany = [
             tags: Term
     ]
+
+    @Override
+    String toString() {
+        return "DocCat[$id]: ${category}, tags: ${tags?.join(',')?:'None'}"
+    }
+
 }
