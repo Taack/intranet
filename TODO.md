@@ -51,3 +51,10 @@ Should be commited separately to have a clean history
 * Attach those files to other objects
 * Local agents on edge computers
 * Make Attachment related service compatible with edge data
+
+## Scheduler
+
+* DSL scheduler
+* SystemD DBUS API usage
+* reverse SSH
+* Depends on Edges
