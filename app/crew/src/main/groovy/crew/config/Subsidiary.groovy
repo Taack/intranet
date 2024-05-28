@@ -10,7 +10,7 @@ import taack.ui.base.common.Style
 import taack.ui.config.Country
 
 @CompileStatic
-final enum SupportedCurrency implements IEnumOptions {
+final enum SupportedCurrency implements IEnumOptions, IEnumOption {
     EUR(2),
     USD(2),
     INR(0),
@@ -55,7 +55,7 @@ final enum SupportedCurrency implements IEnumOptions {
 }
 
 @CompileStatic
-enum SupportedLanguage implements IEnumOptions {
+enum SupportedLanguage implements IEnumOptions, IEnumOption {
     FR('fr', 'Français'),
     EN('en', 'English'),
     ES('es', 'Lengua española'),
