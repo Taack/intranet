@@ -25,12 +25,32 @@ final enum SupportedCurrency implements IEnumOptions {
 
     @Override
     IEnumOption[] getOptions() {
-        values() as IEnumOption[]
+        return values()
     }
 
     @Override
     String getParamKey() {
         return 'currency'
+    }
+
+    @Override
+    String getKey() {
+        return toString()
+    }
+
+    @Override
+    String getValue() {
+        return toString()
+    }
+
+    @Override
+    String getAsset() {
+        return null
+    }
+
+    @Override
+    Boolean isSection() {
+        return null
     }
 }
 
@@ -68,7 +88,7 @@ enum SupportedLanguage implements IEnumOptions {
 
     @Override
     IEnumOption[] getOptions() {
-        values() as IEnumOption[]
+        return values()
     }
 
     @Override
@@ -76,6 +96,25 @@ enum SupportedLanguage implements IEnumOptions {
         return 'lang'
     }
 
+    @Override
+    String getKey() {
+        return iso2
+    }
+
+    @Override
+    String getValue() {
+        return label
+    }
+
+    @Override
+    String getAsset() {
+        return "taack/icons/countries/4x3/${iso2}.webp"
+    }
+
+    @Override
+    Boolean isSection() {
+        return null
+    }
 }
 
 @CompileStatic
