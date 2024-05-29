@@ -10,7 +10,7 @@ import taack.ui.base.common.Style
 import taack.ui.config.Country
 
 @CompileStatic
-final enum SupportedCurrency implements IEnumOptions, IEnumOption {
+final enum SupportedCurrency implements IEnumOptions {
     EUR(2),
     USD(2),
     INR(0),
@@ -55,7 +55,7 @@ final enum SupportedCurrency implements IEnumOptions, IEnumOption {
 }
 
 @CompileStatic
-enum SupportedLanguage implements IEnumOptions, IEnumOption {
+enum SupportedLanguage implements IEnumOptions {
     FR('fr', 'Français'),
     EN('en', 'English'),
     ES('es', 'Lengua española'),
@@ -78,12 +78,12 @@ enum SupportedLanguage implements IEnumOptions, IEnumOption {
     }
 
     static SupportedLanguage fromContext() {
-        SupportedLanguage language = EN
         try {
-            language = LocaleContextHolder.locale.language.split("_")[0]?.toUpperCase()?.replace("ZH", "CN") as SupportedLanguage
+            SupportedLanguage language = LocaleContextHolder.locale.language.split("_")[0]?.toUpperCase()?.replace("ZH", "CN") as SupportedLanguage
+            language ?: EN
         } catch (ignored) {
+            return EN
         }
-        language
     }
 
     @Override
