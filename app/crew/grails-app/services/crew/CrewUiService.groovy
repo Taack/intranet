@@ -107,7 +107,7 @@ class CrewUiService implements WebAttributes {
             boolean canSwitchUser = crewSecurityService.canSwitchUser()
 
             TaackFilter tf = taackFilterService.getBuilder(User).setSortOrder(TaackFilter.Order.DESC, u.dateCreated_)
-                    .setMaxNumberOfLine(20).addFilter(f).build()
+                    .setMaxNumberOfLine(10).addFilter(f).build()
 
             iterate tf, { User ru ->
                 boolean hasActions = crewSecurityService.canEdit(ru)

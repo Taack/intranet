@@ -3,6 +3,7 @@ package crew.config
 
 import groovy.transform.CompileStatic
 import org.springframework.context.i18n.LocaleContextHolder
+import taack.ui.EnumOptions
 import taack.ui.IEnumOption
 import taack.ui.IEnumOptions
 import taack.ui.base.common.IStyled
@@ -10,7 +11,7 @@ import taack.ui.base.common.Style
 import taack.ui.config.Country
 
 @CompileStatic
-final enum SupportedCurrency implements IEnumOptions {
+final enum SupportedCurrency {
     EUR(2),
     USD(2),
     INR(0),
@@ -23,39 +24,13 @@ final enum SupportedCurrency implements IEnumOptions {
 
     final int precision
 
-    @Override
-    IEnumOption[] getOptions() {
-        return values()
-    }
-
-    @Override
-    String getParamKey() {
-        return 'currency'
-    }
-
-    @Override
-    String getKey() {
-        return toString()
-    }
-
-    @Override
-    String getValue() {
-        return toString()
-    }
-
-    @Override
-    String getAsset() {
-        return null
-    }
-
-    @Override
-    Boolean isSection() {
-        return null
+    static IEnumOptions getEnumOption(SupportedCurrency currency) {
+        new EnumOptions(values(), 'currency', currency)
     }
 }
 
 @CompileStatic
-enum SupportedLanguage implements IEnumOptions {
+enum SupportedLanguage implements IEnumOptions, IEnumOption {
     FR('fr', 'Français'),
     EN('en', 'English'),
     ES('es', 'Lengua española'),
@@ -88,7 +63,12 @@ enum SupportedLanguage implements IEnumOptions {
 
     @Override
     IEnumOption[] getOptions() {
-        return values()
+        values() as IEnumOption[]
+    }
+
+    @Override
+    IEnumOption[] getCurrents() {
+        [fromContext()] as IEnumOption[]
     }
 
     @Override
