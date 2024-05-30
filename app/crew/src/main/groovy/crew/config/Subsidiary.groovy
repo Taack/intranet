@@ -3,12 +3,12 @@ package crew.config
 
 import groovy.transform.CompileStatic
 import org.springframework.context.i18n.LocaleContextHolder
+import taack.config.Country
 import taack.ui.EnumOptions
 import taack.ui.IEnumOption
 import taack.ui.IEnumOptions
 import taack.ui.base.common.IStyled
 import taack.ui.base.common.Style
-import taack.ui.config.Country
 
 @CompileStatic
 final enum SupportedCurrency {

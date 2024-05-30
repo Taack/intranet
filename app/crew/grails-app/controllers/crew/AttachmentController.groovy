@@ -22,7 +22,7 @@ import taack.ui.base.block.BlockSpec
 import taack.ui.base.common.ActionIcon
 import taack.ui.base.common.IconStyle
 import taack.ui.base.common.Style
-import taack.ui.utils.Markdown
+import taack.ui.dump.markdown.Markdown
 
 import static taack.render.TaackUiService.tr
 

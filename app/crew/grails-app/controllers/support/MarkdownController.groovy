@@ -10,7 +10,7 @@ import taack.domain.TaackSaveService
 import taack.render.TaackUiService
 import taack.ui.base.UiBlockSpecifier
 import taack.ui.base.block.BlockSpec
-import taack.ui.utils.Markdown
+import taack.ui.dump.markdown.Markdown
 
 @GrailsCompileStatic
 @Secured(['isAuthenticated()'])
