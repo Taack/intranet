@@ -158,9 +158,9 @@ final class AttachmentUiService implements WebAttributes {
             }
         }
         BlockSpec.buildBlockSpec {
-            tableFilter tr('default.filter.label'), f, tr('default.attachment.label'), t, BlockSpec.Width.MAX, {
+            tableFilter f, t, BlockSpec.Width.MAX, {
                 if (uploadAttachment)
-                    action ActionIcon.CREATE, uploadAttachment, selectParams
+                    menuIcon ActionIcon.CREATE, uploadAttachment, selectParams
             }
         }
     }
@@ -172,12 +172,12 @@ final class AttachmentUiService implements WebAttributes {
             if (iFrame) {
                 custom iFrame
             }
-            show "${attachment.originalName}", buildShowAttachment(attachment, iFrame == null), BlockSpec.Width.MAX, {
-                action ActionIcon.EDIT, AttachmentController.&updateAttachment as MC, attachment.id
-                action ActionIcon.DOWNLOAD, AttachmentController.&downloadAttachment as MC, attachment.id
+            show buildShowAttachment(attachment, iFrame == null), BlockSpec.Width.MAX, {
+                menuIcon ActionIcon.EDIT, AttachmentController.&updateAttachment as MC, attachment.id
+                menuIcon ActionIcon.DOWNLOAD, AttachmentController.&downloadAttachment as MC, attachment.id
                 if (attachmentSecurityService.canDownloadFile(attachment) && converterExtensions) {
                     for (def ext in converterExtensions) {
-                        action ext == 'pdf' ? ActionIcon.EXPORT_PDF : ActionIcon.EXPORT, AttachmentController.&extensionForAttachment as MC, [extension: ext, id: attachment.id]
+                        menuIcon ext == 'pdf' ? ActionIcon.EXPORT_PDF : ActionIcon.EXPORT, AttachmentController.&extensionForAttachment as MC, [extension: ext, id: attachment.id]
                     }
                 }
             }

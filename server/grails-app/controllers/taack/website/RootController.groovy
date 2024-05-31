@@ -73,7 +73,7 @@ class RootController {
     def updates() {
         taackUiService.show(new UiBlockSpecifier().ui {
             ajaxBlock "updates", {
-                show("WiP", new UiShowSpecifier().ui {
+                show(new UiShowSpecifier().ui {
                     inlineHtml("WiP", "")
                 }, BlockSpec.Width.MAX)
             }
@@ -83,7 +83,7 @@ class RootController {
     def todo() {
         taackUiService.show(new UiBlockSpecifier().ui {
             ajaxBlock "todo", {
-                show("WiP", new UiShowSpecifier().ui {
+                show(new UiShowSpecifier().ui {
                     inlineHtml("WiP", "")
                 }, BlockSpec.Width.MAX)
             }

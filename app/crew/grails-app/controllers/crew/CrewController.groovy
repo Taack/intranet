@@ -124,7 +124,7 @@ class CrewController implements WebAttributes {
         UiTableSpecifier t = buildUserTableHierarchy(new User(enabled: true))
         UiBlockSpecifier b = new UiBlockSpecifier()
         b.ui {
-            table "Users Hierarchy", t, BlockSpec.Width.MAX
+            table t, BlockSpec.Width.MAX
         }
 
         taackUiService.show(b, buildMenu())
@@ -138,8 +138,8 @@ class CrewController implements WebAttributes {
 
         UiBlockSpecifier b = new UiBlockSpecifier()
         b.ui {
-            tableFilter 'Filter', f, 'Users', t, BlockSpec.Width.MAX, {
-                action ActionIcon.CREATE, CrewController.&editUser as MC
+            tableFilter f, t, BlockSpec.Width.MAX, {
+                menuIcon ActionIcon.CREATE, CrewController.&editUser as MC
             }
         }
         taackUiService.show(b, buildMenu())
@@ -152,7 +152,7 @@ class CrewController implements WebAttributes {
         UiBlockSpecifier b = new UiBlockSpecifier()
         b.ui {
             modal !params.boolean("refresh"), {
-                tableFilter "Filter", f, "Roles", t, BlockSpec.Width.MAX
+                tableFilter f, t, BlockSpec.Width.MAX
             }
         }
 
@@ -167,7 +167,7 @@ class CrewController implements WebAttributes {
 
         taackUiService.show new UiBlockSpecifier().ui {
             modal {
-                tableFilter "Filter", f, "Users", t, BlockSpec.Width.MAX
+                tableFilter f, t, BlockSpec.Width.MAX
             }
         }
     }
@@ -175,7 +175,7 @@ class CrewController implements WebAttributes {
     def showUser(User u) {
         taackUiService.show(new UiBlockSpecifier().ui {
             modal {
-                show u.username, crewUiService.buildUserShow(u), BlockSpec.Width.MAX
+                show crewUiService.buildUserShow(u), BlockSpec.Width.MAX
             }
         })
 
@@ -184,7 +184,7 @@ class CrewController implements WebAttributes {
     def showUserFromSearch() {
         User u = User.read(params.long('id'))
         taackUiService.show(new UiBlockSpecifier().ui {
-            show u.username, crewUiService.buildUserShow(u), BlockSpec.Width.MAX
+            show crewUiService.buildUserShow(u), BlockSpec.Width.MAX
         }, buildMenu())
     }
 
@@ -260,7 +260,7 @@ class CrewController implements WebAttributes {
 
         taackUiService.show(new UiBlockSpecifier().ui {
             modal !params.boolean("refresh"), {
-                table "Edit User Role for ${user.username}", t, BlockSpec.Width.MAX
+                table t, BlockSpec.Width.MAX
             }
         }, buildMenu())
     }
@@ -349,8 +349,8 @@ class CrewController implements WebAttributes {
             }
         }
         UiBlockSpecifier b = new UiBlockSpecifier().ui {
-            table "Roles", t, BlockSpec.Width.MAX, {
-                if (hasActions) action ActionIcon.CREATE, CrewController.&roleForm as MC
+            table t, BlockSpec.Width.MAX, {
+                if (hasActions) menuIcon ActionIcon.CREATE, CrewController.&roleForm as MC
             }
         }
         taackUiService.show(b, buildMenu())

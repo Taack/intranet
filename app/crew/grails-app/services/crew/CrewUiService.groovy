@@ -153,7 +153,7 @@ class CrewUiService implements WebAttributes {
     static UiBlockSpecifier messageBlock(String message) {
         new UiBlockSpecifier().ui {
             modal {
-                custom "Message", message
+                custom message
             }
         }
     }
