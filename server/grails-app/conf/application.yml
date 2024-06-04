@@ -145,7 +145,7 @@ taack-ui:
   logoHeight: 60
   hasMenuLogin: true
   outlineContainer: false
-  bgColor: '#1d5858'
+  bgColor: '#157347'
   fgColor: '#eeeeee'
   bodyBgColor: '#fff'
   javaPath: /usr/bin/java
