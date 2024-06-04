@@ -35,18 +35,6 @@ class CrewGrailsPlugin extends Plugin implements TaackPlugin {
     }
 
     void doWithApplicationContext() {
-//        for (GrailsClass cls in grailsApplication.getArtefacts("Domain")) {
-//            cls.clazz.declaredFields.each {
-//                Annotation[] annotations = it.getDeclaredAnnotations()
-////                println "${cls.clazz}: ${it}: ${annotations}"
-//                for (Annotation annotation : annotations) {
-//                    if (annotation instanceof AttachmentTypes) {
-//                        println "AUO 42763 " + annotation.value()
-//                    }
-//                }
-//
-//            }
-//        }
     }
 
     void onChange(Map<String, Object> event) {

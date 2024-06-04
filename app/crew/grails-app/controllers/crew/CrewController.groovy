@@ -149,14 +149,11 @@ class CrewController implements WebAttributes {
         UiFilterSpecifier f = CrewUiService.buildRoleTableFilter()
         UiTableSpecifier t = crewUiService.buildRoleTable f, true
 
-        UiBlockSpecifier b = new UiBlockSpecifier()
-        b.ui {
-            modal !params.boolean("refresh"), {
+        taackUiService.show new UiBlockSpecifier().ui {
+            modal {
                 tableFilter f, t, BlockSpec.Width.MAX
             }
         }
-
-        taackUiService.show(b)
     }
 
     def selectUserM2O() {
@@ -178,7 +175,6 @@ class CrewController implements WebAttributes {
                 show crewUiService.buildUserShow(u), BlockSpec.Width.MAX
             }
         })
-
     }
 
     def showUserFromSearch() {

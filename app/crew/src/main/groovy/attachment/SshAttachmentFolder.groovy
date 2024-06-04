@@ -109,7 +109,6 @@ abstract class SshAttachmentFolder implements FolderCallback, FileCallback {
                     INode i = itChildren.next()
                     if (i instanceof FileTree.File) {
                         FileTree.File f = i as FileTree.File
-                        println "AUO ${f.fileName} == ${newPath.fileName.toString()}, ${f.internalId}"
                         if (f.fileName == newPath.fileName.toString()) {
                             if (f.internalId) {
                                 a = Attachment.read(f.internalId)
