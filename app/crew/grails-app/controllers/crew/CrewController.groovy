@@ -227,36 +227,9 @@ class CrewController implements WebAttributes {
 
     @Secured("ROLE_ADMIN")
     def editUserRoles(User user) {
-        Role role = new Role()
-
-        UiTableSpecifier t = new UiTableSpecifier().ui {
-            header {
-                column {
-                    sortableFieldHeader role.authority_
-                }
-                column {
-                    fieldHeader "Action"
-                }
-            }
-            iterate(taackFilterService.getBuilder(Role)
-                    .setMaxNumberOfLine(20)
-                    .setSortOrder(TaackFilter.Order.DESC, role.authority_).build()) { Role r ->
-                rowColumn {
-                    rowField r.authority
-                }
-                rowColumn {
-                    if (!UserRole.exists(user.id, r.id)) {
-                        rowAction ActionIcon.ADD, this.&addRoleToUser as MC, [userId: user.id, roleId: r.id]
-                    } else {
-                        rowAction ActionIcon.DELETE, this.&removeRoleToUser as MC, [userId: user.id, roleId: r.id]
-                    }
-                }
-            }
-        }
-
         taackUiService.show(new UiBlockSpecifier().ui {
             modal !params.boolean("refresh"), {
-                table t, BlockSpec.Width.MAX
+                table crewUiService.buildRoleTable(user), BlockSpec.Width.MAX
             }
         }, buildMenu())
     }

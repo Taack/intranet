@@ -78,7 +78,38 @@ class CrewUiService implements WebAttributes {
         }
     }
 
-    UiTableSpecifier buildUserTable(final UiFilterSpecifier f, final boolean hasSelect = false) {
+
+
+    UiTableSpecifier buildRoleTable(User user) {
+        Role role = new Role()
+        new UiTableSpecifier().ui {
+            header {
+                column {
+                    sortableFieldHeader role.authority_
+                }
+                column {
+                    fieldHeader "Action"
+                }
+            }
+            iterate(taackFilterService.getBuilder(Role)
+                    .setMaxNumberOfLine(20)
+                    .setSortOrder(TaackFilter.Order.DESC, role.authority_).build()) { Role r ->
+                rowColumn {
+                    rowField r.authority
+                }
+                rowColumn {
+                    if (!UserRole.exists(user.id, r.id)) {
+                        rowAction ActionIcon.ADD, CrewController.&addRoleToUser as MC, [userId: user.id, roleId: r.id]
+                    } else {
+                        rowAction ActionIcon.DELETE, CrewController.&removeRoleToUser as MC, [userId: user.id, roleId: r.id]
+                    }
+                }
+            }
+        }
+
+    }
+
+        UiTableSpecifier buildUserTable(final UiFilterSpecifier f, final boolean hasSelect = false) {
 
         new UiTableSpecifier().ui {
             User u = new User(manager: new User(), enabled: true)
