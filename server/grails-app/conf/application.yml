@@ -167,5 +167,5 @@ plm:
 edges:
   storePassword: ChangeIt
 
-client.js.path: ''
-#client.js.path: 'http://localhost:8080/client.js'
+#client.js.path: ''
+client.js.path: 'http://localhost:8080/client.js'

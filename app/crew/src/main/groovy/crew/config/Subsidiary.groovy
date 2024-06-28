@@ -7,8 +7,8 @@ import taack.config.Country
 import taack.ui.EnumOptions
 import taack.ui.IEnumOption
 import taack.ui.IEnumOptions
-import taack.ui.base.common.IStyled
-import taack.ui.base.common.Style
+import taack.ui.dsl.common.IStyled
+import taack.ui.dsl.common.Style
 
 @CompileStatic
 final enum SupportedCurrency {

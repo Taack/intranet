@@ -18,16 +18,15 @@ import taack.domain.TaackFilter
 import taack.domain.TaackFilterService
 import taack.render.IFormInputOverrider
 import taack.render.TaackUiOverriderService
-import taack.ui.base.UiFilterSpecifier
-import taack.ui.base.UiFormSpecifier
-import taack.ui.base.UiShowSpecifier
-import taack.ui.base.UiTableSpecifier
-import taack.ui.base.block.BlockSpec
-import taack.ui.base.common.ActionIcon
-import taack.ui.base.common.IconStyle
-import taack.ui.base.filter.expression.FilterExpression
-import taack.ui.base.filter.expression.Operator
-import taack.ui.base.form.FormSpec
+import taack.ui.dsl.UiFilterSpecifier
+import taack.ui.dsl.UiFormSpecifier
+import taack.ui.dsl.UiShowSpecifier
+import taack.ui.dsl.UiTableSpecifier
+import taack.ui.dsl.block.BlockSpec
+import taack.ui.dsl.common.ActionIcon
+import taack.ui.dsl.common.IconStyle
+import taack.ui.dsl.filter.expression.FilterExpression
+import taack.ui.dsl.filter.expression.Operator
 
 import javax.annotation.PostConstruct
 
@@ -111,7 +110,7 @@ final class AttachmentUiService implements WebAttributes {
         t.ui {
             header {
                 column {
-                    fieldHeader "Preview"
+                    label "Preview"
                 }
                 column {
                     sortableFieldHeader a.originalName_
@@ -126,7 +125,7 @@ final class AttachmentUiService implements WebAttributes {
                     sortableFieldHeader a.userCreated_, u.subsidiary_
                 }
                 column {
-                    fieldHeader "Actions"
+                    label "Actions"
                 }
             }
             iterate(taackFilterService.getBuilder(Attachment)
@@ -158,7 +157,7 @@ final class AttachmentUiService implements WebAttributes {
             }
         }
         BlockSpec.buildBlockSpec {
-            tableFilter f, t, BlockSpec.Width.MAX, {
+            tableFilter f, t, {
                 if (uploadAttachment)
                     menuIcon ActionIcon.CREATE, uploadAttachment, selectParams
             }
@@ -172,7 +171,7 @@ final class AttachmentUiService implements WebAttributes {
             if (iFrame) {
                 custom iFrame
             }
-            show buildShowAttachment(attachment, iFrame == null), BlockSpec.Width.MAX, {
+            show buildShowAttachment(attachment, iFrame == null), {
                 menuIcon ActionIcon.EDIT, AttachmentController.&updateAttachment as MC, attachment.id
                 menuIcon ActionIcon.DOWNLOAD, AttachmentController.&downloadAttachment as MC, attachment.id
                 if (attachmentSecurityService.canDownloadFile(attachment) && converterExtensions) {
@@ -234,18 +233,20 @@ final class AttachmentUiService implements WebAttributes {
 
     static UiFormSpecifier buildDocumentAccessForm(DocumentAccess docAccess, MC returnMethod = AttachmentController.&saveDocAccess as MC, Map other = null) {
         new UiFormSpecifier().ui docAccess, {
-            section "Security", FormSpec.Width.FULL_WIDTH, {
-                col {
-                    field docAccess.isInternal_
-                }
-                col {
-                    field docAccess.isRestrictedToMyBusinessUnit_
-                }
-                col {
-                    field docAccess.isRestrictedToMyManagers_
-                }
-                col {
-                    field docAccess.isRestrictedToEmbeddingObjects_
+            section "Security", {
+                row {
+                    col {
+                        field docAccess.isInternal_
+                    }
+                    col {
+                        field docAccess.isRestrictedToMyBusinessUnit_
+                    }
+                    col {
+                        field docAccess.isRestrictedToMyManagers_
+                    }
+                    col {
+                        field docAccess.isRestrictedToEmbeddingObjects_
+                    }
                 }
             }
             formAction returnMethod, docAccess.id, other
@@ -254,7 +255,7 @@ final class AttachmentUiService implements WebAttributes {
 
     static UiFormSpecifier buildDocumentDescriptorForm(DocumentCategory docCat, MC returnMethod = AttachmentController.&saveDocDesc as MC, Map other = null) {
         new UiFormSpecifier().ui docCat, {
-            section "Category", FormSpec.Width.DOUBLE_WIDTH, {
+            section "Category", {
                 field docCat.category_
                 ajaxField docCat.tags_, AttachmentController.&selectTagsM2M as MC
             }
@@ -264,7 +265,7 @@ final class AttachmentUiService implements WebAttributes {
 
     static UiFormSpecifier buildAttachmentForm(Attachment attachment, MC returnMethod = AttachmentController.&saveAttachment as MC, Map other = null) {
         new UiFormSpecifier().ui attachment, {
-            section "File Info", FormSpec.Width.DOUBLE_WIDTH, {
+            section "File Info", {
                 field attachment.filePath_
                 ajaxField attachment.documentCategory_, AttachmentController.&selectDocumentCategory as MC, attachment.documentCategory?.id
                 ajaxField attachment.documentAccess_, AttachmentController.&selectDocumentAccess as MC, attachment.documentAccess_
@@ -278,9 +279,9 @@ final class AttachmentUiService implements WebAttributes {
             field term.name_
             field term.termGroupConfig_
             ajaxField term.parent_, AttachmentController.&selectTermM2O as MC
-            tabs FormSpec.Width.FULL_WIDTH, {
+            tabs {
                 for (SupportedLanguage language : SupportedLanguage.values()) {
-                    tab "Translation ${language.label}", {
+                    tabLabel "Translation ${language.label}", {
                         fieldFromMap "Translation ${language.toString().toLowerCase()}", term.translations_, language.toString().toLowerCase()
                     }
                 }
@@ -313,7 +314,7 @@ final class AttachmentUiService implements WebAttributes {
                 sortableFieldHeader ti.parent_, ti.parent.name_
                 sortableFieldHeader ti.display_
                 sortableFieldHeader ti.active_
-                fieldHeader "Actions"
+                label "Actions"
             }
 
             iterate(taackFilterService.getBuilder(Term)

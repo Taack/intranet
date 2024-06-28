@@ -3,7 +3,7 @@ package taack.website
 import grails.compiler.GrailsCompileStatic
 import org.codehaus.groovy.runtime.MethodClosure
 import taack.domain.TaackSearchService
-import taack.ui.base.UiBlockSpecifier
+import taack.ui.dsl.UiBlockSpecifier
 
 @GrailsCompileStatic
 class RootSearchService {

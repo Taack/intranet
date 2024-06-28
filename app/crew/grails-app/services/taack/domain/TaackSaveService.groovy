@@ -20,8 +20,8 @@ import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.multipart.MultipartHttpServletRequest
 import taack.ast.type.FieldInfo
 import taack.render.TaackUiService
-import taack.ui.base.UiBlockSpecifier
-import taack.ui.base.helper.Utils
+import taack.ui.dsl.UiBlockSpecifier
+import taack.ui.dsl.helper.Utils
 
 import javax.imageio.ImageIO
 import javax.imageio.ImageReader

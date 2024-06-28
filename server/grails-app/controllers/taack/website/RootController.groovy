@@ -8,10 +8,10 @@ import taack.render.TaackUiService
 import taack.ui.TaackPluginConfiguration
 import taack.ui.TaackPluginService
 import taack.ui.TaackUiConfiguration
-import taack.ui.base.UiBlockSpecifier
-import taack.ui.base.UiMenuSpecifier
-import taack.ui.base.UiShowSpecifier
-import taack.ui.base.block.BlockSpec
+import taack.ui.dsl.UiBlockSpecifier
+import taack.ui.dsl.UiMenuSpecifier
+import taack.ui.dsl.UiShowSpecifier
+
 /*
 TODO: Add an infrastructure to list new stuffs from a user and a timestamp
  */
@@ -33,7 +33,7 @@ class RootController {
     private static UiMenuSpecifier buildMenu(String q = null) {
         UiMenuSpecifier m = new UiMenuSpecifier()
         m.ui {
-            menu 'Home', this.&index as MC
+            menu this.&index as MC
             menuSearch RootController.&search as MC, q
         }
         m
@@ -75,7 +75,7 @@ class RootController {
             ajaxBlock "updates", {
                 show(new UiShowSpecifier().ui {
                     inlineHtml("WiP", "")
-                }, BlockSpec.Width.MAX)
+                })
             }
         }, buildMenu())
     }
@@ -85,7 +85,7 @@ class RootController {
             ajaxBlock "todo", {
                 show(new UiShowSpecifier().ui {
                     inlineHtml("WiP", "")
-                }, BlockSpec.Width.MAX)
+                })
             }
         }, buildMenu())
     }

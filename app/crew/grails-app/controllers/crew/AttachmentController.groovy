@@ -17,11 +17,15 @@ import attachment.DocumentAccess
 import attachment.Term
 import taack.domain.*
 import taack.render.TaackUiService
-import taack.ui.base.*
-import taack.ui.base.block.BlockSpec
-import taack.ui.base.common.ActionIcon
-import taack.ui.base.common.IconStyle
-import taack.ui.base.common.Style
+import taack.ui.dsl.UiBlockSpecifier
+import taack.ui.dsl.UiFilterSpecifier
+import taack.ui.dsl.UiMenuSpecifier
+import taack.ui.dsl.UiShowSpecifier
+import taack.ui.dsl.UiTableSpecifier
+import taack.ui.dsl.block.BlockSpec
+import taack.ui.dsl.common.ActionIcon
+import taack.ui.dsl.common.IconStyle
+import taack.ui.dsl.common.Style
 import taack.ui.dump.markdown.Markdown
 
 import static taack.render.TaackUiService.tr
@@ -45,9 +49,9 @@ class AttachmentController {
 
         m.ui {
             menu AttachmentController.&index as MC
-            menu 'Tagged', {
+            label 'Tagged', {
                 for (def tagGroup : TermGroupConfig.values().findAll { it.active }) {
-                    subMenu tagGroup.toString(), AttachmentController.&showTermGroup as MC, [group: tagGroup.toString()]
+                    subMenu AttachmentController.&showTermGroup as MC, [group: tagGroup.toString()]
                 }
             }
             menu AttachmentController.&listTerm as MC
@@ -116,7 +120,7 @@ class AttachmentController {
     def uploadAttachment() {
         taackUiService.show(new UiBlockSpecifier().ui {
             modal {
-                form AttachmentUiService.buildAttachmentForm(new Attachment()), BlockSpec.Width.MAX
+                form AttachmentUiService.buildAttachmentForm(new Attachment())
             }
         })
     }
@@ -125,7 +129,7 @@ class AttachmentController {
         attachmentDescriptor ?= new DocumentAccess()
         taackUiService.show(new UiBlockSpecifier().ui {
             modal {
-                form AttachmentUiService.buildDocumentAccessForm(attachmentDescriptor), BlockSpec.Width.MAX
+                form AttachmentUiService.buildDocumentAccessForm(attachmentDescriptor)
             }
         })
     }
@@ -166,7 +170,7 @@ class AttachmentController {
     def updateAttachment(Attachment attachment) {
         taackUiService.show(new UiBlockSpecifier().ui {
             modal {
-                form AttachmentUiService.buildAttachmentForm(attachment), BlockSpec.Width.MAX
+                form AttachmentUiService.buildAttachmentForm(attachment)
             }
         })
     }
@@ -198,7 +202,7 @@ class AttachmentController {
                             }
                         }
                     }
-                }), BlockSpec.Width.MAX, {
+                }), {
                     menuIcon ActionIcon.GRAPH, this.&model as MethodClosure, [modelName: Attachment.name]
                 }
             }
@@ -236,8 +240,8 @@ class AttachmentController {
 
         ts.ui {
             header {
-                fieldHeader 'Name'
-                fieldHeader 'Action'
+                label 'Name'
+                label 'Action'
             }
             Closure rec
 
@@ -258,17 +262,21 @@ class AttachmentController {
             if (parentTerms) {
                 for (Term t in parentTerms) {
                     if (t) {
-                        rowGroupHeader "${t}"
+                        row {
+                            rowColumn(2) {
+                                rowField t?.toString()
+                            }
+                        }
                         rec(t)
                     }
                 }
             }
         }
         taackUiService.show new UiBlockSpecifier().ui {
-            table ts, BlockSpec.Width.THIRD
+            table ts
             show new UiShowSpecifier().ui(new Object(), {
                 field Markdown.getContentHtml('# Click on a tag ..')
-            }), BlockSpec.Width.TWO_THIRD
+            })
         }, buildMenu()
     }
 
@@ -280,7 +288,7 @@ class AttachmentController {
         def ts = new UiTableSpecifier().ui {
             header {
                 column {
-                    fieldHeader 'Preview'
+                    label 'Preview'
                 }
                 column {
                     sortableFieldHeader a.originalName_
@@ -295,7 +303,7 @@ class AttachmentController {
                     sortableFieldHeader a.userCreated_, u.subsidiary_
                 }
                 column {
-                    fieldHeader 'Actions'
+                    label 'Actions'
                 }
             }
 
@@ -306,7 +314,7 @@ class AttachmentController {
                     .build()) { Attachment aIt, Long counter ->
 
                 rowColumn {
-                    rowField attachmentUiService.preview(aIt.id)
+                    rowField this.attachmentUiService.preview(aIt.id)
                 }
                 rowColumn {
                     rowField aIt.originalName
@@ -327,7 +335,7 @@ class AttachmentController {
             }
         }
         taackUiService.show new UiBlockSpecifier().ui {
-            table ts, BlockSpec.Width.TWO_THIRD
+            table ts
         }
     }
 
@@ -339,11 +347,11 @@ class AttachmentController {
                 ajaxBlock 'selectDocumentAccessTable', {
                     table new UiTableSpecifier().ui({
                         header {
-                            fieldHeader documentAccess.isInternal_
-                            fieldHeader documentAccess.isRestrictedToMyManagers_
-                            fieldHeader documentAccess.isRestrictedToMyBusinessUnit_
-                            fieldHeader documentAccess.isRestrictedToMySubsidiary_
-                            fieldHeader documentAccess.isRestrictedToEmbeddingObjects_
+                            label documentAccess.isInternal_
+                            label documentAccess.isRestrictedToMyManagers_
+                            label documentAccess.isRestrictedToMyBusinessUnit_
+                            label documentAccess.isRestrictedToMySubsidiary_
+                            label documentAccess.isRestrictedToEmbeddingObjects_
                         }
                         for (DocumentAccess da in DocumentAccess.list()) {
                             row {
@@ -387,9 +395,9 @@ class AttachmentController {
 
         UiTableSpecifier ts = new UiTableSpecifier().ui {
             header {
-                fieldHeader t.name_
-                fieldHeader t.termGroupConfig_
-                fieldHeader 'Action'
+                label t.name_
+                label t.termGroupConfig_
+                label 'Action'
             }
             Closure rec
 
@@ -418,7 +426,7 @@ class AttachmentController {
         }
         taackUiService.show new UiBlockSpecifier().ui {
             modal {
-                table ts, BlockSpec.Width.MAX
+                table ts
             }
         }
     }
@@ -432,7 +440,7 @@ class AttachmentController {
         UiFilterSpecifier f = attachmentUiService.buildTermFilter()
         UiTableSpecifier t = attachmentUiService.buildTermTable f
         b.ui {
-            tableFilter f, t, BlockSpec.Width.MAX, {
+            tableFilter f, t, {
                 menuIcon ActionIcon.CREATE, AttachmentController.&editTerm as MC
             }
         }
@@ -444,7 +452,7 @@ class AttachmentController {
         term = term ?: new Term()
         UiBlockSpecifier b = new UiBlockSpecifier().ui {
             modal {
-                form attachmentUiService.buildTermForm(term), BlockSpec.Width.MAX
+                form attachmentUiService.buildTermForm(term)
             }
         }
         taackUiService.show(b)
@@ -470,7 +478,7 @@ class AttachmentController {
         UiBlockSpecifier b = new UiBlockSpecifier()
         b.ui {
             modal {
-                tableFilter f, t, BlockSpec.Width.MAX
+                tableFilter f, t
             }
         }
         taackUiService.show(b)

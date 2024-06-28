@@ -1,20 +1,19 @@
 package crew
 
-
 import attachement.AttachmentUiService
 import grails.compiler.GrailsCompileStatic
 import grails.web.api.WebAttributes
 import org.codehaus.groovy.runtime.MethodClosure as MC
 import taack.domain.TaackFilter
 import taack.domain.TaackFilterService
-import taack.ui.base.UiBlockSpecifier
-import taack.ui.base.UiFilterSpecifier
-import taack.ui.base.UiShowSpecifier
-import taack.ui.base.UiTableSpecifier
-import taack.ui.base.common.ActionIcon
-import taack.ui.base.common.IconStyle
-import taack.ui.base.filter.expression.FilterExpression
-import taack.ui.base.filter.expression.Operator
+import taack.ui.dsl.UiBlockSpecifier
+import taack.ui.dsl.UiFilterSpecifier
+import taack.ui.dsl.UiShowSpecifier
+import taack.ui.dsl.UiTableSpecifier
+import taack.ui.dsl.common.ActionIcon
+import taack.ui.dsl.common.IconStyle
+import taack.ui.dsl.filter.expression.FilterExpression
+import taack.ui.dsl.filter.expression.Operator
 
 import static taack.render.TaackUiService.tr
 
@@ -88,7 +87,7 @@ class CrewUiService implements WebAttributes {
                     sortableFieldHeader role.authority_
                 }
                 column {
-                    fieldHeader "Action"
+                    label "Action"
                 }
             }
             iterate(taackFilterService.getBuilder(Role)
@@ -116,7 +115,7 @@ class CrewUiService implements WebAttributes {
             header {
                 if (!hasSelect) {
                     column {
-                        fieldHeader tr('picture.header.label')
+                        label tr('picture.header.label')
                     }
                 }
                 column {
@@ -132,7 +131,7 @@ class CrewUiService implements WebAttributes {
                     sortableFieldHeader u.firstName_
                 }
                 column {
-                    fieldHeader tr('default.roles.label')
+                    label tr('default.roles.label')
                 }
             }
             boolean canSwitchUser = crewSecurityService.canSwitchUser()
@@ -141,15 +140,15 @@ class CrewUiService implements WebAttributes {
                     .setMaxNumberOfLine(10).addFilter(f).build()
 
             iterate tf, { User ru ->
-                boolean hasActions = crewSecurityService.canEdit(ru)
+                boolean hasActions = this.crewSecurityService.canEdit(ru)
                 if (!hasSelect) {
                     rowColumn {
-                        rowField attachmentUiService.preview(ru.mainPicture?.id)
+                        rowField this.attachmentUiService.preview(ru.mainPicture?.id)
                     }
                 }
                 rowColumn {
                     if (hasSelect)
-                        rowAction "Select User", ActionIcon.SELECT * IconStyle.SCALE_DOWN, ru.id, ru.toString()
+                        rowAction "User", ActionIcon.SELECT * IconStyle.SCALE_DOWN, ru.id, ru.toString()
                     else {
                         rowAction ActionIcon.SHOW * IconStyle.SCALE_DOWN, CrewController.&showUser as MC, ru.id
                         if (hasActions) {
@@ -193,7 +192,7 @@ class CrewUiService implements WebAttributes {
 
     UiShowSpecifier buildUserShow(User u, boolean update = false) {
         new UiShowSpecifier().ui(u, {
-            field "Picture", attachmentUiService.previewFull(u.mainPicture?.id, update ? "${System.currentTimeMillis()}" : null)
+            field "Picture", this.attachmentUiService.previewFull(u.mainPicture?.id, update ? "${System.currentTimeMillis()}" : null)
             fieldLabeled u.username_
             fieldLabeled u.firstName_
             fieldLabeled u.lastName_

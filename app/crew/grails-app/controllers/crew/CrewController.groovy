@@ -1,5 +1,6 @@
 package crew
 
+import attachment.Attachment
 import attachment.DocumentCategory
 import attachment.config.DocumentCategoryEnum
 import crew.config.SupportedLanguage
@@ -10,19 +11,14 @@ import grails.plugin.springsecurity.annotation.Secured
 import grails.web.api.WebAttributes
 import org.codehaus.groovy.runtime.MethodClosure
 import org.codehaus.groovy.runtime.MethodClosure as MC
-import attachment.Attachment
 import taack.domain.TaackFilter
 import taack.domain.TaackFilterService
 import taack.domain.TaackMetaModelService
 import taack.domain.TaackSaveService
 import taack.render.TaackUiService
-import taack.ui.base.*
-import taack.ui.base.block.BlockSpec
-import taack.ui.base.common.ActionIcon
-import taack.ui.base.common.IconStyle
-import taack.ui.base.filter.expression.FilterExpression
-import taack.ui.base.filter.expression.Operator
-import taack.ui.base.form.FormSpec
+import taack.ui.dsl.*
+import taack.ui.dsl.common.ActionIcon
+import taack.ui.dsl.common.IconStyle
 
 @GrailsCompileStatic
 @Secured(['isAuthenticated()'])
@@ -49,24 +45,21 @@ class CrewController implements WebAttributes {
     }
 
     private UiTableSpecifier buildUserTableHierarchy(final User u) {
-
-        def groups = taackFilterService.getBuilder(User).build().listGroup()
-
         boolean hasActions = crewSecurityService.admin
 
         new UiTableSpecifier().ui {
             header {
                 column {
-                    fieldHeader u.username_
-                    groupFieldHeader u.businessUnit_
+                    label u.username_
+                    sortableFieldHeader u.businessUnit_
                 }
                 column {
-                    groupFieldHeader u.subsidiary_
-                    fieldHeader u.manager_
+                    sortableFieldHeader u.subsidiary_
+                    label u.manager_
                 }
                 column {
-                    fieldHeader u.lastName_
-                    fieldHeader u.firstName_
+                    label u.lastName_
+                    label u.firstName_
                 }
             }
 
@@ -100,19 +93,7 @@ class CrewController implements WebAttributes {
                 })
             }
 
-            if (groups) {
-                User filterUser = new User(enabled: true)
-                for (def g : groups) {
-                    int oldCount = count
-                    rowGroupHeader g as String
-                    rec(taackFilterService.getBuilder(User).build().listInGroup(g, new UiFilterSpecifier().sec(User, {
-                        filterFieldExpressionBool new FilterExpression(true, Operator.EQ, filterUser.enabled_)
-                    })).aValue, 0)
-                    rowGroupFooter "Count: ${count - oldCount}"
-                }
-            } else {
-                rec(User.findAllByManagerIsNullAndEnabled(true), 0)
-            }
+            rec(User.findAllByManagerIsNullAndEnabled(true), 0)
         }
     }
 
@@ -122,11 +103,9 @@ class CrewController implements WebAttributes {
 
     def hierarchy() {
         UiTableSpecifier t = buildUserTableHierarchy(new User(enabled: true))
-        UiBlockSpecifier b = new UiBlockSpecifier()
-        b.ui {
-            table t, BlockSpec.Width.MAX
+        UiBlockSpecifier b = new UiBlockSpecifier().ui {
+            table t
         }
-
         taackUiService.show(b, buildMenu())
     }
 
@@ -136,9 +115,8 @@ class CrewController implements WebAttributes {
         UiFilterSpecifier f = CrewUiService.buildUserTableFilter cu
         UiTableSpecifier t = crewUiService.buildUserTable f
 
-        UiBlockSpecifier b = new UiBlockSpecifier()
-        b.ui {
-            tableFilter f, t, BlockSpec.Width.MAX, {
+        UiBlockSpecifier b = new UiBlockSpecifier().ui {
+            tableFilter f, t, {
                 menuIcon ActionIcon.CREATE, CrewController.&editUser as MC
             }
         }
@@ -151,7 +129,7 @@ class CrewController implements WebAttributes {
 
         taackUiService.show new UiBlockSpecifier().ui {
             modal {
-                tableFilter f, t, BlockSpec.Width.MAX
+                tableFilter f, t
             }
         }
     }
@@ -164,7 +142,7 @@ class CrewController implements WebAttributes {
 
         taackUiService.show new UiBlockSpecifier().ui {
             modal {
-                tableFilter f, t, BlockSpec.Width.MAX
+                tableFilter f, t
             }
         }
     }
@@ -172,7 +150,7 @@ class CrewController implements WebAttributes {
     def showUser(User u) {
         taackUiService.show(new UiBlockSpecifier().ui {
             modal {
-                show crewUiService.buildUserShow(u), BlockSpec.Width.MAX
+                show crewUiService.buildUserShow(u)
             }
         })
     }
@@ -180,7 +158,7 @@ class CrewController implements WebAttributes {
     def showUserFromSearch() {
         User u = User.read(params.long('id'))
         taackUiService.show(new UiBlockSpecifier().ui {
-            show crewUiService.buildUserShow(u), BlockSpec.Width.MAX
+            show crewUiService.buildUserShow(u)
         }, buildMenu())
     }
 
@@ -189,7 +167,7 @@ class CrewController implements WebAttributes {
 
         UiFormSpecifier f = new UiFormSpecifier()
         f.ui user, {
-            section "User", FormSpec.Width.ONE_THIRD, {
+            section "User", {
                 field user.username_
                 field user.firstName_
                 field user.lastName_
@@ -197,12 +175,12 @@ class CrewController implements WebAttributes {
                 ajaxField user.mainPicture_, this.&selectUserMainPicture as MC
                 field user.password_
             }
-            section "Coords", FormSpec.Width.ONE_THIRD, {
+            section "Coords", {
                 field user.businessUnit_
                 field user.mail_
                 field user.subsidiary_
             }
-            section "Status", FormSpec.Width.ONE_THIRD, {
+            section "Status", {
                 field user.enabled_
                 field user.accountExpired_
                 field user.accountLocked_
@@ -213,7 +191,7 @@ class CrewController implements WebAttributes {
 
         taackUiService.show new UiBlockSpecifier().ui {
             modal {
-                form f, BlockSpec.Width.MAX
+                form f
             }
         }
     }
@@ -228,8 +206,8 @@ class CrewController implements WebAttributes {
     @Secured("ROLE_ADMIN")
     def editUserRoles(User user) {
         taackUiService.show(new UiBlockSpecifier().ui {
-            modal !params.boolean("refresh"), {
-                table crewUiService.buildRoleTable(user), BlockSpec.Width.MAX
+            modal {
+                table crewUiService.buildRoleTable(user)
             }
         }, buildMenu())
     }
@@ -290,11 +268,11 @@ class CrewController implements WebAttributes {
                     sortableFieldHeader new Role().authority_
                 }
                 column {
-                    fieldHeader "Users"
+                    label "Users"
                 }
                 if (hasActions) {
                     column {
-                        fieldHeader "Edit"
+                        label "Edit"
                     }
                 }
             }
@@ -318,7 +296,7 @@ class CrewController implements WebAttributes {
             }
         }
         UiBlockSpecifier b = new UiBlockSpecifier().ui {
-            table t, BlockSpec.Width.MAX, {
+            table t, {
                 if (hasActions) menuIcon ActionIcon.CREATE, CrewController.&roleForm as MC
             }
         }
@@ -336,7 +314,7 @@ class CrewController implements WebAttributes {
         UiBlockSpecifier b = new UiBlockSpecifier()
         b.ui {
             modal {
-                form f, BlockSpec.Width.MAX
+                form f
             }
         }
         taackUiService.show(b, buildMenu())

@@ -8,8 +8,7 @@ import org.codehaus.groovy.runtime.MethodClosure
 import attachment.Attachment
 import taack.domain.TaackSaveService
 import taack.render.TaackUiService
-import taack.ui.base.UiBlockSpecifier
-import taack.ui.base.block.BlockSpec
+import taack.ui.dsl.UiBlockSpecifier
 import taack.ui.dump.markdown.Markdown
 
 @GrailsCompileStatic
@@ -46,7 +45,7 @@ class MarkdownController {
     def uploadAttachment() {
         taackUiService.show(new UiBlockSpecifier().ui {
             modal {
-                    form AttachmentUiService.buildAttachmentForm(new Attachment(), MarkdownController.&saveAttachment as MethodClosure, [directUpload: params['directUpload'] == "true"]), BlockSpec.Width.MAX
+                    form AttachmentUiService.buildAttachmentForm(new Attachment(), MarkdownController.&saveAttachment as MethodClosure, [directUpload: params['directUpload'] == "true"])
             }
         })
     }

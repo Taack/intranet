@@ -10,7 +10,7 @@ import taack.domain.TaackAttachmentService
 import taack.domain.TaackSearchService
 import taack.solr.SolrFieldType
 import taack.solr.SolrSpecifier
-import taack.ui.base.UiBlockSpecifier
+import taack.ui.dsl.UiBlockSpecifier
 
 import javax.annotation.PostConstruct
 
