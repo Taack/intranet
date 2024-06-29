@@ -38,7 +38,8 @@ class CrewController implements WebAttributes {
             menu CrewController.&listRoles as MC
             menu CrewController.&hierarchy as MC
             menuIcon ActionIcon.CONFIG_USER, this.&editUser as MC
-            menuIcon ActionIcon.EXPORT_PDF, this.&downloadBinPdf as MC
+            menuIcon ActionIcon.EXPORT_CSV, this.&downloadBinPdf as MC
+            menuIcon ActionIcon.EXPORT_PDF, this.&downloadBinPdf2 as MC
             menuSearch this.&search as MethodClosure, q
             menuOptions(SupportedLanguage.fromContext())
         }
@@ -165,26 +166,33 @@ class CrewController implements WebAttributes {
     def editUser(User user) {
         user ?= new User(params)
 
-        UiFormSpecifier f = new UiFormSpecifier()
-        f.ui user, {
-            section "User", {
-                field user.username_
-                field user.firstName_
-                field user.lastName_
-                ajaxField user.manager_, this.&selectUserM2O as MC
-                ajaxField user.mainPicture_, this.&selectUserMainPicture as MC
-                field user.password_
-            }
-            section "Coords", {
-                field user.businessUnit_
-                field user.mail_
-                field user.subsidiary_
-            }
-            section "Status", {
-                field user.enabled_
-                field user.accountExpired_
-                field user.accountLocked_
-                field user.passwordExpired_
+        UiFormSpecifier f = new UiFormSpecifier().ui user, {
+            row {
+                col {
+                    section "User", {
+                        field user.username_
+                        field user.firstName_
+                        field user.lastName_
+                        ajaxField user.manager_, this.&selectUserM2O as MC
+                        ajaxField user.mainPicture_, this.&selectUserMainPicture as MC
+                        field user.password_
+                    }
+                }
+                col {
+                    section "Coords", {
+                        field user.businessUnit_
+                        field user.mail_
+                        field user.subsidiary_
+                    }
+                }
+                col {
+                    section "Status", {
+                        field user.enabled_
+                        field user.accountExpired_
+                        field user.accountLocked_
+                        field user.passwordExpired_
+                    }
+                }
             }
             formAction this.&saveUser as MC, user.id
         }
@@ -199,7 +207,10 @@ class CrewController implements WebAttributes {
     @Secured("ROLE_ADMIN")
     @Transactional
     def saveUser() {
-        if (params.password) params.password = springSecurityService.encodePassword(params.password as String)
+        User u = User.get(params.long('id'))
+        if ((u && u.password != params.password) || !u) {
+            params.password = springSecurityService.encodePassword(params.password as String)
+        }
         taackSaveService.saveThenReloadOrRenderErrors(User)
     }
 
@@ -209,7 +220,7 @@ class CrewController implements WebAttributes {
             modal {
                 table crewUiService.buildRoleTable(user)
             }
-        }, buildMenu())
+        })
     }
 
     @Secured("ROLE_ADMIN")
@@ -217,14 +228,14 @@ class CrewController implements WebAttributes {
     def addRoleToUser() {
         def ur = UserRole.create(User.read(params.long("userId")), Role.read(params.long("roleId")))
         if (ur.hasErrors()) log.error "${ur.errors}"
-        chain(action: "editUserRoles", id: params.long("userId"), params: [refresh: true, isAjax: true, recordState: params['recordState']])
+        chain(action: "editUserRoles", id: params.long("userId"), params: [isAjax: true, refresh: true])
     }
 
     @Secured("ROLE_ADMIN")
     @Transactional
     def removeRoleToUser() {
         UserRole.remove(User.read(params.long("userId")), Role.read(params.long("roleId")))
-        chain(action: "editUserRoles", id: params.long("userId"), params: [refresh: true, isAjax: true, recordState: params['recordState']])
+        chain(action: "editUserRoles", id: params.long("userId"), params: [isAjax: true, refresh: true])
     }
 
     @Transactional
@@ -317,7 +328,7 @@ class CrewController implements WebAttributes {
                 form f
             }
         }
-        taackUiService.show(b, buildMenu())
+        taackUiService.show(b)
     }
 
     @Secured(["ROLE_ADMIN", "ROLE_SWITCH_USER"])
@@ -378,7 +389,11 @@ class CrewController implements WebAttributes {
         taackSaveService.saveThenRedirectOrRenderErrors(Role, this.&listRoles as MC)
     }
 
-    def downloadBinPdf(Boolean isHtml) {
-        taackUiService.downloadPdf(crewPdfService.buildPdfHierarchy(), 'UserHierarchy', isHtml)
+    def downloadBinPdf() {
+        taackUiService.downloadPdf(crewPdfService.buildPdfHierarchy(), 'UserHierarchy', true)
+    }
+
+    def downloadBinPdf2() {
+        taackUiService.downloadPdf(crewPdfService.buildPdfHierarchy(), 'UserHierarchy', false)
     }
 }

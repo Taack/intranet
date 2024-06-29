@@ -77,8 +77,6 @@ class CrewUiService implements WebAttributes {
         }
     }
 
-
-
     UiTableSpecifier buildRoleTable(User user) {
         Role role = new Role()
         new UiTableSpecifier().ui {
@@ -98,9 +96,9 @@ class CrewUiService implements WebAttributes {
                 }
                 rowColumn {
                     if (!UserRole.exists(user.id, r.id)) {
-                        rowAction ActionIcon.ADD, CrewController.&addRoleToUser as MC, [userId: user.id, roleId: r.id]
+                        rowAction ActionIcon.ADD, CrewController.&addRoleToUser as MC, [userId: user.id, roleId: r.id, refresh: true]
                     } else {
-                        rowAction ActionIcon.DELETE, CrewController.&removeRoleToUser as MC, [userId: user.id, roleId: r.id]
+                        rowAction ActionIcon.DELETE, CrewController.&removeRoleToUser as MC, [userId: user.id, roleId: r.id, refresh: true]
                     }
                 }
             }
@@ -140,15 +138,15 @@ class CrewUiService implements WebAttributes {
                     .setMaxNumberOfLine(10).addFilter(f).build()
 
             iterate tf, { User ru ->
-                boolean hasActions = this.crewSecurityService.canEdit(ru)
+                boolean hasActions = crewSecurityService.canEdit(ru)
                 if (!hasSelect) {
                     rowColumn {
-                        rowField this.attachmentUiService.preview(ru.mainPicture?.id)
+                        rowField attachmentUiService.preview(ru.mainPicture?.id)
                     }
                 }
                 rowColumn {
                     if (hasSelect)
-                        rowAction "User", ActionIcon.SELECT * IconStyle.SCALE_DOWN, ru.id, ru.toString()
+                        rowAction "Select User", ActionIcon.SELECT * IconStyle.SCALE_DOWN, ru.id, ru.toString()
                     else {
                         rowAction ActionIcon.SHOW * IconStyle.SCALE_DOWN, CrewController.&showUser as MC, ru.id
                         if (hasActions) {
@@ -192,7 +190,7 @@ class CrewUiService implements WebAttributes {
 
     UiShowSpecifier buildUserShow(User u, boolean update = false) {
         new UiShowSpecifier().ui(u, {
-            field "Picture", this.attachmentUiService.previewFull(u.mainPicture?.id, update ? "${System.currentTimeMillis()}" : null)
+            field "Picture", attachmentUiService.previewFull(u.mainPicture?.id, update ? "${System.currentTimeMillis()}" : null)
             fieldLabeled u.username_
             fieldLabeled u.firstName_
             fieldLabeled u.lastName_

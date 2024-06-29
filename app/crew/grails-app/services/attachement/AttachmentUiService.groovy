@@ -267,7 +267,7 @@ final class AttachmentUiService implements WebAttributes {
         new UiFormSpecifier().ui attachment, {
             section "File Info", {
                 field attachment.filePath_
-                ajaxField attachment.documentCategory_, AttachmentController.&selectDocumentCategory as MC, attachment.documentCategory?.id
+                ajaxField attachment.documentCategory_, AttachmentController.&selectDocumentCategory as MC, attachment.documentCategory_
                 ajaxField attachment.documentAccess_, AttachmentController.&selectDocumentAccess as MC, attachment.documentAccess_
             }
             formAction returnMethod, attachment.id, other
@@ -276,18 +276,20 @@ final class AttachmentUiService implements WebAttributes {
 
     UiFormSpecifier buildTermForm(Term term) {
         new UiFormSpecifier().ui term, {
-            field term.name_
-            field term.termGroupConfig_
-            ajaxField term.parent_, AttachmentController.&selectTermM2O as MC
-            tabs {
-                for (SupportedLanguage language : SupportedLanguage.values()) {
-                    tabLabel "Translation ${language.label}", {
-                        fieldFromMap "Translation ${language.toString().toLowerCase()}", term.translations_, language.toString().toLowerCase()
+            section "Term", {
+                field term.name_
+                field term.termGroupConfig_
+                ajaxField term.parent_, AttachmentController.&selectTermM2O as MC
+                tabs BlockSpec.Width.MAX, {
+                    for (SupportedLanguage language : SupportedLanguage.values()) {
+                        tabLabel "Translation ${language.label}", {
+                            fieldFromMap "Translation ${language.toString().toLowerCase()}", term.translations_, language.toString().toLowerCase()
+                        }
                     }
                 }
+                field term.display_
+                field term.active_
             }
-            field term.display_
-            field term.active_
             formAction AttachmentController.&saveTerm as MC, term.id
         }
     }

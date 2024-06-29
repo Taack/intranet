@@ -1,8 +1,7 @@
 package crew
 
-
-import crew.config.Subsidiary
 import attachement.AttachmentUiService
+import crew.config.Subsidiary
 import grails.compiler.GrailsCompileStatic
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.web.api.WebAttributes
@@ -56,7 +55,7 @@ class CrewPdfService implements WebAttributes {
                         count++
                         boolean muHasChildren = !mu.managedUsers.isEmpty()
                         rowTree muHasChildren, {
-                            rowColumn(1, 1) {
+                            rowColumn {
                                 rowField this.attachmentUiService.preview(mu.mainPicture?.id, TaackAttachmentService.PreviewFormat.DEFAULT_PDF)
                             }
                             rowColumn {
@@ -86,17 +85,17 @@ class CrewPdfService implements WebAttributes {
                 show new UiShowSpecifier().ui {
                     field null, "Printed for", Style.BOLD
                     field null, """${cu.firstName} ${cu.lastName}"""
-                }, BlockSpec.Width.MAX
+                }, BlockSpec.Width.THIRD
                 show new UiShowSpecifier().ui {
                     field """\
                         <div style="height: 2cm; text-align: center;align-content: center; width: 100%;margin-left: 1cm;">
                             ${this.taackUiService.dumpAsset("logo-taack-web.svg")}
                         </div>
                     """.stripIndent()
-                }, BlockSpec.Width.MAX
+                }, BlockSpec.Width.THIRD
                 show new UiShowSpecifier().ui {
                     field null, """${new Date()}""", Style.ALIGN_RIGHT
-                }, BlockSpec.Width.MAX
+                }, BlockSpec.Width.THIRD
 
             }
             printableBody {

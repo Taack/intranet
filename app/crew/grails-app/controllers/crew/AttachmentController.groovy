@@ -1,34 +1,23 @@
 package crew
 
-import attachment.DocumentCategory
-import attachment.TaackDocument
-import crew.config.SupportedLanguage
-import attachment.config.TermGroupConfig
 import attachement.AttachmentSearchService
 import attachement.AttachmentUiService
+import attachment.*
+import attachment.config.TermGroupConfig
+import crew.config.SupportedLanguage
 import grails.compiler.GrailsCompileStatic
 import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.annotation.Secured
 import org.codehaus.groovy.runtime.MethodClosure
 import org.codehaus.groovy.runtime.MethodClosure as MC
 import org.springframework.beans.factory.annotation.Value
-import attachment.Attachment
-import attachment.DocumentAccess
-import attachment.Term
 import taack.domain.*
 import taack.render.TaackUiService
-import taack.ui.dsl.UiBlockSpecifier
-import taack.ui.dsl.UiFilterSpecifier
-import taack.ui.dsl.UiMenuSpecifier
-import taack.ui.dsl.UiShowSpecifier
-import taack.ui.dsl.UiTableSpecifier
-import taack.ui.dsl.block.BlockSpec
+import taack.ui.dsl.*
 import taack.ui.dsl.common.ActionIcon
 import taack.ui.dsl.common.IconStyle
 import taack.ui.dsl.common.Style
 import taack.ui.dump.markdown.Markdown
-
-import static taack.render.TaackUiService.tr
 
 @GrailsCompileStatic
 @Secured(['IS_AUTHENTICATED_REMEMBERED'])
@@ -156,8 +145,13 @@ class AttachmentController {
 
     @Transactional
     def saveDocDesc() {
-        DocumentCategory dc = taackSaveService.save(DocumentCategory, null, false)
-        dc.save(flush: true)
+        DocumentCategory dc = taackSaveService.save(DocumentCategory, null, true)
+        dc.save(flush: true, failOnError: true)
+        if (dc.hasErrors()) {
+            log.error "${dc.errors}"
+        } else {
+            log.info "DocumentCategory $dc"
+        }
         taackSaveService.displayBlockOrRenderErrors(
                 dc,
                 new UiBlockSpecifier().ui {
@@ -263,9 +257,7 @@ class AttachmentController {
                 for (Term t in parentTerms) {
                     if (t) {
                         row {
-                            rowColumn(2) {
-                                rowField t?.toString()
-                            }
+                            rowField "${t}"
                         }
                         rec(t)
                     }
@@ -314,7 +306,7 @@ class AttachmentController {
                     .build()) { Attachment aIt, Long counter ->
 
                 rowColumn {
-                    rowField this.attachmentUiService.preview(aIt.id)
+                    rowField attachmentUiService.preview(aIt.id)
                 }
                 rowColumn {
                     rowField aIt.originalName
@@ -379,9 +371,7 @@ class AttachmentController {
     }
 
     def selectDocumentCategory() {
-        TaackDocument td = taackUiService.ajaxBind(TaackDocument)
-        DocumentCategory documentCategory = td.documentCategory ?: new DocumentCategory()
-
+        DocumentCategory documentCategory = taackUiService.ajaxBind(DocumentCategory)
         taackUiService.show(new UiBlockSpecifier().ui {
             modal {
                 form AttachmentUiService.buildDocumentDescriptorForm(documentCategory)
