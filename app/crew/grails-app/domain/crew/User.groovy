@@ -51,7 +51,7 @@ class User implements Serializable {
         manager nullable: true
         mainPicture nullable: true
         mail nullable: true, email: true
-        password nullable: false, blank: false, password: true
+        password nullable: false, blank: false, password: true, widget: 'passwd'
         username nullable: false, blank: false, unique: true
     }
 

@@ -1,16 +1,17 @@
 package taack.website
 
+import crew.config.SupportedLanguage
 import grails.compiler.GrailsCompileStatic
 import grails.plugin.springsecurity.annotation.Secured
 import org.codehaus.groovy.runtime.MethodClosure as MC
-import org.springframework.beans.factory.annotation.Autowired
+import taack.app.TaackApp
+import taack.app.TaackAppRegisterService
 import taack.render.TaackUiService
-import taack.ui.TaackPluginConfiguration
-import taack.ui.TaackPluginService
-import taack.ui.TaackUiConfiguration
 import taack.ui.dsl.UiBlockSpecifier
 import taack.ui.dsl.UiMenuSpecifier
 import taack.ui.dsl.UiShowSpecifier
+import taack.ui.dsl.block.BlockSpec
+import taack.ui.dump.Parameter
 
 /*
 TODO: Add an infrastructure to list new stuffs from a user and a timestamp
@@ -19,51 +20,37 @@ TODO: Add an infrastructure to list new stuffs from a user and a timestamp
 @GrailsCompileStatic
 @Secured(["isAuthenticated()"])
 class RootController {
-    TaackPluginService taackPluginService
     TaackUiService taackUiService
     RootSearchService rootSearchService
-
-    @Autowired
-    TaackUiConfiguration taackUiPluginConfiguration
-
-    final static Long randIcon = Math.round(Math.random() * Long.MAX_VALUE)
-
-    final Map<String, byte[]> logos = [:]
 
     private static UiMenuSpecifier buildMenu(String q = null) {
         UiMenuSpecifier m = new UiMenuSpecifier()
         m.ui {
             menu this.&index as MC
             menuSearch RootController.&search as MC, q
+            menuOptions(SupportedLanguage.fromContext())
         }
         m
     }
 
-    def index(Boolean taackReset) {
-        render view: "root", model: [taackPluginService: taackPluginService,
-                                     conf    : taackUiPluginConfiguration,
-                                     menu: taackUiService.visitMenu(buildMenu(params["q"] as String))]
-    }
-
-    def getPluginLogo(String pluginControllerName) {
-        if (pluginControllerName) {
-            if (!logos[pluginControllerName]) {
-                synchronized (logos) {
-                    TaackPluginConfiguration conf = taackPluginService.getTaackPluginConfigurationFromControllerName(pluginControllerName)
-                    if (conf) {
-                        logos[pluginControllerName] = conf.class.getResourceAsStream(conf.imageResource).bytes
+    def index() {
+        UiBlockSpecifier b = new UiBlockSpecifier().ui {
+            row {
+                TaackAppRegisterService.apps.eachWithIndex { TaackApp a, int i ->
+                    col BlockSpec.Width.QUARTER, {
+                        show(new UiShowSpecifier().ui {
+                            inlineHtml(
+                                    """\
+                                    <a href="${Parameter.urlMapped(a.entryPoint)}">
+                                        <div class="taack-app" style="width: 220px; padding: 35px; text-align: center;display: inline-grid;">${a.svg}<div><b>${a.label}</b><br>${a.desc}</div></div>
+                                    </a>
+                                    """.stripIndent())
+                        })
                     }
                 }
             }
-            response.setContentType 'image/svg+xml'
-            response.setHeader("Cache-Control", "max-age=604800")
-            try {
-                response.outputStream << logos[pluginControllerName]
-            } catch(Exception e) {
-                log.warn "getPluginLogo: ${e.toString()}"
-            }
         }
-        return false
+        taackUiService.show(b, buildMenu())
     }
 
     def search(String q) {

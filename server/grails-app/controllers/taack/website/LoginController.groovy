@@ -14,23 +14,33 @@
  */
 package taack.website
 
+import crew.User
+import crew.config.SupportedLanguage
 import grails.compiler.GrailsCompileStatic
 import grails.config.Config
 import grails.core.support.GrailsConfigurationAware
 import grails.plugin.springsecurity.SpringSecurityService
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.annotation.Secured
-import taack.ui.TaackUiConfiguration
+import taack.render.TaackUiService
+import taack.ui.dsl.UiBlockSpecifier
+import taack.ui.dsl.UiFormSpecifier
+import taack.ui.dsl.UiMenuSpecifier
 
 @GrailsCompileStatic
 @Secured('permitAll')
 class LoginController extends grails.plugin.springsecurity.LoginController implements GrailsConfigurationAware {
 
-	@Autowired
-	TaackUiConfiguration taackUiPluginConfiguration
-	/** Show the login page. */
-	def auth() {
+	TaackUiService taackUiService
 
+	private static UiMenuSpecifier buildMenu(String q = null) {
+		UiMenuSpecifier m = new UiMenuSpecifier()
+		m.ui {
+			menuOptions(SupportedLanguage.fromContext())
+		}
+		m
+	}
+
+	def auth() {
 		ConfigObject conf = getConf()
 
 		if ((springSecurityService as SpringSecurityService).isLoggedIn()) {
@@ -39,12 +49,20 @@ class LoginController extends grails.plugin.springsecurity.LoginController imple
 		}
 
 		String postUrl = request.contextPath + conf.apf["filterProcessesUrl"]
-		render view: 'crewAuth', model: [postUrl: postUrl,
-		                             rememberMeParameter: conf.rememberMe["parameter"],
-		                             usernameParameter: conf.apf["usernameParameter"],
-		                             passwordParameter: conf.apf["passwordParameter"],
-									 conf: taackUiPluginConfiguration,
-		                             gspLayout: conf.gsp["layoutAuth"]]
+
+		User user = new User()
+
+		UiFormSpecifier f = new UiFormSpecifier().ui(user) {
+			section 'Credentials', {
+				field user.username_
+				field user.password_
+			}
+			formAction('Login', postUrl)
+		}
+
+		taackUiService.show(new UiBlockSpecifier().ui {
+			form f
+		}, buildMenu())
 	}
 
 	@Override

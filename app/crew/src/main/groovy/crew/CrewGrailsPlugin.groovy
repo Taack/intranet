@@ -2,16 +2,11 @@ package crew
 
 import grails.compiler.GrailsCompileStatic
 import grails.plugins.Plugin
-import org.codehaus.groovy.runtime.MethodClosure
-import attachment.Attachment
-import taack.ui.TaackPlugin
-import taack.ui.TaackPluginConfiguration
-
 /*
 TODO: put user extra configuration accessible to server to centralize configuration
  */
 @GrailsCompileStatic
-class CrewGrailsPlugin extends Plugin implements TaackPlugin {
+class CrewGrailsPlugin extends Plugin {
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "4.0.3 > *"
     // resources that are excluded from plugin packaging
@@ -50,50 +45,5 @@ class CrewGrailsPlugin extends Plugin implements TaackPlugin {
 
     void onShutdown(Map<String, Object> event) {
         // TODO Implement code that is executed when the application shuts down (optional)
-    }
-
-    static final List<TaackPluginConfiguration.PluginRole> crewPluginRoles = [
-            new TaackPluginConfiguration.PluginRole("ROLE_CREW_ADMIN", TaackPluginConfiguration.PluginRole.RoleRanking.DIRECTOR),
-            new TaackPluginConfiguration.PluginRole("ROLE_CREW_MANAGER", TaackPluginConfiguration.PluginRole.RoleRanking.MANAGER),
-            new TaackPluginConfiguration.PluginRole("ROLE_CREW_USER", TaackPluginConfiguration.PluginRole.RoleRanking.USER),
-    ]
-
-    static final List<TaackPluginConfiguration.TaackLinkClass> linkClasses = [
-            new TaackPluginConfiguration.TaackLinkClass(Attachment.class, 'publicName', AttachmentController.&showAttachment as MethodClosure)
-    ]
-
-    static final TaackPluginConfiguration crewPluginConfiguration = new TaackPluginConfiguration("Crew",
-            "/crew/crew.svg", "crew",
-            new TaackPluginConfiguration.IPluginRole() {
-                @Override
-                List<TaackPluginConfiguration.PluginRole> getPluginRoles() {
-                    crewPluginRoles
-                }
-            })
-
-    static final List<TaackPluginConfiguration.PluginRole> attPluginRoles = [
-            new TaackPluginConfiguration.PluginRole("ROLE_ATT_ADMIN", TaackPluginConfiguration.PluginRole.RoleRanking.DIRECTOR),
-            new TaackPluginConfiguration.PluginRole("ROLE_ATT_MANAGER", TaackPluginConfiguration.PluginRole.RoleRanking.MANAGER),
-            new TaackPluginConfiguration.PluginRole("ROLE_ATT_USER", TaackPluginConfiguration.PluginRole.RoleRanking.USER),
-    ]
-
-    static final TaackPluginConfiguration attPluginConfiguration = new TaackPluginConfiguration("Attachment",
-            "/att/att.svg", "attachment",
-            new TaackPluginConfiguration.IPluginRole() {
-                @Override
-                List<TaackPluginConfiguration.PluginRole> getPluginRoles() {
-                    attPluginRoles
-                }
-            },
-            new TaackPluginConfiguration.ITaackLinkClass() {
-                @Override
-                List<TaackPluginConfiguration.TaackLinkClass> getTaackLinkClasses() {
-                    linkClasses
-                }
-            })
-
-    @Override
-    List<TaackPluginConfiguration> getTaackPluginControllerConfigurations() {
-        [crewPluginConfiguration, attPluginConfiguration]
     }
 }
