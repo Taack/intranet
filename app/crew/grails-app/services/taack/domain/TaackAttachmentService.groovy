@@ -253,7 +253,7 @@ class TaackAttachmentService implements WebAttributes, DataBinder {
         if (!attachment) return
         def response = webRequest.currentResponse
         response.setContentType(attachment.contentType)
-        response.setHeader("Content-disposition", "attachment;filename=\"${URLEncoder.encode(attachment.getName(), "UTF-8")}\"")
+        response.setHeader("Content-disposition", "attachment;filename=${URLEncoder.encode(attachment.getName(), "UTF-8")}")
         response.outputStream << new File(attachmentPath(attachment)).bytes
     }
 

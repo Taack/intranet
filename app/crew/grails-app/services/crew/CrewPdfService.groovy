@@ -81,7 +81,7 @@ class CrewPdfService implements WebAttributes {
         User cu = springSecurityService.currentUser as User
 
         new UiPrintableSpecifier().ui {
-            printableHeaderLeft('4.5cm') {
+            printableHeaderLeft('7.5cm') {
                 show new UiShowSpecifier().ui {
                     field null, "Printed for", Style.BOLD
                     field null, """${cu.firstName} ${cu.lastName}"""

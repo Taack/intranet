@@ -95,7 +95,7 @@ class AttachmentController {
         }
     }
 
-    def downloadAttachment(Attachment attachment) {
+    def downloadBinAttachment(Attachment attachment) {
         taackAttachmentService.downloadAttachment(attachment)
     }
 
@@ -321,7 +321,7 @@ class AttachmentController {
                     rowField aIt.userCreated.subsidiary.toString()
                 }
                 rowColumn {
-                    rowAction ActionIcon.DOWNLOAD, AttachmentController.&downloadAttachment as MC, aIt.id
+                    rowAction ActionIcon.DOWNLOAD, AttachmentController.&downloadBinAttachment as MC, aIt.id
                     rowAction ActionIcon.SHOW, AttachmentController.&showAttachment as MC, aIt.id
                 }
             }

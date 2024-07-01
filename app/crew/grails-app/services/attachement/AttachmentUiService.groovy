@@ -151,7 +151,7 @@ final class AttachmentUiService implements WebAttributes {
                 rowColumn {
                     if (selectMC)
                         rowAction ActionIcon.SELECT * IconStyle.SCALE_DOWN, selectMC as MC, att.id, selectParams
-                    rowAction ActionIcon.DOWNLOAD * IconStyle.SCALE_DOWN, AttachmentController.&downloadAttachment as MC, att.id
+                    rowAction ActionIcon.DOWNLOAD * IconStyle.SCALE_DOWN, AttachmentController.&downloadBinAttachment as MC, att.id
                     rowAction ActionIcon.SHOW * IconStyle.SCALE_DOWN, AttachmentController.&showAttachment as MC, att.id
                 }
             }
@@ -173,7 +173,7 @@ final class AttachmentUiService implements WebAttributes {
             }
             show buildShowAttachment(attachment, iFrame == null), {
                 menuIcon ActionIcon.EDIT, AttachmentController.&updateAttachment as MC, attachment.id
-                menuIcon ActionIcon.DOWNLOAD, AttachmentController.&downloadAttachment as MC, attachment.id
+                menuIcon ActionIcon.DOWNLOAD, AttachmentController.&downloadBinAttachment as MC, attachment.id
                 if (attachmentSecurityService.canDownloadFile(attachment) && converterExtensions) {
                     for (def ext in converterExtensions) {
                         menuIcon ext == 'pdf' ? ActionIcon.EXPORT_PDF : ActionIcon.EXPORT, AttachmentController.&extensionForAttachment as MC, [extension: ext, id: attachment.id]
@@ -225,7 +225,7 @@ final class AttachmentUiService implements WebAttributes {
                         rowField a.fileSize_
                     }
                     if (this.attachmentSecurityService.canDownloadFile(a))
-                        rowAction ActionIcon.DOWNLOAD, AttachmentController.&downloadAttachment as MC, a.id
+                        rowAction ActionIcon.DOWNLOAD, AttachmentController.&downloadBinAttachment as MC, a.id
                 }
             }
         }

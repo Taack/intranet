@@ -135,13 +135,13 @@ class CrewUiService implements WebAttributes {
             boolean canSwitchUser = crewSecurityService.canSwitchUser()
 
             TaackFilter tf = taackFilterService.getBuilder(User).setSortOrder(TaackFilter.Order.DESC, u.dateCreated_)
-                    .setMaxNumberOfLine(10).addFilter(f).build()
+                    .setMaxNumberOfLine(6).addFilter(f).build()
 
             iterate tf, { User ru ->
-                boolean hasActions = crewSecurityService.canEdit(ru)
+                boolean hasActions = this.crewSecurityService.canEdit(ru)
                 if (!hasSelect) {
                     rowColumn {
-                        rowField attachmentUiService.preview(ru.mainPicture?.id)
+                        rowField this.attachmentUiService.preview(ru.mainPicture?.id)
                     }
                 }
                 rowColumn {

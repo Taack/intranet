@@ -144,7 +144,8 @@ final enum AdministrativeIdentifier {
 
 @CompileStatic
 final enum Subsidiary implements IStyled {
-    YOUR_COMPANY(null, 'Your Company', Address.YOUR_ADDRESS, SupportedCurrency.USD, SupportedLanguage.EN)
+    YOUR_SUBSIDIARY1(null, 'Your Subsidiary US', Address.YOUR_ADDRESS, SupportedCurrency.USD, SupportedLanguage.EN),
+    YOUR_SUBSIDIARY2(null, 'Your Subsidiary FR', Address.YOUR_ADDRESS, SupportedCurrency.EUR, SupportedLanguage.FR)
 
     Subsidiary(final Subsidiary parent, final String company, final Address address, final SupportedCurrency currency,
                final SupportedLanguage defaultLanguage, final AdministrativeIdentifier administrativeIdentifier = null,
