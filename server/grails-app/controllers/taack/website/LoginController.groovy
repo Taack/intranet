@@ -56,6 +56,7 @@ class LoginController extends grails.plugin.springsecurity.LoginController imple
 			section 'Credentials', {
 				field user.username_
 				field user.password_
+				field user.rememberMe_
 			}
 			formAction('Login', postUrl)
 		}

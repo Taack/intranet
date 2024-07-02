@@ -37,9 +37,13 @@ class User implements Serializable {
     boolean accountLocked
     boolean passwordExpired
 
+    boolean rememberMe
+
     Set<Role> getAuthorities() {
         (UserRole.findAllByUser(this) as List<UserRole>)*.role as Set<Role>
     }
+
+    static transients = ['rememberMe']
 
     static constraints = {
         userCreated nullable: true
