@@ -1,6 +1,7 @@
 package taack.domain
 
-import app.config.AttachmentContentType
+import attachment.config.AttachmentContentType
+import crew.User
 import grails.artefact.controller.support.ResponseRenderer
 import grails.compiler.GrailsCompileStatic
 import grails.plugin.springsecurity.SpringSecurityService
@@ -17,11 +18,10 @@ import org.springframework.context.i18n.LocaleContextHolder
 import org.springframework.validation.Errors
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.multipart.MultipartHttpServletRequest
-import org.taack.User
 import taack.ast.type.FieldInfo
 import taack.render.TaackUiService
-import taack.ui.base.UiBlockSpecifier
-import taack.ui.base.helper.Utils
+import taack.ui.dsl.UiBlockSpecifier
+import taack.ui.dsl.helper.Utils
 
 import javax.imageio.ImageIO
 import javax.imageio.ImageReader
@@ -53,6 +53,7 @@ class TaackSaveService implements ResponseRenderer, ServletAttributes, DataBinde
         if (isAjax && params && !params.containsKey('isAjax')) {
             p = new HashMap<String, Object>()
             p.putAll(params)
+            p.remove('recordState')
             p.put('isAjax', true)
         }
         grailsApplication.mainContext.getBean(ApplicationTagLib).createLink(controller: controller, action: action, params: p)
@@ -63,6 +64,7 @@ class TaackSaveService implements ResponseRenderer, ServletAttributes, DataBinde
         if (isAjax && params && !params.containsKey('isAjax')) {
             p = new HashMap<String, Object>()
             p.putAll(params)
+            p.remove('recordState')
             p.put('isAjax', true)
         }
         grailsApplication.mainContext.getBean(ApplicationTagLib).createLink(controller: controller, action: action, params: p, id: id)
@@ -307,8 +309,11 @@ class TaackSaveService implements ResponseRenderer, ServletAttributes, DataBinde
                 render """__ErrorKeyStart__${it.key}:<ul class="errorKey">${it.value.collect { """<li class="errorEntry">$it</li>""" }.join('')}</ul>__ErrorKeyEnd__"""
             }.join('')
         } else {
-            if (redirectAction) render """__redirect__${urlMapped(Utils.getControllerName(redirectAction), redirectAction.method)}/${params.id ?: gormEntity.ident() ?: ''}?recordState=${params['recordState']}"""
-            else render """__reload__"""
+            String rs = params.containsKey('recordState') && params['recordState'] ? '?recordState=' + params['recordState'] : ''
+
+            if (redirectAction) {
+                render """__redirect__${urlMapped(Utils.getControllerName(redirectAction), redirectAction.method)}/${params.id ?: gormEntity.ident() ?: ''}$rs"""
+            } else render """__reload__"""
         }
     }
 
@@ -341,8 +346,4 @@ class TaackSaveService implements ResponseRenderer, ServletAttributes, DataBinde
         }
     }
 
-    // TODO: Implement cases where formSpecifier is not null
-    void saveThenDisplayBlockOrRenderErrors(final Class<? extends GormEntity> aClass, final UiBlockSpecifier blockSpecifier, final FieldInfo lockedFields = null) {
-        displayBlockOrRenderErrors(save(aClass, lockedFields), blockSpecifier)
-    }
 }

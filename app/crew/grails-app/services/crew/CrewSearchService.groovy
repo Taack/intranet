@@ -4,11 +4,10 @@ package crew
 import grails.compiler.GrailsCompileStatic
 import org.codehaus.groovy.runtime.MethodClosure
 import org.grails.datastore.gorm.GormEntity
-import org.taack.User
 import taack.domain.TaackSearchService
 import taack.solr.SolrSpecifier
 import taack.solr.SolrFieldType
-import taack.ui.base.UiBlockSpecifier
+import taack.ui.dsl.UiBlockSpecifier
 
 import javax.annotation.PostConstruct
 

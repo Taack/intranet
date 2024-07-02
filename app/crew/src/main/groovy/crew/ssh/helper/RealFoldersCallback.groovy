@@ -2,7 +2,7 @@ package crew.ssh.helper
 
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
-import org.taack.User
+import crew.User
 import taack.ssh.vfs.FileCallback
 import taack.ssh.vfs.FileTree
 import taack.ssh.vfs.FolderCallback

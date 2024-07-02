@@ -1,30 +1,34 @@
 package attachement
 
-import app.config.SupportedLanguage
+import attachment.Attachment
+import attachment.DocumentAccess
+import attachment.DocumentCategory
+import attachment.Term
 import crew.AttachmentController
+import crew.User
+import crew.config.SupportedLanguage
 import grails.compiler.GrailsCompileStatic
 import grails.web.api.WebAttributes
 import org.codehaus.groovy.runtime.MethodClosure as MC
 import org.grails.plugins.web.taglib.ApplicationTagLib
 import org.springframework.beans.factory.annotation.Autowired
-import org.taack.Attachment
-import org.taack.AttachmentDescriptor
-import org.taack.Term
-import org.taack.User
 import taack.ast.type.FieldInfo
 import taack.domain.TaackAttachmentService
 import taack.domain.TaackFilter
 import taack.domain.TaackFilterService
-import taack.ui.base.UiFilterSpecifier
-import taack.ui.base.UiFormSpecifier
-import taack.ui.base.UiShowSpecifier
-import taack.ui.base.UiTableSpecifier
-import taack.ui.base.block.BlockSpec
-import taack.ui.base.common.ActionIcon
-import taack.ui.base.common.IconStyle
-import taack.ui.base.filter.expression.FilterExpression
-import taack.ui.base.filter.expression.Operator
-import taack.ui.base.form.FormSpec
+import taack.render.IFormInputOverrider
+import taack.render.TaackUiOverriderService
+import taack.ui.dsl.UiFilterSpecifier
+import taack.ui.dsl.UiFormSpecifier
+import taack.ui.dsl.UiShowSpecifier
+import taack.ui.dsl.UiTableSpecifier
+import taack.ui.dsl.block.BlockSpec
+import taack.ui.dsl.common.ActionIcon
+import taack.ui.dsl.common.IconStyle
+import taack.ui.dsl.filter.expression.FilterExpression
+import taack.ui.dsl.filter.expression.Operator
+
+import javax.annotation.PostConstruct
 
 import static taack.render.TaackUiService.tr
 
@@ -36,6 +40,30 @@ final class AttachmentUiService implements WebAttributes {
 
     @Autowired
     ApplicationTagLib applicationTagLib
+
+    @PostConstruct
+    void init() {
+        Attachment a = new Attachment()
+        IFormInputOverrider formInputOverrider = new IFormInputOverrider<Attachment>() {
+            @Override
+            String getValue(Attachment attachment, FieldInfo fieldInfo) {
+                return attachment.filePath
+            }
+
+            @Override
+            String getImagePreview(Attachment attachment, FieldInfo fieldInfo) {
+                return applicationTagLib.createLink(controller: 'attachment', action: 'preview', id: attachment.id)
+            }
+
+            @Override
+            String getTextSnippet(Attachment attachment, FieldInfo fieldInfo) {
+                return attachment.originalName
+            }
+        }
+        TaackUiOverriderService.addInputToOverride(formInputOverrider, a.filePath_)
+        TaackUiOverriderService.addInputToOverride(formInputOverrider, Attachment)
+    }
+
 
     String preview(final Long id) {
         if (!id) return "<span/>"
@@ -51,12 +79,12 @@ final class AttachmentUiService implements WebAttributes {
 
     String previewFull(Long id, String p = null) {
         if (!id) return "<span/>"
-        """<div style="text-align: center;"><img src="${applicationTagLib.createLink(controller: 'attachment', action: 'previewFull', id: id)}${p ? "?$p" : ""}"></div>"""
+        """<div style="text-align: center;"><img style="max-height: 420px" src="${applicationTagLib.createLink(controller: 'attachment', action: 'previewFull', id: id)}${p ? "?$p" : ""}"></div>"""
     }
 
     Closure<BlockSpec> buildAttachmentsBlock(final MC selectMC = null, final Map selectParams = null, final MC uploadAttachment = AttachmentController.&uploadAttachment as MC) {
         Attachment a = new Attachment()
-        AttachmentDescriptor ad = new AttachmentDescriptor(type: null)
+        DocumentCategory dc = new DocumentCategory(category: null)
         Term term = new Term()
         User u = new User()
 
@@ -66,8 +94,8 @@ final class AttachmentUiService implements WebAttributes {
                 filterField a.originalName_
                 filterField a.contentTypeCategoryEnum_
                 filterField a.contentTypeEnum_
-                filterField a.attachmentDescriptor_, ad.type_
-                filterField a.tags_, term.termGroupConfig_
+                filterField a.documentCategory_, dc.category_
+                filterField a.documentCategory_, dc.tags_, term.termGroupConfig_
                 filterFieldExpressionBool "Active", new FilterExpression(true, Operator.EQ, a.active_)
             }
             section tr('file.access.label'), {
@@ -82,7 +110,7 @@ final class AttachmentUiService implements WebAttributes {
         t.ui {
             header {
                 column {
-                    fieldHeader "Preview"
+                    label "Preview"
                 }
                 column {
                     sortableFieldHeader a.originalName_
@@ -97,42 +125,41 @@ final class AttachmentUiService implements WebAttributes {
                     sortableFieldHeader a.userCreated_, u.subsidiary_
                 }
                 column {
-                    fieldHeader "Actions"
+                    label "Actions"
                 }
             }
             iterate(taackFilterService.getBuilder(Attachment)
                     .setMaxNumberOfLine(8)
                     .setSortOrder(TaackFilter.Order.DESC, a.dateCreated_)
                     .build()) { Attachment att ->
-                row {
-                    rowColumn {
-                        rowField preview(att.id)
-                    }
-                    rowColumn {
-                        rowField att.originalName
-                        rowField att.dateCreated_
-                    }
-                    rowColumn {
-                        rowField att.fileSize_
-                        rowField att.contentType
-                    }
-                    rowColumn {
-                        rowField att.userCreated.username
-                        rowField att.userCreated.subsidiary?.toString()
-                    }
-                    rowColumn {
-                        if (selectMC)
-                            rowAction ActionIcon.SELECT * IconStyle.SCALE_DOWN, selectMC as MC, att.id, selectParams
-                        rowAction ActionIcon.DOWNLOAD * IconStyle.SCALE_DOWN, AttachmentController.&downloadAttachment as MC, att.id
-                        rowAction ActionIcon.SHOW * IconStyle.SCALE_DOWN, AttachmentController.&showAttachment as MC, att.id
-                    }
+                String aPreview = this.preview(att.id)
+                rowColumn {
+                    rowField aPreview
+                }
+                rowColumn {
+                    rowField att.originalName
+                    rowField att.dateCreated_
+                }
+                rowColumn {
+                    rowField att.fileSize_
+                    rowField att.contentType
+                }
+                rowColumn {
+                    rowField att.userCreated.username
+                    rowField att.userCreated.subsidiary?.toString()
+                }
+                rowColumn {
+                    if (selectMC)
+                        rowAction ActionIcon.SELECT * IconStyle.SCALE_DOWN, selectMC as MC, att.id, selectParams
+                    rowAction ActionIcon.DOWNLOAD * IconStyle.SCALE_DOWN, AttachmentController.&downloadBinAttachment as MC, att.id
+                    rowAction ActionIcon.SHOW * IconStyle.SCALE_DOWN, AttachmentController.&showAttachment as MC, att.id
                 }
             }
         }
         BlockSpec.buildBlockSpec {
-            tableFilter tr('default.filter.label'), f, tr('default.attachment.label'), t, BlockSpec.Width.MAX, {
+            tableFilter f, t, {
                 if (uploadAttachment)
-                    action ActionIcon.CREATE, uploadAttachment, selectParams
+                    menuIcon ActionIcon.CREATE, uploadAttachment, selectParams
             }
         }
     }
@@ -142,18 +169,14 @@ final class AttachmentUiService implements WebAttributes {
         def converterExtensions = TaackAttachmentService.converterExtensions(attachment)
         BlockSpec.buildBlockSpec {
             if (iFrame) {
-                ajaxBlock "showAttachment${fieldName}IFrame", {
-                    custom iFrame
-                }
+                custom iFrame
             }
-            ajaxBlock "showAttachment${fieldName}", {
-                show "${attachment.originalName}", buildShowAttachment(attachment, iFrame == null), BlockSpec.Width.MAX, {
-                    action ActionIcon.EDIT, AttachmentController.&updateAttachment as MC, attachment.id
-                    action ActionIcon.DOWNLOAD, AttachmentController.&downloadAttachment as MC, attachment.id
-                    if (attachmentSecurityService.canDownloadFile(attachment) && converterExtensions) {
-                        for (def ext in converterExtensions) {
-                            action ext == 'pdf' ? ActionIcon.EXPORT_PDF : ActionIcon.EXPORT, AttachmentController.&extensionForAttachment as MC, [extension: ext, id: attachment.id]
-                        }
+            show buildShowAttachment(attachment, iFrame == null), {
+                menuIcon ActionIcon.EDIT, AttachmentController.&updateAttachment as MC, attachment.id
+                menuIcon ActionIcon.DOWNLOAD, AttachmentController.&downloadBinAttachment as MC, attachment.id
+                if (attachmentSecurityService.canDownloadFile(attachment) && converterExtensions) {
+                    for (def ext in converterExtensions) {
+                        menuIcon ext == 'pdf' ? ActionIcon.EXPORT_PDF : ActionIcon.EXPORT, AttachmentController.&extensionForAttachment as MC, [extension: ext, id: attachment.id]
                     }
                 }
             }
@@ -166,22 +189,23 @@ final class AttachmentUiService implements WebAttributes {
     }
 
     UiShowSpecifier buildShowAttachment(final Attachment attachment, boolean hasPreview = true) {
-        AttachmentDescriptor ad = new AttachmentDescriptor()
+        DocumentAccess da = new DocumentAccess()
+        DocumentCategory dc = new DocumentCategory()
         new UiShowSpecifier().ui attachment, {
             if (hasPreview)
                 section "Preview", {
-                    field previewFull(attachment.id)
+                    field this.previewFull(attachment.id)
                 }
             section "File Meta", {
-                field "Name", attachment.originalName_
-                field "Size", attachment.fileSize_
-                field "Date Created", attachment.dateCreated_
-                field "Content Type", attachment.contentType_
+                fieldLabeled attachment.originalName_
+                fieldLabeled attachment.fileSize_
+                fieldLabeled attachment.dateCreated_
+                fieldLabeled attachment.contentType_
 
             }
             section "Attachment Meta", {
-                fieldLabeled attachment.attachmentDescriptor_, ad.type_
-                fieldLabeled attachment.attachmentDescriptor_, ad.isInternal_
+                fieldLabeled attachment.documentCategory_, dc.category_
+                fieldLabeled attachment.documentAccess_, da.isInternal_
             }
             showAction AttachmentController.&showLinkedData as MC, attachment.id
         }
@@ -191,7 +215,7 @@ final class AttachmentUiService implements WebAttributes {
         new UiTableSpecifier().ui {
             for (Attachment a : attachments.sort { a1, a2 -> a2.dateCreated <=> a1.dateCreated }) {
                 row {
-                    rowField preview(a.id)
+                    rowField this.preview(a.id)
                     rowColumn {
                         rowField a.userCreated.username
                         rowField a.dateCreated_
@@ -200,34 +224,51 @@ final class AttachmentUiService implements WebAttributes {
                         rowField a.getName()
                         rowField a.fileSize_
                     }
-                    if (attachmentSecurityService.canDownloadFile(a))
-                        rowAction ActionIcon.DOWNLOAD, AttachmentController.&downloadAttachment as MC, a.id
+                    if (this.attachmentSecurityService.canDownloadFile(a))
+                        rowAction ActionIcon.DOWNLOAD, AttachmentController.&downloadBinAttachment as MC, a.id
                 }
             }
         }
     }
 
-    static UiFormSpecifier buildAttachmentDescriptorForm(AttachmentDescriptor attachment, MC returnMethod = AttachmentController.&saveAttachmentDescriptor as MC, Map other = null) {
-        new UiFormSpecifier().ui attachment, {
-            section "File Info", FormSpec.Width.DOUBLE_WIDTH, {
-                field attachment.type_
+    static UiFormSpecifier buildDocumentAccessForm(DocumentAccess docAccess, MC returnMethod = AttachmentController.&saveDocAccess as MC, Map other = null) {
+        new UiFormSpecifier().ui docAccess, {
+            section "Security", {
+                row {
+                    col {
+                        field docAccess.isInternal_
+                    }
+                    col {
+                        field docAccess.isRestrictedToMyBusinessUnit_
+                    }
+                    col {
+                        field docAccess.isRestrictedToMyManagers_
+                    }
+                    col {
+                        field docAccess.isRestrictedToEmbeddingObjects_
+                    }
+                }
             }
-            section "Security", FormSpec.Width.DOUBLE_WIDTH, {
-                field attachment.isInternal_
-                field attachment.isRestrictedToMyBusinessUnit_
-                field attachment.isRestrictedToMyManagers_
-                field attachment.isRestrictedToEmbeddingObjects_
+            formAction returnMethod, docAccess.id, other
+        }
+    }
+
+    static UiFormSpecifier buildDocumentDescriptorForm(DocumentCategory docCat, MC returnMethod = AttachmentController.&saveDocDesc as MC, Map other = null) {
+        new UiFormSpecifier().ui docCat, {
+            section "Category", {
+                field docCat.category_
+                ajaxField docCat.tags_, AttachmentController.&selectTagsM2M as MC
             }
-            formAction returnMethod, attachment.id, other
+            formAction returnMethod, docCat.id, other
         }
     }
 
     static UiFormSpecifier buildAttachmentForm(Attachment attachment, MC returnMethod = AttachmentController.&saveAttachment as MC, Map other = null) {
         new UiFormSpecifier().ui attachment, {
-            section "File Info", FormSpec.Width.DOUBLE_WIDTH, {
+            section "File Info", {
                 field attachment.filePath_
-                ajaxField attachment.attachmentDescriptor_, AttachmentController.&editAttachmentDescriptor as MC, attachment.attachmentDescriptor?.id
-                ajaxField attachment.tags_, AttachmentController.&selectTagsM2M as MC
+                ajaxField attachment.documentCategory_, AttachmentController.&selectDocumentCategory as MC, attachment.documentCategory_
+                ajaxField attachment.documentAccess_, AttachmentController.&selectDocumentAccess as MC, attachment.documentAccess_
             }
             formAction returnMethod, attachment.id, other
         }
@@ -235,18 +276,20 @@ final class AttachmentUiService implements WebAttributes {
 
     UiFormSpecifier buildTermForm(Term term) {
         new UiFormSpecifier().ui term, {
-            field term.name_
-            field term.termGroupConfig_
-            ajaxField term.parent_, AttachmentController.&selectTermM2O as MC
-            sectionTabs FormSpec.Width.FULL_WIDTH, {
-                for (SupportedLanguage language : SupportedLanguage.values()) {
-                    sectionTab "Translation ${language.label}", {
-                        fieldFromMap "Translation ${language.toString().toLowerCase()}", term.translations_, language.toString().toLowerCase()
+            section "Term", {
+                field term.name_
+                field term.termGroupConfig_
+                ajaxField term.parent_, AttachmentController.&selectTermM2O as MC
+                tabs BlockSpec.Width.MAX, {
+                    for (SupportedLanguage language : SupportedLanguage.values()) {
+                        tabLabel "Translation ${language.label}", {
+                            fieldFromMap "Translation ${language.toString().toLowerCase()}", term.translations_, language.toString().toLowerCase()
+                        }
                     }
                 }
+                field term.display_
+                field term.active_
             }
-            field term.display_
-            field term.active_
             formAction AttachmentController.&saveTerm as MC, term.id
         }
     }
@@ -257,9 +300,7 @@ final class AttachmentUiService implements WebAttributes {
             section "Term", {
                 filterField t.name_
                 filterField t.termGroupConfig_
-                section "Parent", {
-                    filterField t.parent_, t.parent.name_
-                }
+                filterField t.parent_, t.parent.name_
                 filterFieldExpressionBool "Display", new FilterExpression(true, Operator.EQ, t.display_)
                 filterFieldExpressionBool "Active", new FilterExpression(true, Operator.EQ, t.active_)
             }
@@ -275,31 +316,30 @@ final class AttachmentUiService implements WebAttributes {
                 sortableFieldHeader ti.parent_, ti.parent.name_
                 sortableFieldHeader ti.display_
                 sortableFieldHeader ti.active_
-                fieldHeader "Actions"
+                label "Actions"
+            }
 
-                iterate(taackFilterService.getBuilder(Term)
-                        .setMaxNumberOfLine(30)
-                        .addFilter(f)
-                        .setSortOrder(TaackFilter.Order.ASC, ti.name_)
-                        .build()) { Term term ->
-                    row {
-                        rowField term.name
-                        rowField term.termGroupConfig?.toString()
-                        rowField term.parent?.name
-                        rowField term.display.toString()
-                        rowField term.active.toString()
-                        rowColumn {
-                            if (selectMode)
-                                rowAction ActionIcon.SELECT * IconStyle.SCALE_DOWN, AttachmentController.&selectTermM2OCloseModal as MC, term.id
-                            else {
-                                if (term.active)
-                                    rowAction ActionIcon.DELETE * IconStyle.SCALE_DOWN, AttachmentController.&deleteTerm as MC, term.id
-                                rowAction ActionIcon.EDIT * IconStyle.SCALE_DOWN, AttachmentController.&editTerm as MC, term.id
-                            }
-                        }
+            iterate(taackFilterService.getBuilder(Term)
+                    .setMaxNumberOfLine(30)
+                    .addFilter(f)
+                    .setSortOrder(TaackFilter.Order.ASC, ti.name_)
+                    .build()) { Term term ->
+                rowField term.name
+                rowField term.termGroupConfig?.toString()
+                rowField term.parent?.name
+                rowField term.display.toString()
+                rowField term.active.toString()
+                rowColumn {
+                    if (selectMode)
+                        rowAction ActionIcon.SELECT * IconStyle.SCALE_DOWN, AttachmentController.&selectTermM2OCloseModal as MC, term.id
+                    else {
+                        if (term.active)
+                            rowAction ActionIcon.DELETE * IconStyle.SCALE_DOWN, AttachmentController.&deleteTerm as MC, term.id
+                        rowAction ActionIcon.EDIT * IconStyle.SCALE_DOWN, AttachmentController.&editTerm as MC, term.id
                     }
                 }
             }
         }
     }
 }
+

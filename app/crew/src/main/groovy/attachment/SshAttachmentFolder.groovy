@@ -1,10 +1,9 @@
 package attachment
 
+import crew.User
 import grails.util.Pair
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
-import org.taack.Attachment
-import org.taack.User
 import taack.domain.TaackAttachmentService
 import taack.ssh.vfs.FileCallback
 import taack.ssh.vfs.FileTree
@@ -110,7 +109,6 @@ abstract class SshAttachmentFolder implements FolderCallback, FileCallback {
                     INode i = itChildren.next()
                     if (i instanceof FileTree.File) {
                         FileTree.File f = i as FileTree.File
-                        println "AUO ${f.fileName} == ${newPath.fileName.toString()}, ${f.internalId}"
                         if (f.fileName == newPath.fileName.toString()) {
                             if (f.internalId) {
                                 a = Attachment.read(f.internalId)

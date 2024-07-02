@@ -1,23 +1,19 @@
 package crew
 
-
 import attachement.AttachmentUiService
 import grails.compiler.GrailsCompileStatic
 import grails.web.api.WebAttributes
 import org.codehaus.groovy.runtime.MethodClosure as MC
-import org.taack.Role
-import org.taack.User
-import org.taack.UserRole
 import taack.domain.TaackFilter
 import taack.domain.TaackFilterService
-import taack.ui.base.UiBlockSpecifier
-import taack.ui.base.UiFilterSpecifier
-import taack.ui.base.UiShowSpecifier
-import taack.ui.base.UiTableSpecifier
-import taack.ui.base.common.ActionIcon
-import taack.ui.base.common.IconStyle
-import taack.ui.base.filter.expression.FilterExpression
-import taack.ui.base.filter.expression.Operator
+import taack.ui.dsl.UiBlockSpecifier
+import taack.ui.dsl.UiFilterSpecifier
+import taack.ui.dsl.UiShowSpecifier
+import taack.ui.dsl.UiTableSpecifier
+import taack.ui.dsl.common.ActionIcon
+import taack.ui.dsl.common.IconStyle
+import taack.ui.dsl.filter.expression.FilterExpression
+import taack.ui.dsl.filter.expression.Operator
 
 import static taack.render.TaackUiService.tr
 
@@ -72,25 +68,52 @@ class CrewUiService implements WebAttributes {
                     .setMaxNumberOfLine(20)
                     .setSortOrder(TaackFilter.Order.DESC, u.authority_)
                     .build()) { Role r, Long counter ->
-                row {
-                    rowColumn {
-                        rowField r.authority
-                        if (hasSelect)
-                            rowAction tr('default.role.label'), ActionIcon.SELECT * IconStyle.SCALE_DOWN, r.id, r.toString()
-                    }
+                rowColumn {
+                    rowField r.authority
+                    if (hasSelect)
+                        rowAction tr('default.role.label'), ActionIcon.SELECT * IconStyle.SCALE_DOWN, r.id, r.toString()
                 }
             }
         }
     }
 
-    UiTableSpecifier buildUserTable(final UiFilterSpecifier f, final boolean hasSelect = false) {
+    UiTableSpecifier buildRoleTable(User user) {
+        Role role = new Role()
+        new UiTableSpecifier().ui {
+            header {
+                column {
+                    sortableFieldHeader role.authority_
+                }
+                column {
+                    label "Action"
+                }
+            }
+            iterate(taackFilterService.getBuilder(Role)
+                    .setMaxNumberOfLine(20)
+                    .setSortOrder(TaackFilter.Order.DESC, role.authority_).build()) { Role r ->
+                rowColumn {
+                    rowField r.authority
+                }
+                rowColumn {
+                    if (!UserRole.exists(user.id, r.id)) {
+                        rowAction ActionIcon.ADD, CrewController.&addRoleToUser as MC, [userId: user.id, roleId: r.id, refresh: true]
+                    } else {
+                        rowAction ActionIcon.DELETE, CrewController.&removeRoleToUser as MC, [userId: user.id, roleId: r.id, refresh: true]
+                    }
+                }
+            }
+        }
+
+    }
+
+        UiTableSpecifier buildUserTable(final UiFilterSpecifier f, final boolean hasSelect = false) {
 
         new UiTableSpecifier().ui {
             User u = new User(manager: new User(), enabled: true)
             header {
                 if (!hasSelect) {
                     column {
-                        fieldHeader tr('picture.header.label')
+                        label tr('picture.header.label')
                     }
                 }
                 column {
@@ -106,27 +129,27 @@ class CrewUiService implements WebAttributes {
                     sortableFieldHeader u.firstName_
                 }
                 column {
-                    fieldHeader tr('default.roles.label')
+                    label tr('default.roles.label')
                 }
             }
             boolean canSwitchUser = crewSecurityService.canSwitchUser()
 
             TaackFilter tf = taackFilterService.getBuilder(User).setSortOrder(TaackFilter.Order.DESC, u.dateCreated_)
-                    .setMaxNumberOfLine(20).addFilter(f).build()
+                    .setMaxNumberOfLine(6).addFilter(f).build()
 
-            iterate(tf) { User ru ->
-                row {
-                    boolean hasActions = crewSecurityService.canEdit(ru)
-                    if (!hasSelect) {
-                        rowColumn {
-                            rowField attachmentUiService.preview(ru.mainPicture?.id)
-                        }
-                    }
+            iterate tf, { User ru ->
+                boolean hasActions = this.crewSecurityService.canEdit(ru)
+                if (!hasSelect) {
                     rowColumn {
+                        rowField this.attachmentUiService.preview(ru.mainPicture?.id)
+                    }
+                }
+                rowColumn {
+                    if (hasSelect)
+                        rowAction "Select User", ActionIcon.SELECT * IconStyle.SCALE_DOWN, ru.id, ru.toString()
+                    else {
                         rowAction ActionIcon.SHOW * IconStyle.SCALE_DOWN, CrewController.&showUser as MC, ru.id
-                        if (hasSelect)
-                            rowAction "Select User", ActionIcon.SELECT * IconStyle.SCALE_DOWN, ru.id, ru.toString()
-                        else if (hasActions) {
+                        if (hasActions) {
                             rowAction ActionIcon.EDIT * IconStyle.SCALE_DOWN, CrewController.&editUser as MC, ru.id
                             if (canSwitchUser && ru.enabled)
                                 rowAction ActionIcon.SHOW * IconStyle.SCALE_DOWN, CrewController.&switchUser as MC, ru.id
@@ -135,23 +158,23 @@ class CrewUiService implements WebAttributes {
                                 rowAction ActionIcon.DELETE * IconStyle.SCALE_DOWN, CrewController.&deleteUser as MC, ru.id
                             }
                         }
+                    }
 
-                        rowField ru.username_
-                        rowField ru.dateCreated_
-                    }
-                    rowColumn {
-                        rowField ru.subsidiary_
-                        rowField ru.manager?.username
-                    }
-                    rowColumn {
-                        rowField ru.lastName_
-                        rowField ru.firstName_
-                    }
-                    rowColumn {
-                        if (hasActions && !hasSelect)
-                            rowAction ActionIcon.EDIT * IconStyle.SCALE_DOWN, CrewController.&editUserRoles as MC, ru.id
-                        rowField ru.authorities*.authority.join(', ')
-                    }
+                    rowField ru.username_
+                    rowField ru.dateCreated_
+                }
+                rowColumn {
+                    rowField ru.subsidiary_
+                    rowField ru.manager?.username
+                }
+                rowColumn {
+                    rowField ru.lastName_
+                    rowField ru.firstName_
+                }
+                rowColumn {
+                    if (hasActions && !hasSelect)
+                        rowAction ActionIcon.EDIT * IconStyle.SCALE_DOWN, CrewController.&editUserRoles as MC, ru.id
+                    rowField ru.authorities*.authority.join(', ')
                 }
             }
         }
@@ -160,7 +183,7 @@ class CrewUiService implements WebAttributes {
     static UiBlockSpecifier messageBlock(String message) {
         new UiBlockSpecifier().ui {
             modal {
-                custom "Message", message
+                custom message
             }
         }
     }

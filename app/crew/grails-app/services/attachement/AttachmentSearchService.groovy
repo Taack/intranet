@@ -1,16 +1,16 @@
 package attachement
 
-import app.config.AttachmentContentTypeCategory
+import attachment.config.AttachmentContentTypeCategory
 import crew.AttachmentController
 import grails.compiler.GrailsCompileStatic
 import org.codehaus.groovy.runtime.MethodClosure
 import org.grails.datastore.gorm.GormEntity
-import org.taack.Attachment
+import attachment.Attachment
 import taack.domain.TaackAttachmentService
 import taack.domain.TaackSearchService
 import taack.solr.SolrFieldType
 import taack.solr.SolrSpecifier
-import taack.ui.base.UiBlockSpecifier
+import taack.ui.dsl.UiBlockSpecifier
 
 import javax.annotation.PostConstruct
 

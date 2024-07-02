@@ -1,12 +1,12 @@
 package crew
 
-import app.config.AttachmentType
 import grails.compiler.GrailsCompileStatic
 import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.SpringSecurityService
 import org.codehaus.groovy.runtime.MethodClosure as MC
-import org.taack.AttachmentDescriptor
-import org.taack.User
+import attachment.DocumentAccess
+import taack.app.TaackApp
+import taack.app.TaackAppRegisterService
 import taack.render.TaackUiEnablerService
 
 import javax.annotation.PostConstruct
@@ -30,6 +30,8 @@ class CrewSecurityService {
                 this.&securityClosure,
                 CrewController.&editUser as MC,
                 CrewController.&saveUser as MC)
+        TaackAppRegisterService.register(new TaackApp(CrewController.&index as MC, new String(this.class.getResourceAsStream("/crew/crew.svg").readAllBytes())))
+
     }
 
     User authenticatedRolesUser() {
@@ -62,21 +64,20 @@ class CrewSecurityService {
     }
 
     @Transactional
-    AttachmentDescriptor getMainPictureAttachmentDescriptor() {
-        AttachmentDescriptor descriptor = AttachmentDescriptor.findOrSaveWhere(
-                type: AttachmentType.mainPicture,
+    DocumentAccess getMainPictureDocumentAccess() {
+        DocumentAccess documentAccess = DocumentAccess.findOrSaveWhere(
                 isRestrictedToMyManagers: false,
                 isInternal: true,
                 isRestrictedToMyBusinessUnit: false,
                 isRestrictedToMySubsidiary: false,
                 isRestrictedToEmbeddingObjects: false
         )
-        if (!descriptor.id) {
-            descriptor.save(flush: true)
-            if (descriptor.hasErrors())
-                log.error("${descriptor.errors}")
+        if (!documentAccess.id) {
+            documentAccess.save(flush: true)
+            if (documentAccess.hasErrors())
+                log.error("${documentAccess.errors}")
         }
-        descriptor
+        documentAccess
     }
 
 }

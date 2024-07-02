@@ -1,19 +1,17 @@
 package crew
 
-
-import app.config.Subsidiary
 import attachement.AttachmentUiService
+import crew.config.Subsidiary
 import grails.compiler.GrailsCompileStatic
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.web.api.WebAttributes
-import org.taack.User
 import taack.domain.TaackAttachmentService
 import taack.render.TaackUiService
-import taack.ui.base.UiPrintableSpecifier
-import taack.ui.base.UiShowSpecifier
-import taack.ui.base.UiTableSpecifier
-import taack.ui.base.block.BlockSpec
-import taack.ui.base.common.Style
+import taack.ui.dsl.UiPrintableSpecifier
+import taack.ui.dsl.UiShowSpecifier
+import taack.ui.dsl.UiTableSpecifier
+import taack.ui.dsl.block.BlockSpec
+import taack.ui.dsl.common.Style
 
 @GrailsCompileStatic
 class CrewPdfService implements WebAttributes {
@@ -33,33 +31,32 @@ class CrewPdfService implements WebAttributes {
 
     private UiTableSpecifier buildUserPdfTableHierarchy(Subsidiary subsidiary) {
         new UiTableSpecifier().ui {
-
             header {
                 User u = new User()
                 column {
-                    fieldHeader 'Photo'
+                    label 'Photo'
                 }
                 column {
-                    fieldHeader u.username_
-                    fieldHeader u.businessUnit_
+                    label u.username_
+                    label u.businessUnit_
                 }
                 column {
-                    fieldHeader u.lastName_
-                    fieldHeader u.firstName_
+                    label u.lastName_
+                    label u.firstName_
                 }
             }
 
             int count = 0
             Closure rec
             rec = { List<User> mus, int level ->
-//                rowIndent({
+                rowIndent({
                     level++
                     for (def mu : mus) {
                         count++
                         boolean muHasChildren = !mu.managedUsers.isEmpty()
                         rowTree muHasChildren, {
-                            rowColumn(1, 1, new Style("firstCellInGroup-${level}", cssStyle[level])) {
-                                rowField attachmentUiService.preview(mu.mainPicture?.id, TaackAttachmentService.PreviewFormat.DEFAULT_PDF)
+                            rowColumn {
+                                rowField this.attachmentUiService.preview(mu.mainPicture?.id, TaackAttachmentService.PreviewFormat.DEFAULT_PDF)
                             }
                             rowColumn {
                                 rowField mu.username_
@@ -74,7 +71,7 @@ class CrewPdfService implements WebAttributes {
                             rec(mu.managedUsers, level)
                         }
                     }
-//                })
+                })
             }
             rec(User.findAllByManagerIsNullAndEnabledAndSubsidiary(true, subsidiary), 0)
         }
@@ -84,7 +81,7 @@ class CrewPdfService implements WebAttributes {
         User cu = springSecurityService.currentUser as User
 
         new UiPrintableSpecifier().ui {
-            printableHeaderLeft('4.5cm') {
+            printableHeaderLeft('7.5cm') {
                 show new UiShowSpecifier().ui {
                     field null, "Printed for", Style.BOLD
                     field null, """${cu.firstName} ${cu.lastName}"""
@@ -92,7 +89,7 @@ class CrewPdfService implements WebAttributes {
                 show new UiShowSpecifier().ui {
                     field """\
                         <div style="height: 2cm; text-align: center;align-content: center; width: 100%;margin-left: 1cm;">
-                            ${taackUiService.dumpAsset("logo-taack-web.svg")}
+                            ${this.taackUiService.dumpAsset("logo-taack-web.svg")}
                         </div>
                     """.stripIndent()
                 }, BlockSpec.Width.THIRD
