@@ -45,7 +45,7 @@ abstract class GenerateTaackAppTask extends DefaultTask {
         import grails.compiler.GrailsCompileStatic
         import grails.plugin.springsecurity.annotation.Secured
         import taack.render.TaackUiService
-        import taack.ui.base.UiBlockSpecifier
+        import taack.ui.dsl.UiBlockSpecifier
          
         @GrailsCompileStatic
         @Secured(['ROLE_ADMIN'])
@@ -84,20 +84,28 @@ abstract class GenerateTaackAppTask extends DefaultTask {
          
         import grails.compiler.GrailsCompileStatic
         import grails.web.api.WebAttributes
-        import org.codehaus.groovy.runtime.MethodClosure
-        import org.springframework.context.MessageSource
-        import org.springframework.context.i18n.LocaleContextHolder
-        import taack.ui.base.UiMenuSpecifier
+        import org.codehaus.groovy.runtime.MethodClosure as MC
+        import taack.ui.dsl.UiMenuSpecifier
+        import taack.app.TaackApp
+        import taack.app.TaackAppRegisterService
 
-        import static taack.render.TaackUiService.tr
+        import javax.annotation.PostConstruct
  
         @GrailsCompileStatic
         class ${appName.capitalize()}UiService implements WebAttributes {
 
+            static lazyInit = false
+
+            @PostConstruct
+            void init() {
+                TaackAppRegisterService.register(new TaackApp(${appName.capitalize()}Controller.&index as MC, new String(this.class.getResourceAsStream("/${appName}/${appName}.svg").readAllBytes())))        
+            }
+
+
             UiMenuSpecifier buildMenu() {
                 UiMenuSpecifier m = new UiMenuSpecifier()
                 m.ui {
-                    menu tr("default.home.label"), ${appName.capitalize()}Controller.&index as MethodClosure
+                    menu ${appName.capitalize()}Controller.&index as MC
                 }
                 m
             }
@@ -124,14 +132,9 @@ abstract class GenerateTaackAppTask extends DefaultTask {
          
         import grails.compiler.GrailsCompileStatic
         import grails.plugins.Plugin
-        import taack.ui.TaackPlugin
-        import taack.ui.TaackPluginConfiguration
          
-        /*
-        TODO: put user extra configuration accessible to server to centralize configuration
-        */
         @GrailsCompileStatic
-        class ${appName.capitalize()}GrailsPlugin extends Plugin implements TaackPlugin {
+        class ${appName.capitalize()}GrailsPlugin extends Plugin {
             // the version or versions of Grails the plugin is designed for
             def grailsVersion = "4.0.3 > *"
             // resources that are excluded from plugin packaging
@@ -171,26 +174,6 @@ abstract class GenerateTaackAppTask extends DefaultTask {
             
             void onShutdown(Map<String, Object> event) {
                // TODO Implement code that is executed when the application shuts down (optional)
-            }
-            
-            static final List<TaackPluginConfiguration.PluginRole> pluginRoles = [
-                   new TaackPluginConfiguration.PluginRole("ROLE_${appName.toUpperCase()}_DIRECTOR", TaackPluginConfiguration.PluginRole.RoleRanking.DIRECTOR),
-                   new TaackPluginConfiguration.PluginRole("ROLE_${appName.toUpperCase()}_MANAGER", TaackPluginConfiguration.PluginRole.RoleRanking.MANAGER),
-                   new TaackPluginConfiguration.PluginRole("ROLE_${appName.toUpperCase()}_USER", TaackPluginConfiguration.PluginRole.RoleRanking.USER),
-            ]
-            
-            static final TaackPluginConfiguration pluginConfiguration = new TaackPluginConfiguration("${appName.capitalize()}",
-                   "/$appName/${appName}.svg", "$appName",
-                   new TaackPluginConfiguration.IPluginRole() {
-                       @Override
-                       List<TaackPluginConfiguration.PluginRole> getPluginRoles() {
-                           pluginRoles
-                       }
-                   })
-            
-            @Override
-            List<TaackPluginConfiguration> getTaackPluginControllerConfigurations() {
-               [pluginConfiguration]
             }
         }
          
