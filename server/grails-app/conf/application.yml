@@ -140,9 +140,9 @@ taack-ui:
   root: ${HOME}/taack
   resources: ${HOME}/taack/resources
   #  logoFileName: logo-colored.webp
-  logoFileName: logo-taack-web.svg
-  logoWidth: 70
-  logoHeight: 60
+  logoFileName: taack-logo-small-web.svg
+  logoWidth: 100
+  logoHeight: 40
   hasMenuLogin: true
   outlineContainer: false
   bgColor: '#05294c'

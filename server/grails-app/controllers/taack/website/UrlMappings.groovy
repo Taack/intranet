@@ -5,13 +5,7 @@ import org.springframework.security.access.AccessDeniedException
 class UrlMappings {
 
     static mappings = {
-        "/"(controller: 'root')
-//        "500"(view:'/error')
-//        "404"(view:'/notFound')
-//         "/login/$action"(controller: 'login')
-//         "/admin"(controller: 'root', action: 'index')
-//         "/"(controller: 'welcome')
-//         "/$action"(controller: 'welcome')
+        "/"(controller: 'root', action: 'index')
 
         "/$controller/$action?/$id?(.$format)?"{
             constraints {
