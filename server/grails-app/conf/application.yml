@@ -132,7 +132,7 @@ grails:
             jwt:
               secret: 'ChangeThisIfUsingSecurityRestGrailsPLugin'
 ---
-intranet.noSsh: true
+intranet.noSsh: false
 intranet.root: ${HOME}/intranetFilesGH
 ---
 taack-ui:
