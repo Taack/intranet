@@ -66,7 +66,7 @@ class User implements Serializable {
     }
 
     String getRawImg() {
-        AttachmentUiService.INSTANCE?.previewInline(mainPicture?.id, false)
+        AttachmentUiService.INSTANCE?.previewInline(mainPicture?.id, true)
     }
 
     List<User> getManagedUsers() {

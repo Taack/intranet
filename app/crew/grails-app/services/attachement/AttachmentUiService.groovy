@@ -59,9 +59,13 @@ final class AttachmentUiService implements WebAttributes {
 
     String previewInline(Long id, boolean isInline) {
         Attachment a = Attachment.read(id)
-        if (a && isInline)
-            """<img style="max-height: 64px; max-width: 64px;" src="data:${a.contentType} ${Base64.getEncoder().encodeToString(taackAttachmentService.attachmentPreview(a).bytes)}">"""
-        else if (a && !isInline)
+        if (a && isInline) {
+            if (a.contentType.contains('svg')) {
+                """<img style="max-height: 64px; max-width: 64px;" src="data:image/webp;base64, ${Base64.getEncoder().encodeToString(taackAttachmentService.attachmentPreview(a).bytes)}">"""
+            } else {
+                """<img style="max-height: 64px; max-width: 64px;" src="data:${a.contentType};base64, ${Base64.getEncoder().encodeToString(taackAttachmentService.attachmentPreview(a).bytes)}">"""
+            }
+        } else if (a && !isInline)
             """<img style="max-height: 64px; max-width: 64px;" src="/attachment/preview/${id}"/> """
         else
             ''
