@@ -34,41 +34,41 @@ import static taack.render.TaackUiService.tr
 
 @GrailsCompileStatic
 final class AttachmentUiService implements WebAttributes {
+
     TaackAttachmentService taackAttachmentService
     TaackFilterService taackFilterService
     AttachmentSecurityService attachmentSecurityService
 
+    static lazyInit = false
+
+    static AttachmentUiService INSTANCE = null
     @Autowired
     ApplicationTagLib applicationTagLib
 
     @PostConstruct
     void init() {
-        Attachment a = new Attachment()
-        IFormInputOverrider formInputOverrider = new IFormInputOverrider<Attachment>() {
-            @Override
-            String getValue(Attachment attachment, FieldInfo fieldInfo) {
-                return attachment.filePath
-            }
-
-            @Override
-            String getImagePreview(Attachment attachment, FieldInfo fieldInfo) {
-                return applicationTagLib.createLink(controller: 'attachment', action: 'preview', id: attachment.id)
-            }
-
-            @Override
-            String getTextSnippet(Attachment attachment, FieldInfo fieldInfo) {
-                return attachment.originalName
-            }
-        }
-        TaackUiOverriderService.addInputToOverride(formInputOverrider, a.filePath_)
-        TaackUiOverriderService.addInputToOverride(formInputOverrider, Attachment)
+        INSTANCE = this
     }
 
 
     String preview(final Long id) {
         if (!id) return "<span/>"
-        if (params.boolean("isPdf")) """<img style="max-height: 64px; max-width: 64px;" src="file://${taackAttachmentService.attachmentPreview(Attachment.get(id)).path}">"""
+        if (params.boolean("isPdf")) """<img style="max-height: 64px; max-width: 64px;" src="file://${taackAttachmentService.attachmentPreview(Attachment.read(id)).path}">"""
         else """<div style="text-align: center;"><img style="max-height: 64px; max-width: 64px;" src="${applicationTagLib.createLink(controller: 'attachment', action: 'preview', id: id)}"></div>"""
+    }
+
+    String previewInline(Long id, boolean isInline) {
+        Attachment a = Attachment.read(id)
+        if (a && isInline) {
+            if (a.contentType.contains('svg')) {
+                """<img style="max-height: 64px; max-width: 64px;" src="data:image/webp;base64, ${Base64.getEncoder().encodeToString(taackAttachmentService.attachmentPreview(a).bytes)}">"""
+            } else {
+                """<img style="max-height: 64px; max-width: 64px;" src="data:${a.contentType};base64, ${Base64.getEncoder().encodeToString(taackAttachmentService.attachmentPreview(a).bytes)}">"""
+            }
+        } else if (a && !isInline)
+            """<img style="max-height: 64px; max-width: 64px;" src="/attachment/preview/${id}"/> """
+        else
+            ''
     }
 
     String preview(final Long id, TaackAttachmentService.PreviewFormat format) {

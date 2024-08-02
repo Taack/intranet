@@ -1,12 +1,13 @@
 package crew
 
+import attachement.AttachmentUiService
+import attachment.Attachment
 import crew.config.BusinessUnit
 import crew.config.Subsidiary
 import crew.config.SupportedLanguage
-import attachment.Attachment
+import grails.compiler.GrailsCompileStatic
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
-import grails.compiler.GrailsCompileStatic
 import taack.ast.annotation.TaackFieldEnum
 
 @GrailsCompileStatic
@@ -62,6 +63,10 @@ class User implements Serializable {
     static mapping = {
         table name: 'taack_users'
         password column: '`password`'
+    }
+
+    String getRawImg() {
+        AttachmentUiService.INSTANCE?.previewInline(mainPicture?.id, true)
     }
 
     List<User> getManagedUsers() {
