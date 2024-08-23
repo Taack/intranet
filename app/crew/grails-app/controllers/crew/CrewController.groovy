@@ -333,19 +333,21 @@ class CrewController implements WebAttributes {
 
     @Secured(["ROLE_ADMIN", "ROLE_SWITCH_USER"])
     def switchUser(User user) {
-        render """
+        render """\
+   <!doctype html>
    <html>
    <form action='/login/impersonate' method='POST'>
       Switch to user: <input type='text' name='username' value="${user.username}"/> <br/>
       <input type='submit' value='Switch'/>
    </form>
    </html>
-        """
+   """.stripIndent()
     }
 
     @Secured(["ROLE_ADMIN", "ROLE_SWITCH_USER"])
     def replaceUser(User user) {
-        render """
+        render """\
+   <!doctype html>
    <html>
    <form action='doReplaceUser' method='POST'>
       Replace user: <input type='text' name='userFrom' value="${user.username}"/> <br/>
@@ -353,7 +355,7 @@ class CrewController implements WebAttributes {
       <input type='submit' value='Replace'/>
    </form>
    </html>
-        """
+   """.stripIndent()
     }
 
     TaackMetaModelService taackMetaModelService
