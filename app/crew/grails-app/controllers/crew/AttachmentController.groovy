@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value
 import taack.domain.*
 import taack.render.TaackUiService
 import taack.ui.dsl.*
+import taack.ui.dsl.block.BlockSpec
 import taack.ui.dsl.common.ActionIcon
 import taack.ui.dsl.common.IconStyle
 import taack.ui.dsl.common.Style
@@ -232,7 +233,6 @@ class AttachmentController {
         ts.ui {
             header {
                 label 'Name'
-                label 'Action'
             }
             Closure rec
 
@@ -262,10 +262,18 @@ class AttachmentController {
             }
         }
         taackUiService.show new UiBlockSpecifier().ui {
-            table ts
-            show new UiShowSpecifier().ui(new Object(), {
-                field Markdown.getContentHtml('# Click on a tag ..')
-            })
+            row {
+                col BlockSpec.Width.QUARTER, {
+                    table ts
+                }
+                col {
+                    ajaxBlock('taggedFiles') {
+                        show new UiShowSpecifier().ui(new Object(), {
+                            field Markdown.getContentHtml('# Click on a tag ..')
+                        })
+                    }
+                }
+            }
         }, buildMenu()
     }
 
@@ -300,10 +308,10 @@ class AttachmentController {
                     .setSortOrder(TaackFilter.Order.DESC, a.dateCreated_)
                     .setMaxNumberOfLine(20)
                     .addRestrictedIds(attachments*.id as Long[])
-                    .build()) { Attachment aIt, Long counter ->
+                    .build()) { Attachment aIt ->
 
                 rowColumn {
-                    rowField attachmentUiService.preview(aIt.id)
+                    rowField this.attachmentUiService.preview(aIt.id)
                 }
                 rowColumn {
                     rowField aIt.originalName
@@ -323,9 +331,11 @@ class AttachmentController {
                 }
             }
         }
-        taackUiService.show new UiBlockSpecifier().ui {
-            table ts
-        }
+        taackUiService.show(new UiBlockSpecifier().ui {
+            ajaxBlock('taggedFiles') {
+                table ts
+            }
+        })
     }
 
     def selectDocumentAccess() {
