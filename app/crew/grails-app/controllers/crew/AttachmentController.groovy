@@ -34,20 +34,17 @@ class AttachmentController {
     String rootPath
 
     static private UiMenuSpecifier buildMenu(String q = null) {
-        UiMenuSpecifier m = new UiMenuSpecifier()
-
-        m.ui {
+        new UiMenuSpecifier().ui {
             menu AttachmentController.&index as MC
             label 'Tagged', {
                 for (def tagGroup : TermGroupConfig.values().findAll { it.active }) {
-                    subMenu AttachmentController.&showTermGroup as MC, [group: tagGroup.toString()]
+                    subMenu tagGroup.toString(), AttachmentController.&showTermGroup as MC, [group: tagGroup.toString()]
                 }
             }
             menu AttachmentController.&listTerm as MC
             menuSearch this.&search as MC, q
             menuOptions(SupportedLanguage.fromContext())
         }
-        m
     }
 
     def index() {
