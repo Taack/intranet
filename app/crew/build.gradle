@@ -2,6 +2,14 @@ plugins {
     id 'taack-grails-plugin'
 }
 
+dependencies {
+    implementation "org.apache.solr:solr-solrj:${solrj}"
+    implementation "org.apache.tika:tika-core:${tika}"
+    implementation "org.apache.tika:tika-parsers-standard:${tika}"
+    implementation "org.apache.tika:tika-parser-ocr-module:${tika}"
+    implementation "org.apache.tika:tika-parser-html-module:${tika}"
+}
+
 grails {
     // should use gradle -Dgrails.run.active=true bootRun
     exploded = true

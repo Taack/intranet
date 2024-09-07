@@ -273,7 +273,7 @@ class AttachmentController {
         Attachment a = new Attachment()
         DocumentAccess ad = new DocumentAccess()
         User u = new User()
-        def attachments = Attachment.executeQuery('from Attachment a where a.active = true and ?0 in elements(a.tags)', term) as List<Attachment>
+        def attachments = Attachment.executeQuery('from Attachment a where a.active = true and ?0 in elements(a.documentCategory.tags)', term) as List<Attachment>
         def ts = new UiTableSpecifier().ui {
             header {
                 column {
