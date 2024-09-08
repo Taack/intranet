@@ -266,7 +266,7 @@ class AttachmentController {
                 col BlockSpec.Width.QUARTER, {
                     table ts
                 }
-                col {
+                col BlockSpec.Width.THREE_QUARTER, {
                     ajaxBlock('taggedFiles') {
                         show new UiShowSpecifier().ui(new Object(), {
                             field Markdown.getContentHtml('# Click on a tag ..')
