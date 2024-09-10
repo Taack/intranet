@@ -37,7 +37,7 @@ class RootController {
         UiBlockSpecifier b = new UiBlockSpecifier().ui {
             row {
                 TaackAppRegisterService.apps.eachWithIndex { TaackApp a, int i ->
-                    col BlockSpec.Width.QUARTER, {
+                    col BlockSpec.Width.FLEX, {
                         show(new UiShowSpecifier().ui {
                             inlineHtml(
                                     """\
