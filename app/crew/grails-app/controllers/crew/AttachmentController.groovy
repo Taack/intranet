@@ -76,21 +76,14 @@ class AttachmentController {
     }
 
     def showAttachment(Attachment attachment) {
-        if (params.boolean('isAjax'))
-            taackUiService.show(new UiBlockSpecifier().ui {
-                modal {
-                    ajaxBlock 'showAttachment', {
-                        inline attachmentUiService.buildShowAttachmentBlock(attachment)
-                    }
+        taackUiService.show(new UiBlockSpecifier().ui {
+            modal {
+                show this.attachmentUiService.buildShowAttachment(attachment), {
+                    menuIcon ActionIcon.EDIT, AttachmentController.&updateAttachment as MC, attachment.id
+                    menuIcon ActionIcon.DOWNLOAD, AttachmentController.&downloadBinAttachment as MC, attachment.id
                 }
-            })
-        else {
-            taackUiService.show(new UiBlockSpecifier().ui {
-                ajaxBlock 'showAttachment', {
-                    inline attachmentUiService.buildShowAttachmentBlock(attachment)
-                }
-            }, buildMenu())
-        }
+            }
+        })
     }
 
     def downloadBinAttachment(Attachment attachment) {
