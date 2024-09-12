@@ -30,7 +30,7 @@ tasks.register('generateTaackAppTask', generateTaackApp.GenerateTaackAppTask) {
     group = 'help'
     description = 'Create a Taack app module'
     outputDirectory = file('../app')
-    appName = modName
+    appName = System.getProperty("modName")
 }
 
 grails {
