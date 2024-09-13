@@ -162,8 +162,9 @@ exe:
 plm:
   freecadPath: /home/auo/dev/FreeCAD/build/bin/FreeCAD
   singleInstance: true
+  offscreen: true
   xvfbRun: false
-  useWeston: true
+  useWeston: false
 edges:
   storePassword: ChangeIt
 
