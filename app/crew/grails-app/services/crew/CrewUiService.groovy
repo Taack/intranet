@@ -191,7 +191,7 @@ class CrewUiService implements WebAttributes {
 
     UiShowSpecifier buildUserShow(User u, boolean update = false) {
         new UiShowSpecifier().ui(u, {
-            field "Picture", attachmentUiService.previewFull(u.mainPicture?.id, update ? "${System.currentTimeMillis()}" : null)
+            field "Picture", this.attachmentUiService.previewFull(u.mainPicture?.id, update ? "${System.currentTimeMillis()}" : null)
             fieldLabeled u.username_
             fieldLabeled u.firstName_
             fieldLabeled u.lastName_

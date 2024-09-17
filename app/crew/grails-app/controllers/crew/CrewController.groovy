@@ -164,7 +164,7 @@ class CrewController implements WebAttributes {
     }
 
     def editUser(User user) {
-        user ?= new User(params)
+        user ?= new User(enabled: true)
 
         UiFormSpecifier f = new UiFormSpecifier().ui user, {
             row {
@@ -194,7 +194,7 @@ class CrewController implements WebAttributes {
                     }
                 }
             }
-            formAction this.&saveUser as MC, user.id
+            formAction this.&saveUser as MC, user?.id
         }
 
         taackUiService.show new UiBlockSpecifier().ui {

@@ -57,7 +57,11 @@ class User implements Serializable {
         mainPicture nullable: true
         mail nullable: true, email: true
         password nullable: false, blank: false, password: true, widget: 'passwd'
-        username nullable: false, blank: false, unique: true
+        username nullable: false, blank: false, unique: true, validator: { String s ->
+            if (!s.matches(/[A-Za-z0-9]+/))
+                return 'name.alphanum.only.validator'
+            else return true
+        }
     }
 
     static mapping = {
