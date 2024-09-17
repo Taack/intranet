@@ -17,6 +17,25 @@ repositories {
     gradlePluginPortal()
 }
 
+// https://docs.spring.io/spring-boot/index.html
+dependencyManagement {
+    dependencies {
+        dependency "org.apache.solr:solr-solrj:${solrj}"
+
+        // 9.4.53.v20231009
+        dependency "org.eclipse.jetty.http2:http2-common:${jetty}"
+        dependency "org.eclipse.jetty.http2:http2-client:${jetty}"
+        dependency "org.eclipse.jetty.http2:http2-hpack:${jetty}"
+        dependency "org.eclipse.jetty.http2:http2-http-client-transport:${jetty}"
+        dependency "org.eclipse.jetty:jetty-alpn-client:${jetty}"
+        dependency "org.eclipse.jetty:jetty-http:${jetty}"
+        dependency "org.eclipse.jetty:jetty-io:${jetty}"
+        dependency "org.eclipse.jetty:jetty-util:${jetty}"
+        dependency "org.eclipse.jetty:jetty-client:${jetty}"
+        dependency "org.eclipse.jetty:jetty-alpn-java-client:${jetty}"
+    }
+}
+
 dependencies {
     compileOnly("io.micronaut:micronaut-inject-groovy")
     implementation("org.grails:grails-core")

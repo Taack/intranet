@@ -160,10 +160,11 @@ exe:
   convertPath: /usr/bin/convert
   unzipPath: /usr/bin/unzip
 plm:
-  freecadPath: /usr/bin/FreeCAD
+  freecadPath: /home/auo/dev/FreeCAD/build/bin/FreeCAD
   singleInstance: true
+  offscreen: true
   xvfbRun: false
-  useWeston: true
+  useWeston: false
 edges:
   storePassword: ChangeIt
 

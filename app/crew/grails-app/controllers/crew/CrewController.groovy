@@ -218,7 +218,9 @@ class CrewController implements WebAttributes {
     def editUserRoles(User user) {
         taackUiService.show(new UiBlockSpecifier().ui {
             modal {
-                table crewUiService.buildRoleTable(user)
+                ajaxBlock 'editUserRolesClick', {
+                    table crewUiService.buildRoleTable(user)
+                }
             }
         })
     }
