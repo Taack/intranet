@@ -99,7 +99,7 @@ class CrewPdfService implements WebAttributes {
                     """.stripIndent()
                 }, BlockSpec.Width.THIRD
                 show new UiShowSpecifier().ui {
-                    field null, """${shortDate}""", Style.ALIGN_RIGHT
+                    field Style.ALIGN_RIGHT, """${shortDate}"""
                 }, BlockSpec.Width.THIRD
 
             }

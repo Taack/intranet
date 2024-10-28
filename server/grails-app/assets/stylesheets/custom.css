@@ -1,3 +1,22 @@
 /*
 *= require_self
 */
+
+
+.navbar-nav .nav-link.active {
+    color: #21aa51;
+}
+li:has(a.nav-link.active) > a.nav-link {
+    color: #21aa51;
+}
+
+div[taacktag=MENU_BLOCK] > nav {
+    background-color: rgba(236, 240, 246, 0.38);
+}
+div[taacktag=TABLE] > nav {
+    background-color: rgba(225, 240, 242, 0.25);
+}
+
+div[taacktag=MENU_BLOCK] {
+    border: #b7b6b6 1px dashed;
+}
