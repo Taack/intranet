@@ -79,6 +79,7 @@ class AttachmentController {
         taackUiService.show(new UiBlockSpecifier().ui {
             modal {
                 show this.attachmentUiService.buildShowAttachment(attachment), {
+                    menu AttachmentController.&showLinkedData as MC, attachment.id
                     menuIcon ActionIcon.EDIT, AttachmentController.&updateAttachment as MC, attachment.id
                     menuIcon ActionIcon.DOWNLOAD, AttachmentController.&downloadBinAttachment as MC, attachment.id
                 }
