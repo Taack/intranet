@@ -1,7 +1,6 @@
 package taack.domain
 
 import attachment.config.AttachmentContentType
-import crew.User
 import grails.artefact.controller.support.ResponseRenderer
 import grails.compiler.GrailsCompileStatic
 import grails.plugin.springsecurity.SpringSecurityService
@@ -11,7 +10,6 @@ import org.codehaus.groovy.runtime.MethodClosure
 import org.grails.datastore.gorm.GormEnhancer
 import org.grails.datastore.gorm.GormEntity
 import org.grails.datastore.gorm.GormStaticApi
-import org.grails.orm.hibernate.cfg.GrailsHibernateUtil
 import org.grails.plugins.web.taglib.ApplicationTagLib
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.i18n.LocaleContextHolder
@@ -43,11 +41,6 @@ class TaackSaveService implements ResponseRenderer, ServletAttributes, DataBinde
         intranetRoot + "/attachment/store"
     }
 
-    static <D extends GormEntity> boolean beanIsOwnerLocking(D entity) {
-        boolean ret = false
-        return ret
-    }
-
     final String urlMapped(String controller, String action, Map<String, ? extends Object> params = null, boolean isAjax = false) {
         def p = params
         if (isAjax && params && !params.containsKey('isAjax')) {
@@ -59,50 +52,11 @@ class TaackSaveService implements ResponseRenderer, ServletAttributes, DataBinde
         grailsApplication.mainContext.getBean(ApplicationTagLib).createLink(controller: controller, action: action, params: p)
     }
 
-    final String urlMapped(String controller, String action, Long id, Map<String, ? extends Object> params = null, boolean isAjax = false) {
-        def p = params
-        if (isAjax && params && !params.containsKey('isAjax')) {
-            p = new HashMap<String, Object>()
-            p.putAll(params)
-            p.remove('recordState')
-            p.put('isAjax', true)
-        }
-        grailsApplication.mainContext.getBean(ApplicationTagLib).createLink(controller: controller, action: action, params: p, id: id)
-    }
-
-
-    static Class beanRealClass(Object entity) {
-        beanReal(entity).class
-    }
-
-    static Object beanReal(Object entity) {
-        if (entity instanceof GeneratedGroovyProxy) {
-            return entity.proxyTarget
-        } else {
-            GrailsHibernateUtil.unwrapIfProxy(entity)
-        }
-    }
-
-    static <D extends GormEntity> boolean beanIsLocked(D entity) {
-        Class beanClass = beanRealClass(entity)
-//        if (IUserInterface.isAssignableFrom(beanClass) && beanClass.getAt("enumTransition")) {
-//            IEnumTransition enumTransition = entity.getAt(beanClass.getAt("enumTransition") as String) as IEnumTransition
-//            if (enumTransition.lockedFields?.contains('*') && enumTransition.lockedFields?.size() == 1) {
-//                return true
-//            }
-//        }
-        return beanIsOwnerLocking(entity)
-    }
-
     private static <D extends GormEntity> D getGorm(Long id, Class<D> classD) {
         // TODO: Find another way compatible with compileStatic
         GormEntity gormEntity = ((GormStaticApi<D>) GormEnhancer.findStaticApi(classD)).get(id)
-        if (!gormEntity) gormEntity = classD.newInstance()
+        if (!gormEntity) gormEntity = classD.getDeclaredConstructor().newInstance()
         return gormEntity
-    }
-
-    final <T extends GormEntity> T prepareSave(final Class<T> aClass, final FieldInfo[] lockedFields = null) {
-        save(aClass, lockedFields, true)
     }
 
     final <T extends GormEntity> T save(final Class<T> aClass, final FieldInfo[] lockedFields = null, final boolean doNotSave = false) {
@@ -128,27 +82,11 @@ class TaackSaveService implements ResponseRenderer, ServletAttributes, DataBinde
             }
         }
 
-        if (beanIsLocked(gormEntity))
-            if (!bindingName)// || !bindingName.equals(transitionName))
-                throw new SecurityException("bean is locked!")
-
-        long c1 = System.currentTimeMillis()
-// TODO very slow
-//        gormEntity.getProperties().get('constrainedProperties').each {
-//            if (it.properties.get('value')['widget'] == 'ajax') {
-//                if (params[it.properties.get('key')] && (params[it.properties.get('key')] as String).isEmpty()) {
-//                    params[it.properties.get('key')] = null
-//                }
-//            }
-//        }
-
         long c2 = System.currentTimeMillis()
-//        T oldEntity
+
         if (gormEntity instanceof IDomainHistory && gormEntity.ident() != null) {
-//            if (gormEntity.dirty) {
             T oldEntity = (gormEntity as IDomainHistory<T>).cloneDirectObjectData()
             save(oldEntity, lockedFields, doNotSave, true)
-//            } else return gormEntity
         }
 
         if (!doNotBindParams)
@@ -161,20 +99,6 @@ class TaackSaveService implements ResponseRenderer, ServletAttributes, DataBinde
                     String realFieldName = bindingName.substring(0, iPoint)
                     String key = bindingName.substring(iPoint + 1)
                     (gormEntity.getAt(realFieldName) as Map).put(key, params.get(bindingName))
-                } else if (bindingName.contains("_setKey_")) {
-                    int iPoint = bindingName.indexOf('_setKey_')
-                    String realFieldName = bindingName.substring(0, iPoint)
-                    String key = bindingName.substring(iPoint + 8)
-                    Object o = (gormEntity.getAt(realFieldName) as Map)[key]
-                    (gormEntity.getAt(realFieldName) as Map).remove(key)
-                    String newKey = params.get(bindingName)
-                    (gormEntity.getAt(realFieldName) as Map).put(newKey, o ?: "")
-                } else if (bindingName.contains("_setValue_")) {
-                    int iPoint = bindingName.indexOf('_setValue_')
-                    String realFieldName = bindingName.substring(0, iPoint)
-                    String key = bindingName.substring(iPoint + 10)
-                    (gormEntity.getAt(realFieldName) as Map)[key] = params.get(bindingName)
-                    println gormEntity.getAt(realFieldName)
                 } else {
                     if (id) {
                         if (bindingName.contains(',')) {
@@ -183,21 +107,6 @@ class TaackSaveService implements ResponseRenderer, ServletAttributes, DataBinde
                     } else bindData(gormEntity, params)
                 }
             } else {
-                boolean hasReverse = params.keySet().join('').contains('__ReverseField__')
-                if (hasReverse) {
-                    Map<?, ?> reverseParams = params.findAll {
-                        it.key.toString().startsWith("__ReverseField__")
-                    }
-                    params.removeAll {
-                        it.key.toString().startsWith("__ReverseField__")
-                    }
-                    reverseParams.each {
-                        final keySplited = it.key.toString().split(':')
-                        final String className = keySplited[1]
-                        final String fieldName = keySplited[2]
-
-                    }
-                }
                 boolean hasFilePath = gormEntity.hasProperty("filePath")
 
                 if (hasFilePath) {
@@ -263,29 +172,21 @@ class TaackSaveService implements ResponseRenderer, ServletAttributes, DataBinde
 
         if (gormEntity.hasChanged()) {
             if (gormEntity.hasProperty("userCreated") && gormEntity["userCreated"] == null) {
-                gormEntity["userCreated"] = User.read(springSecurityService.currentUserId as Long)
+                gormEntity["userCreated"] = springSecurityService.currentUser
             }
             if (gormEntity.hasProperty("userUpdated")) {
-                gormEntity["userUpdated"] = User.read(springSecurityService.currentUserId as Long)
+                gormEntity["userUpdated"] = springSecurityService.currentUser
             }
         }
 
         long c4 = System.currentTimeMillis()
         if (!doNotSave) {
-//            if (oldEntity && gormEntity instanceof IDomainHistory && gormEntity.ident() != null) {
-//                gormEntity.save(failsOnError: true)
-//                oldEntity.save(failsOnError: true)
-//                if (oldEntity.hasErrors()) {
-//                    log.error "oldEntity errors: ${oldEntity.errors}"
-//                }
-//            } else {
             gormEntity.save(failsOnError: true)
-//            }
         }
 
         long c5 = System.currentTimeMillis()
 
-        log.info "constrainedProperties: ${c2 - c1}ms, bindingName: ${c3 - c2}ms, gormEntity.hasChanged: ${c4 - c3}ms, save: ${c5 - c4}ms: ELAPSED:${c5 - c1}ms"
+        log.info "bindingName: ${c3 - c2}ms, gormEntity.hasChanged: ${c4 - c3}ms, save: ${c5 - c4}ms: ELAPSED:${c5 - c2}ms"
 
         if (!doNotSave && gormEntity.hasErrors()) {
             log.error "${gormEntity.errors}"
@@ -296,23 +197,10 @@ class TaackSaveService implements ResponseRenderer, ServletAttributes, DataBinde
     def redirectOrRenderErrors(final GormEntity gormEntity, final MethodClosure redirectAction = null) {
         if (gormEntity.hasErrors()) {
             Errors errors = gormEntity.errors
-
-            Map<String, List<String>> fieldErrors = [:]
-            errors.fieldErrors.each {
-                if (fieldErrors.get(it.field)) {
-                    fieldErrors.get(it.field).add(grailsAttributes.messageSource.getMessage(it, LocaleContextHolder.locale))
-                } else {
-                    fieldErrors.put(it.field, [grailsAttributes.messageSource.getMessage(it, LocaleContextHolder.locale)])
-                }
-            }
-            return fieldErrors.collect {
-                render """__ErrorKeyStart__${it.key}:<ul class="errorKey">${it.value.collect { """<li class="errorEntry">$it</li>""" }.join('')}</ul>__ErrorKeyEnd__"""
-            }.join('')
+            return processErrors(errors)
         } else {
-            String rs = params.containsKey('recordState') && params['recordState'] ? '?recordState=' + params['recordState'] : ''
-
             if (redirectAction) {
-                render """__redirect__${urlMapped(Utils.getControllerName(redirectAction), redirectAction.method)}/${params.id ?: gormEntity.ident() ?: ''}$rs"""
+                render """__redirect__${urlMapped(Utils.getControllerName(redirectAction), redirectAction.method)}/${params.id ?: gormEntity.ident() ?: ''}"""
             } else render """__reload__"""
         }
     }
@@ -326,21 +214,24 @@ class TaackSaveService implements ResponseRenderer, ServletAttributes, DataBinde
         redirectOrRenderErrors(save(aClass, lockedFields), null)
     }
 
+    private def processErrors(Errors errors) {
+        Map<String, List<String>> fieldErrors = [:]
+        errors.fieldErrors.each {
+            if (fieldErrors.get(it.field)) {
+                fieldErrors.get(it.field).add(grailsAttributes.messageSource.getMessage(it, LocaleContextHolder.locale))
+            } else {
+                fieldErrors.put(it.field, [grailsAttributes.messageSource.getMessage(it, LocaleContextHolder.locale)])
+            }
+        }
+        return fieldErrors.collect {
+            render """__ErrorKeyStart__${it.key}:<ul class="errorKey">${it.value.collect { """<li class="errorEntry">$it</li>""" }.join('')}</ul>__ErrorKeyEnd__"""
+        }.join('')
+    }
+
     def displayBlockOrRenderErrors(final GormEntity gormEntity, final UiBlockSpecifier blockSpecifier) {
         if (gormEntity.hasErrors()) {
             Errors errors = gormEntity.errors
-
-            Map<String, List<String>> fieldErrors = [:]
-            errors.fieldErrors.each {
-                if (fieldErrors.get(it.field)) {
-                    fieldErrors.get(it.field).add(grailsAttributes.messageSource.getMessage(it, LocaleContextHolder.locale))
-                } else {
-                    fieldErrors.put(it.field, [grailsAttributes.messageSource.getMessage(it, LocaleContextHolder.locale)])
-                }
-            }
-            return fieldErrors.collect {
-                render """__ErrorKeyStart__${it.key}:<ul class="errorKey">${it.value.collect { """<li class="errorEntry">$it</li>""" }.join('')}</ul>__ErrorKeyEnd__"""
-            }.join('')
+            return processErrors(errors)
         } else {
             render taackUiService.visit(blockSpecifier)
         }
