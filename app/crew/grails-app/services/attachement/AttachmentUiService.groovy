@@ -134,7 +134,7 @@ final class AttachmentUiService implements WebAttributes {
                     .build()) { Attachment att ->
                 String aPreview = this.preview(att.id)
                 rowColumn {
-                    rowField aPreview
+                    rowFieldRaw aPreview
                 }
                 rowColumn {
                     rowField att.originalName

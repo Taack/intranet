@@ -18,7 +18,7 @@ import taack.ui.dsl.block.BlockSpec
 import taack.ui.dsl.common.ActionIcon
 import taack.ui.dsl.common.IconStyle
 import taack.ui.dsl.common.Style
-import taack.ui.dump.markdown.Markdown
+import taack.wysiwyg.Markdown
 
 @GrailsCompileStatic
 @Secured(['IS_AUTHENTICATED_REMEMBERED'])
@@ -218,8 +218,6 @@ class AttachmentController {
 
     def showTermGroup(String group) {
         def termGroup = group as TermGroupConfig
-        Attachment a = new Attachment()
-        User u = new User()
 
         List<Term> parentTerms = Term.findAllByActiveAndTermGroupConfigAndParentIsNull(true, termGroup)
         UiTableSpecifier ts = new UiTableSpecifier()
@@ -262,9 +260,9 @@ class AttachmentController {
                 }
                 col BlockSpec.Width.THREE_QUARTER, {
                     ajaxBlock('taggedFiles') {
-                        show new UiShowSpecifier().ui(new Object(), {
+                        show new UiShowSpecifier().ui {
                             field Markdown.getContentHtml('# Click on a tag ..')
-                        })
+                        }
                     }
                 }
             }
@@ -273,7 +271,6 @@ class AttachmentController {
 
     def showTermAttachments(Term term) {
         Attachment a = new Attachment()
-        DocumentAccess ad = new DocumentAccess()
         User u = new User()
         def attachments = Attachment.executeQuery('from Attachment a where a.active = true and ?0 in elements(a.documentCategory.tags)', term) as List<Attachment>
         def ts = new UiTableSpecifier().ui {

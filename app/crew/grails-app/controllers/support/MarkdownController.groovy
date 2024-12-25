@@ -9,7 +9,7 @@ import attachment.Attachment
 import taack.domain.TaackSaveService
 import taack.render.TaackUiService
 import taack.ui.dsl.UiBlockSpecifier
-import taack.ui.dump.markdown.Markdown
+import taack.wysiwyg.Markdown
 
 @GrailsCompileStatic
 @Secured(['isAuthenticated()'])
