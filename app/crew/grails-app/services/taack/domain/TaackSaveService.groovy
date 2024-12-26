@@ -1,11 +1,16 @@
 package taack.domain
 
+import attachment.Attachment
+import attachment.DocumentAccess
+import attachment.DocumentCategory
 import attachment.config.AttachmentContentType
+import crew.User
 import grails.artefact.controller.support.ResponseRenderer
 import grails.compiler.GrailsCompileStatic
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.web.api.ServletAttributes
 import grails.web.databinding.DataBinder
+import grails.web.servlet.mvc.GrailsParameterMap
 import org.codehaus.groovy.runtime.MethodClosure
 import org.grails.datastore.gorm.GormEnhancer
 import org.grails.datastore.gorm.GormEntity
@@ -46,7 +51,6 @@ class TaackSaveService implements ResponseRenderer, ServletAttributes, DataBinde
         if (isAjax && params && !params.containsKey('isAjax')) {
             p = new HashMap<String, Object>()
             p.putAll(params)
-            p.remove('recordState')
             p.put('isAjax', true)
         }
         grailsApplication.mainContext.getBean(ApplicationTagLib).createLink(controller: controller, action: action, params: p)
@@ -108,6 +112,58 @@ class TaackSaveService implements ResponseRenderer, ServletAttributes, DataBinde
                 }
             } else {
                 boolean hasFilePath = gormEntity.hasProperty("filePath")
+
+                List<String> names = gormEntity.class.declaredFields.findAll {
+                    it.name.endsWith('AttachmentList')
+                }*.name
+                Set<String> toRemove = []
+                params.keySet().each {
+                    String k = it
+                    if (k.endsWith('File')) {
+                        String n = names.find {
+                            k.startsWith(it - 'AttachmentList')
+                        }
+                        toRemove.add k
+
+                        final List<MultipartFile> mfl = (request as MultipartHttpServletRequest).getFiles(k)
+                        mfl.each { mf ->
+                            final String sha1ContentSum = MessageDigest.getInstance("SHA1").digest(mf.bytes).encodeHex().toString()
+                            final String p = sha1ContentSum + fileExtension(mf.originalFilename)
+                            final String d = attachmentStorePath
+                            File target = new File(d + "/" + p)
+                            log.info("create file ${target.path}")
+                            mf.transferTo(target)
+                            Attachment a = new Attachment()
+                            if (gormEntity.hasProperty('documentAccess') && params['documentAccess'])
+                                a.documentAccess = DocumentAccess.read(params['documentAccess'] as Long)
+                            else
+                                a.documentAccess = DocumentAccess.findOrCreateWhere(isInternal: false, isRestrictedToEmbeddingObjects: true, isRestrictedToMyBusinessUnit: false, isRestrictedToMyManagers: false, isRestrictedToMySubsidiary: false)
+                            a.userCreated = springSecurityService.currentUser as User
+                            a.userUpdated = a.userCreated
+                            a.filePath = p
+                            a.fileSize = target.size()
+                            a.contentShaOne = sha1ContentSum
+                            a.documentCategory = new DocumentCategory()
+                            a.contentType = mf.contentType
+                            a.originalName = mf.originalFilename
+                            a.contentTypeEnum = AttachmentContentType.fromMimeType(mf.contentType)
+                            a.save(flush: true, failOnError: true)
+                            if (a.hasErrors()) {
+                                log.error("${a.errors}")
+                            } else {
+                                (gormEntity[n] as List<Attachment>).add a
+                            }
+                        }
+                    }
+                }
+
+                toRemove.each {
+                    int ptIndex = it.indexOf('.')
+                    if (ptIndex != -1) {
+                        (params[it.substring(0, ptIndex)] as GrailsParameterMap).remove(it.substring(ptIndex + 1))
+                    }
+                    params.remove(it)
+                }
 
                 if (hasFilePath) {
                     final List<MultipartFile> mfl = (request as MultipartHttpServletRequest).getFiles("filePath")
