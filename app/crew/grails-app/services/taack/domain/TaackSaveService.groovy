@@ -151,7 +151,8 @@ class TaackSaveService implements ResponseRenderer, ServletAttributes, DataBinde
                             if (a.hasErrors()) {
                                 log.error("${a.errors}")
                             } else {
-                                (gormEntity[n] as List<Attachment>).add a
+                                log.info "link $a to $n field on $gormEntity"
+                                gormEntity.addTo(n, a)
                             }
                         }
                     }
