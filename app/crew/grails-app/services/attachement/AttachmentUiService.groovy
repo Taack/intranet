@@ -214,17 +214,17 @@ final class AttachmentUiService implements WebAttributes {
         new UiTableSpecifier().ui {
             for (Attachment a : attachments.sort { a1, a2 -> a2.dateCreated <=> a1.dateCreated }) {
                 row {
-                    rowField this.preview(a.id)
+                    rowFieldRaw this.preview(a.id)
                     rowColumn {
                         rowField a.userCreated.username
                         rowField a.dateCreated_
                     }
                     rowColumn {
+                        if (this.attachmentSecurityService.canDownloadFile(a))
+                            rowAction ActionIcon.DOWNLOAD * IconStyle.SCALE_DOWN, AttachmentController.&downloadBinAttachment as MC, a.id
                         rowField a.getName()
                         rowField a.fileSize_
                     }
-                    if (this.attachmentSecurityService.canDownloadFile(a))
-                        rowAction ActionIcon.DOWNLOAD, AttachmentController.&downloadBinAttachment as MC, a.id
                 }
             }
         }
