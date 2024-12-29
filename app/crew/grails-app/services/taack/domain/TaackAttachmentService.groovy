@@ -249,12 +249,12 @@ class TaackAttachmentService implements WebAttributes, DataBinder {
         additionalShowIFrame(attachment)?.createShowIFrame(attachment)
     }
 
-    void downloadAttachment(Attachment attachment) {
+    void downloadAttachment(Attachment attachment, PreviewFormat previewFormat = null) {
         if (!attachment) return
         def response = webRequest.currentResponse
         response.setContentType(attachment.contentType)
         response.setHeader("Content-disposition", "attachment;filename=${URLEncoder.encode(attachment.getName(), "UTF-8")}")
-        response.outputStream << new File(attachmentPath(attachment)).bytes
+        response.outputStream << (previewFormat ? attachmentPreview(attachment, previewFormat) : new File(attachmentPath(attachment))).bytes
     }
 
     String attachmentContent(Attachment attachment) {
