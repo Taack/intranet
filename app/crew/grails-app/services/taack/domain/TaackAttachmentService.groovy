@@ -1,7 +1,14 @@
 package taack.domain
 
+import attachment.DocumentAccess
+import attachment.DocumentCategory
+import attachment.config.AttachmentContentType
 import attachment.config.AttachmentContentTypeCategory
+import attachment.config.DocumentCategoryEnum
+import crew.User
 import grails.compiler.GrailsCompileStatic
+import grails.gorm.transactions.Transactional
+import grails.plugin.springsecurity.SpringSecurityService
 import grails.util.Pair
 import grails.web.api.WebAttributes
 import grails.web.databinding.DataBinder
@@ -14,15 +21,20 @@ import org.apache.tika.sax.BodyContentHandler
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import attachment.Attachment
+import org.springframework.web.multipart.MultipartFile
 import org.taack.IAttachmentConverter
+import org.taack.IAttachmentEditorIFrame
 import org.taack.IAttachmentPreviewConverter
 import org.taack.IAttachmentShowIFrame
 import taack.ui.TaackUiConfiguration
 
 import javax.annotation.PostConstruct
+import java.security.MessageDigest
 
 @GrailsCompileStatic
 class TaackAttachmentService implements WebAttributes, DataBinder {
+    SpringSecurityService springSecurityService
+
     final Object imageConverter = new Object()
 
     @Autowired
@@ -44,16 +56,18 @@ class TaackAttachmentService implements WebAttributes, DataBinder {
     }
 
     enum PreviewFormat {
-        DEFAULT(false, 240, 150),
-        DEFAULT_PDF(true, 480, 300),
-        PREVIEW_MEDIUM(false, 480, 300),
-        PREVIEW_LARGE(false, 1280, 800),
-        PREVIEW_LARGE_PDF(true, 1280, 800)
+        DEFAULT(false, 240, 160, 240, 160),
+        DEFAULT_PDF(true, 960, 640, 960, 640),
+        PREVIEW_MEDIUM(false, 960, 640, 480, 320),
+        PREVIEW_LARGE(false, 1920, 1080, 1920, 1080),
+        PREVIEW_LARGE_PDF(true, 1920, 1080, 1920, 1080)
 
-        PreviewFormat(boolean isPdf, int pixelWidth, int pixelHeight) {
+        PreviewFormat(boolean isPdf, int pixelWidth, int pixelHeight, int previewPixelHeight, int previewPixelWidth) {
             this.isPdf = isPdf
             this.pixelHeight = pixelHeight
             this.pixelWidth = pixelWidth
+            this.previewPixelHeight = previewPixelHeight
+            this.previewPixelWidth = previewPixelWidth
         }
 
         String getPreviewExtension() {
@@ -67,6 +81,8 @@ class TaackAttachmentService implements WebAttributes, DataBinder {
         final boolean isPdf
         final int pixelHeight
         final int pixelWidth
+        final int previewPixelHeight
+        final int previewPixelWidth
     }
 
     String previewPath(final PreviewFormat format) {
@@ -128,6 +144,7 @@ class TaackAttachmentService implements WebAttributes, DataBinder {
         DOCX(".docx", "doc.webp", ConvertMode.UNO_CONVERTER),
         DOC(".doc", "doc.webp", ConvertMode.UNO_CONVERTER),
         XLS(".xls", "ods.webp", ConvertMode.UNO_CONVERTER),
+        XLSM(".xlsm", "ods.webp", ConvertMode.UNO_CONVERTER),
         XLSX(".xlsx", "ods.webp", ConvertMode.UNO_CONVERTER),
         ODS(".ods", "ods.webp", ConvertMode.UNO_CONVERTER),
         PPT(".ppt", "odp.webp", ConvertMode.UNO_CONVERTER),
@@ -157,6 +174,7 @@ class TaackAttachmentService implements WebAttributes, DataBinder {
     static Map<String, IAttachmentPreviewConverter> additionalPreviewConverter = [:]
     static Map<String, Pair<List<String>, IAttachmentConverter>> additionalConverter = [:]
     static Map<String, IAttachmentShowIFrame> additionalShow = [:]
+    static Map<String, IAttachmentEditorIFrame> additionalEdit = [:]
 
     @PostConstruct
     void init() {
@@ -201,7 +219,7 @@ class TaackAttachmentService implements WebAttributes, DataBinder {
                     final String fileExtension = attachment.originalName.substring(attachment.originalName.lastIndexOf('.') + 1)
                     IAttachmentPreviewConverter previewConverter = additionalPreviewConverter[fileExtension]
                     if (previewConverter) {
-                        previewConverter.createWebpPreview(attachment, preview.path)
+                        previewConverter.createWebpPreview(attachment, preview.path, previewFormat)
                         if (preview.exists()) {
                             return preview
                         }
@@ -217,6 +235,12 @@ class TaackAttachmentService implements WebAttributes, DataBinder {
     static void registerPreviewConverter(IAttachmentPreviewConverter previewConverter) {
         for (String extension in previewConverter.previewManagedExtensions) {
             additionalPreviewConverter.put(extension, previewConverter)
+        }
+    }
+
+    static void registerEdit(IAttachmentEditorIFrame editor) {
+        for (String extension in editor.editIFrameManagedExtensions) {
+            additionalEdit.put(extension, editor)
         }
     }
 
@@ -242,19 +266,30 @@ class TaackAttachmentService implements WebAttributes, DataBinder {
 
     static IAttachmentShowIFrame additionalShowIFrame(Attachment attachment) {
         String name = attachment.originalName.substring(attachment.originalName.lastIndexOf('.') + 1)
+
         additionalShow[name]
+    }
+
+    static IAttachmentEditorIFrame additionalEditIFrame(Attachment attachment) {
+        String name = attachment.originalName.substring(attachment.originalName.lastIndexOf('.') + 1)
+
+        additionalEdit[name]
     }
 
     static String showIFrame(Attachment attachment) {
         additionalShowIFrame(attachment)?.createShowIFrame(attachment)
     }
 
-    void downloadAttachment(Attachment attachment, PreviewFormat previewFormat = null) {
+    static String editIFrame(Attachment attachment) {
+        additionalEditIFrame(attachment)?.createEditIFrame(attachment)
+    }
+
+    void downloadAttachment(Attachment attachment, boolean inline = false) {
         if (!attachment) return
         def response = webRequest.currentResponse
         response.setContentType(attachment.contentType)
-        response.setHeader("Content-disposition", "attachment;filename=${URLEncoder.encode(attachment.getName(), "UTF-8")}")
-        response.outputStream << (previewFormat ? attachmentPreview(attachment, previewFormat) : new File(attachmentPath(attachment))).bytes
+        response.setHeader("Content-disposition", "${inline ? 'inline' : 'attachment'};filename=${URLEncoder.encode(attachment.getName(), "UTF-8")}")
+        response.outputStream << new File(attachmentPath(attachment)).bytes
     }
 
     String attachmentContent(Attachment attachment) {
@@ -305,4 +340,56 @@ class TaackAttachmentService implements WebAttributes, DataBinder {
         handler.toString()
     }
 
+    void postPrepareSave(Attachment attachment) {
+        attachment.contentTypeEnum = AttachmentContentType.fromMimeType(attachment.contentType)
+        attachment.contentTypeCategoryEnum = attachment.contentTypeEnum?.category ?: AttachmentContentTypeCategory.OTHER
+    }
+
+    @Transactional
+    Attachment createAttachment(MultipartFile f) {
+        if (!f || f.empty) {
+            return null
+        }
+        final String sha1ContentSum = MessageDigest.getInstance("SHA1").digest(f.bytes).encodeHex().toString()
+        final String p = sha1ContentSum + "." + (f.originalFilename.substring(f.originalFilename.lastIndexOf('.') + 1) ?: "NONE")
+        final String d = (storePath)
+        File target = new File(d + "/" + p)
+        f.transferTo(target)
+
+        Attachment attachment = new Attachment()
+        attachment.filePath = p
+        attachment.contentType = f.contentType
+        attachment.contentTypeEnum = AttachmentContentType.fromMimeType(f.contentType)
+        attachment.contentTypeCategoryEnum = AttachmentContentTypeCategory.DOCUMENT
+        attachment.originalName = f.originalFilename
+        attachment.contentShaOne = sha1ContentSum
+        attachment.fileSize = f.size
+        User currentUser = User.read(springSecurityService.currentUserId as Long)
+        attachment.userCreated = currentUser
+        attachment.userUpdated = currentUser
+        attachment.documentCategory = DocumentCategory.findOrCreateByCategory(DocumentCategoryEnum.OTHER)
+        attachment.documentAccess = DocumentAccess.findOrCreateByIsInternalAndIsRestrictedToMyBusinessUnitAndIsRestrictedToMySubsidiaryAndIsRestrictedToMyManagersAndIsRestrictedToEmbeddingObjects(false, false, false, false, true)
+        attachment.save(flush: true, failOnError: true)
+        return attachment
+    }
+
+    Attachment updateContentSameContentType(Attachment attachment, byte[] content) {
+        final String sha1ContentSum = MessageDigest.getInstance("SHA1").digest(content).encodeHex().toString()
+        final String p = sha1ContentSum + "." + (attachment.originalName.substring(attachment.originalName.lastIndexOf('.') + 1) ?: "NONE")
+        final String d = (storePath)
+        File target = new File(d + "/" + p)
+        FileOutputStream fo = new FileOutputStream(target)
+        fo.write(content)
+
+        Attachment old = attachment.cloneDirectObjectData()
+        old.save(flush: true, failOnError: true)
+
+        if (old.errors)
+            log.error("${old.errors}")
+
+        attachment.fileSize = content.size()
+        attachment.contentShaOne = sha1ContentSum
+        attachment.filePath = p
+        attachment
+    }
 }
