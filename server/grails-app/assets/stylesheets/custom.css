@@ -1,3 +1,98 @@
 /*
 *= require_self
+*= require last
 */
+
+a[ajaxaction], .nav-link, .table-link, .page-link, .sortColumn > a, input[taackajaxformm2maction], input[taackajaxformm2oaction] {
+    cursor: pointer;
+}
+
+.navbar-nav .nav-link.active {
+    color: #9af973;
+}
+li:has(a.nav-link.active) > a.nav-link {
+    color: #9af973;
+}
+
+div[taacktag=MENU_BLOCK] > nav {
+    background-color: rgba(236, 240, 246, 0.38);
+}
+div[taacktag=TABLE] > nav {
+    background-color: rgba(225, 240, 242, 0.25);
+}
+
+div[taacktag=MENU_BLOCK] {
+    border: #b7b6b6 1px dashed;
+}
+
+.tag {
+    display: inline-block;
+    max-width: fit-content;
+    padding: .2em .5em .2em .5em;
+    margin: .1em;
+    color: white;
+    border-radius: 4px;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+    background: rgb(78, 164, 221);
+    white-space: nowrap;
+}
+
+.blueTag {
+    background: #4EA4DD;
+}
+
+.greenTag {
+    background: #73ad00;
+}
+
+.yellowTag {
+    background: #ffe84c;
+    color: #423d0a;
+    border: solid #dfe14e 1px;
+    text-shadow: none;
+}
+
+.orangeTag {
+    background: #fb9a00;
+}
+
+.redTag {
+    background: #f50f0f;
+}
+
+.pinkTag {
+    background: #ff598e;
+}
+
+.greyTag {
+    background: #9ba3a9;
+}
+
+.whiteTag {
+    background: white;
+    color: #1f1f1f;
+    border: solid #e0e0e0 1px;
+    text-shadow: none;
+}
+
+.table-sm {
+    font-size: small;
+}
+
+.hidden {
+    display: none !important;
+    visibility: hidden !important
+}
+
+div[blockid='login-auth'] {
+    width: 400px;
+    margin-top: 15px;
+}
+
+.restricted-app {
+    opacity: 0.35;
+}
+
+.app-desc hr {
+    margin: 0;
+}

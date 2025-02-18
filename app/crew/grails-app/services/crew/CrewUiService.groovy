@@ -142,7 +142,7 @@ class CrewUiService implements WebAttributes {
                 boolean hasActions = this.crewSecurityService.canEdit(ru)
                 if (!hasSelect) {
                     rowColumn {
-                        rowField this.attachmentUiService.preview(ru.mainPicture?.id)
+                        rowFieldRaw this.attachmentUiService.preview(ru.mainPicture?.id)
                     }
                 }
                 rowColumn {

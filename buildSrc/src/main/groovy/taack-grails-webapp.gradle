@@ -6,20 +6,13 @@ plugins {
     id 'application'
 }
 
-configurations {
-    developmentOnly
-    runtimeClasspath {
-        extendsFrom developmentOnly
-    }
-}
-
 dependencies {
     if (Os.isFamily(Os.FAMILY_MAC)) {
         runtimeOnly 'net.java.dev.jna:jna:5.14.0'
         implementation 'io.methvin:directory-watcher:0.18.0'
     }
 
-    developmentOnly('org.springframework.boot:spring-boot-devtools')
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
     console 'org.grails:grails-console'
     implementation 'org.grails.plugins:gsp'
     profile 'org.grails.profiles:web'

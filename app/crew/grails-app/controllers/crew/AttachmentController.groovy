@@ -2,23 +2,35 @@ package crew
 
 import attachement.AttachmentSearchService
 import attachement.AttachmentUiService
-import attachment.*
+import attachment.Attachment
+import attachment.DocumentAccess
+import attachment.DocumentCategory
+import attachment.Term
 import attachment.config.TermGroupConfig
 import crew.config.SupportedLanguage
 import grails.compiler.GrailsCompileStatic
 import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.annotation.Secured
-import org.codehaus.groovy.runtime.MethodClosure
 import org.codehaus.groovy.runtime.MethodClosure as MC
 import org.springframework.beans.factory.annotation.Value
-import taack.domain.*
+import org.taack.IAttachmentEditorIFrame
+import org.taack.IAttachmentShowIFrame
+import taack.domain.TaackAttachmentService
+import taack.domain.TaackFilter
+import taack.domain.TaackFilterService
+import taack.domain.TaackMetaModelService
+import taack.domain.TaackSaveService
 import taack.render.TaackUiService
 import taack.ui.dsl.*
 import taack.ui.dsl.block.BlockSpec
 import taack.ui.dsl.common.ActionIcon
 import taack.ui.dsl.common.IconStyle
 import taack.ui.dsl.common.Style
-import taack.ui.dump.markdown.Markdown
+import taack.ui.dsl.filter.expression.FilterExpression
+import taack.ui.dsl.filter.expression.Operator
+import taack.wysiwyg.Markdown
+
+import static taack.render.TaackUiService.tr
 
 @GrailsCompileStatic
 @Secured(['IS_AUTHENTICATED_REMEMBERED'])
@@ -76,11 +88,91 @@ class AttachmentController {
     }
 
     def showAttachment(Attachment attachment) {
+        IAttachmentShowIFrame iFrame = TaackAttachmentService.additionalShowIFrame(attachment)
+        IAttachmentEditorIFrame iEditor = TaackAttachmentService.additionalEditIFrame(attachment)
         taackUiService.show(new UiBlockSpecifier().ui {
             modal {
                 show this.attachmentUiService.buildShowAttachment(attachment), {
-                    menuIcon ActionIcon.EDIT, AttachmentController.&updateAttachment as MC, attachment.id
+                    if (iEditor) {
+                        menu "EDIT", AttachmentController.&inlineEdition as MC, attachment.id
+                    }
+                    for (def ext in TaackAttachmentService.converterExtensions(attachment)) {
+                        menu "Download ${ext}", AttachmentController.&downloadBinExtensionForAttachment as MC, [extension: ext, id: attachment.id]
+                    }
+
+                    if (iFrame)
+                        menuIcon ActionIcon.SHOW, AttachmentController.&showAttachmentIFrame as MC, attachment.id
+                    menuIcon ActionIcon.EDIT, AttachmentController.&editAttachment as MC, attachment.id
                     menuIcon ActionIcon.DOWNLOAD, AttachmentController.&downloadBinAttachment as MC, attachment.id
+                    menuIcon ActionIcon.GRAPH, AttachmentController.&attachmentHistory as MC, attachment.id
+                }
+            }
+        })
+    }
+
+    def attachmentHistory(Attachment attachment) {
+        taackUiService.show(new UiBlockSpecifier().ui {
+            modal {
+                List<Attachment> attachmentHistory = attachment.history
+                table new UiTableSpecifier().ui({
+                    header {
+                        label tr("default.preview.label")
+                        column {
+                            label attachment.originalName_
+                            label "Version"
+                        }
+                        column {
+                            label attachment.userCreated_
+                            label attachment.dateCreated_
+                        }
+                    }
+
+                    attachmentHistory.each { aIt ->
+                        row {
+                            rowFieldRaw this.attachmentUiService.preview(aIt.id)
+                            rowColumn {
+                                rowAction ActionIcon.DOWNLOAD * IconStyle.SCALE_DOWN, AttachmentController.&downloadBinAttachment as MC, aIt.id
+                                rowField aIt.originalName
+                                rowField "${aIt.version}"
+                            }
+                            rowColumn {
+                                rowField aIt.userCreated_
+                                rowField aIt.dateCreated_
+                            }
+                        }
+                    }
+                }), {
+                    label tr("history.label")
+                }
+            }
+        })
+    }
+
+
+    def inlineEdition(Attachment attachment) {
+        String iFrame = TaackAttachmentService.editIFrame(attachment)
+        taackUiService.show(new UiBlockSpecifier().ui {
+            modal {
+                custom(iFrame)
+            }
+        })
+    }
+
+
+    def showAttachmentIFrame(Attachment attachment) {
+        String iFrame = TaackAttachmentService.showIFrame(attachment)
+        taackUiService.show(new UiBlockSpecifier().ui {
+            modal {
+                if (iFrame) {
+                    custom(iFrame)
+                } else {
+                    show this.attachmentUiService.buildShowAttachment(attachment), {
+                        for (def ext in TaackAttachmentService.converterExtensions(attachment)) {
+                            menu "Download ${ext}", AttachmentController.&downloadBinExtensionForAttachment as MC, [extension: ext, id: attachment.id]
+                        }
+                        menuIcon ActionIcon.EDIT, AttachmentController.&editAttachment as MC, attachment.id
+                        menuIcon ActionIcon.DOWNLOAD, AttachmentController.&downloadBinAttachment as MC, attachment.id
+                    }
                 }
             }
         })
@@ -96,42 +188,23 @@ class AttachmentController {
         }
     }
 
-
-    def uploadAttachment() {
-        taackUiService.show(new UiBlockSpecifier().ui {
-            modal {
-                form AttachmentUiService.buildAttachmentForm(new Attachment())
-            }
-        })
-    }
-
-    def editAttachmentDescriptor(DocumentAccess attachmentDescriptor) {
-        attachmentDescriptor ?= new DocumentAccess()
-        taackUiService.show(new UiBlockSpecifier().ui {
-            modal {
-                form AttachmentUiService.buildDocumentAccessForm(attachmentDescriptor)
-            }
-        })
-    }
-
     @Transactional
-    def saveDocAccess() {
-        params['id'] = null
-        DocumentAccess ad = taackSaveService.save(DocumentAccess, null, false)
-        ad = DocumentAccess.findOrCreateWhere(
+    def saveDocAccess(DocumentAccess ad) {
+        DocumentAccess ad2 = DocumentAccess.findWhere(
                 isInternal: ad.isInternal,
                 isRestrictedToMyBusinessUnit: ad.isRestrictedToMyBusinessUnit,
                 isRestrictedToMySubsidiary: ad.isRestrictedToMySubsidiary,
                 isRestrictedToMyManagers: ad.isRestrictedToMyManagers,
                 isRestrictedToEmbeddingObjects: ad.isRestrictedToEmbeddingObjects,
         )
-        if (!ad.id)
+        if (ad2) {
+            ad = ad2
+        } else {
             ad.save(flush: true)
-        taackSaveService.displayBlockOrRenderErrors(ad,
-                new UiBlockSpecifier().ui {
-                    closeModal(ad.id, ad.toString())
-                }
-        )
+        }
+        taackSaveService.displayBlockOrRenderErrors(ad, new UiBlockSpecifier().ui {
+            closeModal(ad.id, ad.toString())
+        })
     }
 
     @Transactional
@@ -151,19 +224,35 @@ class AttachmentController {
         )
     }
 
-
-    def updateAttachment(Attachment attachment) {
+    def editAttachment(Attachment attachment) {
         taackUiService.show(new UiBlockSpecifier().ui {
-            modal {
-                form AttachmentUiService.buildAttachmentForm(attachment)
+            String selectActionUrl = params["selectActionUrl"]
+            if (!selectActionUrl) {
+                modal {
+                    form attachmentUiService.buildAttachmentForm(attachment ?: new Attachment()), TaackAttachmentService.additionalCreate?.closure
+                }
+            } else {
+                ajaxBlock "selectingAttachmentBlock", {
+                    form attachmentUiService.buildAttachmentForm(new Attachment(), selectActionUrl), TaackAttachmentService.additionalCreate?.closure
+                }
             }
+
         })
     }
 
     @Transactional
-    @Secured(['ROLE_ADMIN', 'ROLE_ATT_USER'])
     def saveAttachment() {
-        taackSaveService.saveThenReloadOrRenderErrors(Attachment)
+        Attachment a = taackSaveService.save(Attachment)
+        if (a.validate()) {
+            String selectActionUrl = params["selectActionUrl"]
+            if (selectActionUrl) {
+                redirect url: selectActionUrl.replace("&#61;", "=") + "&id=${a.id}&isAjax=true"
+            } else {
+                taackUiService.ajaxReload()
+            }
+        } else {
+            taackSaveService.redirectOrRenderErrors(a, null)
+        }
     }
 
     def showLinkedData(Attachment attachment) {
@@ -176,7 +265,9 @@ class AttachmentController {
                             rowColumn 3, {
                                 rowField "${classNameField.aValue}: ${classNameField.bValue}", Style.EMPHASIS + Style.BLUE
                             }
-                            rowAction ActionIcon.GRAPH, this.&model as MethodClosure, [modelName: classNameField.aValue]
+                            rowColumn {
+                                rowAction ActionIcon.GRAPH, this.&model as MC, [modelName: classNameField.aValue]
+                            }
                         }
                         for (def obj : objs[classNameField]) {
                             row {
@@ -188,7 +279,7 @@ class AttachmentController {
                         }
                     }
                 }), {
-                    menuIcon ActionIcon.GRAPH, this.&model as MethodClosure, [modelName: Attachment.name]
+                    menuIcon ActionIcon.GRAPH, this.&model as MC, [modelName: Attachment.name]
                 }
             }
         })
@@ -205,20 +296,18 @@ class AttachmentController {
         })
     }
 
-    def extensionForAttachment(Attachment attachment) {
+    def downloadBinExtensionForAttachment(Attachment attachment) {
         String ext = (params['extension'] as String)?.toLowerCase()
         def f = TaackAttachmentService.convertExtension(attachment, ext)
         if (f?.exists()) {
             response.setContentType("application/${ext}")
-            response.setHeader('Content-disposition', "filename=" + "${URLEncoder.encode('${attachment.originalNameWithoutExtension}.${ext}', 'UTF-8')}\"")
+            response.setHeader('Content-disposition', "filename=" + "${URLEncoder.encode("${attachment.originalName}.${ext}", 'UTF-8')}")
             response.outputStream << f.bytes
         } else return null
     }
 
     def showTermGroup(String group) {
         def termGroup = group as TermGroupConfig
-        Attachment a = new Attachment()
-        User u = new User()
 
         List<Term> parentTerms = Term.findAllByActiveAndTermGroupConfigAndParentIsNull(true, termGroup)
         UiTableSpecifier ts = new UiTableSpecifier()
@@ -227,43 +316,41 @@ class AttachmentController {
             header {
                 label 'Name'
             }
-            Closure rec
 
+            Closure rec
             rec = { Term term ->
                 rowIndent {
                     def children = Term.findAllByParentAndActive term, true
                     boolean termHasChildren = !children.isEmpty()
                     rowTree termHasChildren, {
-                        rowField term.name
-                        rowAction ActionIcon.SHOW * IconStyle.SCALE_DOWN, this.&showTermAttachments as MC, term.id
+                        rowColumn {
+                            rowAction ActionIcon.SHOW * IconStyle.SCALE_DOWN, this.&showTermAttachments as MC, term.id
+                            rowField term.name
+                        }
                     }
                     if (termHasChildren) {
                         for (def tc : children) rec(tc)
                     }
                 }
             }
-
-            if (parentTerms) {
-                for (Term t in parentTerms) {
-                    if (t) {
-                        row {
-                            rowField "${t}"
-                        }
-                        rec(t)
-                    }
-                }
+            for (Term t in parentTerms) {
+                rec(t)
             }
         }
         taackUiService.show new UiBlockSpecifier().ui {
             row {
                 col BlockSpec.Width.QUARTER, {
-                    table ts
+                    table ts, {
+                        label "Tags (${termGroup.toString()})"
+                    }
                 }
                 col BlockSpec.Width.THREE_QUARTER, {
                     ajaxBlock('taggedFiles') {
-                        show new UiShowSpecifier().ui(new Object(), {
-                            field Markdown.getContentHtml('# Click on a tag ..')
-                        })
+                        show new UiShowSpecifier().ui({
+                            field Markdown.getContentHtml('## Click on a tag ..')
+                        }), {
+                            label "Files"
+                        }
                     }
                 }
             }
@@ -271,158 +358,90 @@ class AttachmentController {
     }
 
     def showTermAttachments(Term term) {
-        Attachment a = new Attachment()
-        DocumentAccess ad = new DocumentAccess()
-        User u = new User()
-        def attachments = Attachment.executeQuery('from Attachment a where a.active = true and ?0 in elements(a.documentCategory.tags)', term) as List<Attachment>
-        def ts = new UiTableSpecifier().ui {
-            header {
-                column {
-                    label 'Preview'
-                }
-                column {
-                    sortableFieldHeader a.originalName_
-                    sortableFieldHeader a.dateCreated_
-                }
-                column {
-                    sortableFieldHeader a.fileSize_
-                    sortableFieldHeader a.contentType_
-                }
-                column {
-                    sortableFieldHeader a.userCreated_, u.username_
-                    sortableFieldHeader a.userCreated_, u.subsidiary_
-                }
-                column {
-                    label 'Actions'
-                }
-            }
-
-            iterate(taackFilterService.getBuilder(Attachment)
-                    .setSortOrder(TaackFilter.Order.DESC, a.dateCreated_)
-                    .setMaxNumberOfLine(20)
-                    .addRestrictedIds(attachments*.id as Long[])
-                    .build()) { Attachment aIt ->
-
-                rowColumn {
-                    rowField this.attachmentUiService.preview(aIt.id)
-                }
-                rowColumn {
-                    rowField aIt.originalName
-                    rowField aIt.dateCreated_
-                }
-                rowColumn {
-                    rowField aIt.fileSize_
-                    rowField aIt.contentType
-                }
-                rowColumn {
-                    rowField aIt.userCreated.username
-                    rowField aIt.userCreated.subsidiary.toString()
-                }
-                rowColumn {
-                    rowAction ActionIcon.DOWNLOAD, AttachmentController.&downloadBinAttachment as MC, aIt.id
-                    rowAction ActionIcon.SHOW, AttachmentController.&showAttachment as MC, aIt.id
-                }
-            }
-        }
+        List<Attachment> attachments = Attachment.executeQuery('from Attachment a where a.active = true and ?0 in elements(a.documentCategory.tags)', term) as List<Attachment>
         taackUiService.show(new UiBlockSpecifier().ui {
             ajaxBlock('taggedFiles') {
-                table ts
+                table attachmentUiService.buildObjectAttachmentsTable(term, attachments), {
+                    label "Files (${term.name})"
+                }
             }
         })
+    }
+
+    def selectAttachment() {
+        Attachment a = new Attachment(documentCategory: new DocumentCategory(), userCreated: new User())
+        taackUiService.createModal {
+            tableFilter(new UiFilterSpecifier().ui(Attachment, {
+                section tr('file.metadata.label'), {
+                    filterField a.originalName_
+                    filterField a.contentTypeEnum_
+                    filterField a.contentTypeCategoryEnum_
+                    filterField tr('default.userCreated.label'), a.userCreated_, a.userCreated.username_
+                    filterField a.userCreated_, a.userCreated.subsidiary_
+                    filterFieldExpressionBool tr("default.active.label"), new FilterExpression(true, Operator.EQ, a.active_)
+                }
+                section tr('default.documentCategory.label'), {
+                    filterField a.documentCategory_, a.documentCategory.category_
+                    filterField a.documentCategory_, a.documentCategory.tags_, new Term().termGroupConfig_
+                }
+            }), new UiTableSpecifier().ui {
+                header {
+                    column {
+                        label tr("default.preview.label")
+                    }
+                    column {
+                        sortableFieldHeader a.originalName_
+                        sortableFieldHeader a.dateCreated_
+                    }
+                    column {
+                        sortableFieldHeader a.contentTypeEnum_
+                    }
+                    column {
+                        sortableFieldHeader tr("default.userCreated.label"), a.userCreated_, a.userCreated.username_
+                        sortableFieldHeader a.userCreated_, a.userCreated.subsidiary_
+                    }
+                }
+
+                iterate(taackFilterService.getBuilder(Attachment)
+                        .setMaxNumberOfLine(8)
+                        .setSortOrder(TaackFilter.Order.DESC, a.dateCreated_)
+                        .build()) { Attachment att ->
+                    rowColumn {
+                        rowFieldRaw this.attachmentUiService.preview(att.id)
+                    }
+                    rowColumn {
+                        rowAction ActionIcon.SELECT * IconStyle.SCALE_DOWN, att.id, att.toString()
+                        rowAction(att.originalName, AttachmentController.&showAttachment as MC, att.id)
+                        rowField att.dateCreated_
+                    }
+                    rowColumn {
+                        rowField att.contentTypeEnum_
+                    }
+                    rowColumn {
+                        rowField att.userCreated_
+                        rowField att.userCreated.subsidiary_
+                    }
+                }
+            })
+        }
     }
 
     def selectDocumentAccess() {
-        TaackDocument td = taackUiService.ajaxBind(TaackDocument)
-        DocumentAccess documentAccess = td.documentAccess ?: new DocumentAccess()
+        DocumentAccess documentAccess = taackUiService.ajaxBind(DocumentAccess)
         taackUiService.show(new UiBlockSpecifier().ui {
             modal {
-                ajaxBlock 'selectDocumentAccessTable', {
-                    table new UiTableSpecifier().ui({
-                        header {
-                            label documentAccess.isInternal_
-                            label documentAccess.isRestrictedToMyManagers_
-                            label documentAccess.isRestrictedToMyBusinessUnit_
-                            label documentAccess.isRestrictedToMySubsidiary_
-                            label documentAccess.isRestrictedToEmbeddingObjects_
-                        }
-                        for (DocumentAccess da in DocumentAccess.list()) {
-                            row {
-                                rowColumn {
-                                    rowAction ActionIcon.SELECT * IconStyle.SCALE_DOWN, this.&selectDocumentAccessCloseModal as MC, da.id
-                                    rowField da.isInternal_
-                                }
-                                rowField da.isRestrictedToMyManagers_
-                                rowField da.isRestrictedToMyBusinessUnit_
-                                rowField da.isRestrictedToMySubsidiary_
-                                rowField da.isRestrictedToEmbeddingObjects_
-                            }
-                        }
-                    })
-                }
-                ajaxBlock 'selectDocumentAccessForm', {
-                    form AttachmentUiService.buildDocumentAccessForm(documentAccess)
-                }
+                form attachmentUiService.buildDocumentAccessForm(documentAccess)
             }
         })
-    }
-
-    def selectDocumentAccessCloseModal(DocumentAccess documentAccess) {
-        taackUiService.closeModal(documentAccess.id, documentAccess.toString())
     }
 
     def selectDocumentCategory() {
         DocumentCategory documentCategory = taackUiService.ajaxBind(DocumentCategory)
         taackUiService.show(new UiBlockSpecifier().ui {
             modal {
-                form AttachmentUiService.buildDocumentDescriptorForm(documentCategory)
+                form attachmentUiService.buildDocumentCategoryForm(documentCategory)
             }
         })
-    }
-
-    def selectTagsM2M() {
-        List<Term> parentTerms = Term.findAllByActiveAndParentIsNull(true)
-        Term t = new Term()
-
-        UiTableSpecifier ts = new UiTableSpecifier().ui {
-            header {
-                label t.name_
-                label t.termGroupConfig_
-                label 'Action'
-            }
-            Closure rec
-
-            rec = { Term term ->
-                rowIndent {
-                    def children = Term.findAllByParentAndActive term, true
-                    boolean termHasChildren = !children.isEmpty()
-                    rowTree termHasChildren, {
-                        rowField term.name
-                        rowField term.termGroupConfig?.toString()
-                        rowAction ActionIcon.SELECT * IconStyle.SCALE_DOWN, this.&selectTagsM2MCloseModal as MethodClosure, term.id
-                    }
-                    if (termHasChildren) {
-                        for (def tc : children) rec(tc)
-                    }
-                }
-            }
-
-            if (parentTerms) {
-                for (Term pt in parentTerms) {
-                    if (pt) {
-                        rec(pt)
-                    }
-                }
-            }
-        }
-        taackUiService.show new UiBlockSpecifier().ui {
-            modal {
-                table ts
-            }
-        }
-    }
-
-    def selectTagsM2MCloseModal(Term term) {
-        taackUiService.closeModal(term.id, term.toString())
     }
 
     def listTerm() {
@@ -461,7 +480,6 @@ class AttachmentController {
         redirect action: 'listTerm'
     }
 
-    @Secured(['ROLE_ADMIN', 'ROLE_TERM_ADMIN'])
     def selectTermM2O() {
         UiFilterSpecifier f = attachmentUiService.buildTermFilter()
         UiTableSpecifier t = attachmentUiService.buildTermTable f, true
@@ -473,14 +491,4 @@ class AttachmentController {
         }
         taackUiService.show(b)
     }
-
-    @Secured(['ROLE_ADMIN', 'ROLE_TERM_ADMIN'])
-    def selectTermM2OCloseModal(Term term) {
-        UiBlockSpecifier block = new UiBlockSpecifier()
-        block.ui {
-            closeModal term.id, "${term}"
-        }
-        taackUiService.show(block)
-    }
-
 }
