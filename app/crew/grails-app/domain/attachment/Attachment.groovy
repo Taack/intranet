@@ -90,7 +90,12 @@ class Attachment extends TaackDocument implements IDomainHistory<Attachment> {
 
     @Override
     List<Attachment> getHistory() {
-        return null
+        try {
+            return [this] + Attachment.findAllByNextVersion(this).sort { (it as Attachment).id }.reverse() // from recent to old
+        } catch(e) {
+            println "Attachment  ${e}"
+            return null
+        }
     }
 
 }

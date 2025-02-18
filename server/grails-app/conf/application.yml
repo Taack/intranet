@@ -136,20 +136,19 @@ intranet.noSsh: false
 intranet.root: ${HOME}/intranetFilesGH
 ---
 taack-ui:
-  defaultTitle: Taack Framework
+  defaultTitle: Intranet
   root: ${HOME}/taack
   resources: ${HOME}/taack/resources
-  #  logoFileName: logo-colored.webp
   logoFileName: taack-logo-small-web.svg
-  logoWidth: 100
+  logoWidth: 150
   logoHeight: 40
   hasMenuLogin: true
-  outlineContainer: false
+  outlineContainer: true
   bgColor: '#05294c'
   fgColor: '#eeeeee'
   bodyBgColor: '#fff'
   javaPath: /usr/bin/java
-  plantUmlPath: ${HOME}/plantuml-1.2022.7.jar
+  plantUmlPath: ${HOME}/plantuml-gplv2-1.2024.0.jar
   solrUrl: 'http://localhost:8983/solr/taack'
 ---
 intercom:
