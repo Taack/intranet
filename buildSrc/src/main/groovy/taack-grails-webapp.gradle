@@ -6,13 +6,6 @@ plugins {
     id 'application'
 }
 
-configurations {
-    developmentOnly
-    runtimeClasspath {
-        extendsFrom developmentOnly
-    }
-}
-
 dependencies {
     if (Os.isFamily(Os.FAMILY_MAC)) {
         runtimeOnly 'net.java.dev.jna:jna:5.14.0'

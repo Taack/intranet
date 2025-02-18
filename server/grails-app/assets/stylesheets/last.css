@@ -1,0 +1,76 @@
+/*
+*= require_self
+*/
+.modal-body {
+    padding-top: 0;
+    padding-bottom: 0;
+    top: -1em;
+}
+.btn-close {
+    z-index: 1000;
+}
+
+.taack-close {
+    padding: 10px 20px 20px 0;
+    border-bottom: none;
+}
+
+nav.navbar:has([title='Help']) {
+    position: absolute;
+    right: 0;
+    top: 0;
+    z-index: 999;
+}
+
+[data-bs-theme='dark'] {
+    .taackColorBlue {
+        color: #54C9F8;
+    }
+
+    /*Transform black svg to white*/
+    img[src='/assets/icons/comments.svg'], .wysiwyg-action-button {
+        filter: invert(94%) sepia(94%) saturate(24%) hue-rotate(41deg) brightness(107%) contrast(105%);
+    }
+
+    .wysiwyg-action-button:hover {
+        /*This gets inverted to black in dark mode*/
+        background-color: white;
+    }
+
+    .preview-img {
+        background-color: white;
+    }
+
+    .bg-white {
+        background-color: #212529 !important;
+    }
+
+    .fieldcontain .property-label {
+        color: #dee2e6;
+    }
+}
+
+/*Fix bootstrap title being unaligned*/
+label.form-label {
+    margin-left: calc(1.5rem * .5);
+}
+
+/* Paginate */
+ul.pagination>span {
+    width: -webkit-fill-available;
+    text-align: center;
+}
+
+table[taacktableid="meetingReports"] a.table-link {
+    overflow-wrap: anywhere;
+}
+
+.child-project-item {
+    height: 22px;
+}
+
+.wysiwyg-markdown-preview blockquote {
+    margin: 0;
+    padding: 0 1em;
+    border-left: .25em solid var(--bs-modal-color);
+}
