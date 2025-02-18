@@ -1,5 +1,6 @@
 package taack.domain
 
+import attachment.Attachment
 import attachment.DocumentAccess
 import attachment.DocumentCategory
 import attachment.config.AttachmentContentType
@@ -20,13 +21,11 @@ import org.apache.tika.parser.ocr.TesseractOCRConfig
 import org.apache.tika.sax.BodyContentHandler
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import attachment.Attachment
 import org.springframework.web.multipart.MultipartFile
-import org.taack.IAttachmentConverter
-import org.taack.IAttachmentEditorIFrame
-import org.taack.IAttachmentPreviewConverter
-import org.taack.IAttachmentShowIFrame
+import org.taack.*
+import taack.ui.TaackUi
 import taack.ui.TaackUiConfiguration
+import taack.ui.dsl.UiMenuSpecifier
 
 import javax.annotation.PostConstruct
 import java.security.MessageDigest
@@ -175,6 +174,7 @@ class TaackAttachmentService implements WebAttributes, DataBinder {
     static Map<String, Pair<List<String>, IAttachmentConverter>> additionalConverter = [:]
     static Map<String, IAttachmentShowIFrame> additionalShow = [:]
     static Map<String, IAttachmentEditorIFrame> additionalEdit = [:]
+    static UiMenuSpecifier additionalCreate = new UiMenuSpecifier()
 
     @PostConstruct
     void init() {
@@ -242,6 +242,10 @@ class TaackAttachmentService implements WebAttributes, DataBinder {
         for (String extension in editor.editIFrameManagedExtensions) {
             additionalEdit.put(extension, editor)
         }
+    }
+
+    static void registerCreate(IAttachmentCreate create) {
+        additionalCreate = TaackUi.mergeMenu create.editorCreate(), additionalCreate
     }
 
     static void registerConverter(IAttachmentConverter converter) {
@@ -391,5 +395,13 @@ class TaackAttachmentService implements WebAttributes, DataBinder {
         attachment.contentShaOne = sha1ContentSum
         attachment.filePath = p
         attachment
+    }
+
+    Attachment cloneToNewAttachment(Attachment attachment) {
+        Attachment newAttachment = attachment.cloneDirectObjectData()
+        newAttachment.userCreated = springSecurityService.currentUser as User
+        newAttachment.nextVersion = null
+        newAttachment.active = true
+        newAttachment
     }
 }
