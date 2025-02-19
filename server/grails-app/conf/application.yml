@@ -159,13 +159,26 @@ exe:
   convertPath: /usr/bin/convert
   unzipPath: /usr/bin/unzip
 plm:
-  freecadPath: ${HOME}/dev/FreeCAD/build/bin/FreeCAD
+  freecadPath: ${HOME}/freecad-app-link
   singleInstance: true
   offscreen: false
   xvfbRun: false
   useWeston: true
 edges:
   storePassword: ChangeIt
+
+---
+dwg:
+  qcadFolder: ${HOME}/qcad-dir-link
+
+stp:
+  #  freecadPath: ${HOME}/FreeCAD_1.0.0-conda-Linux-x86_64-py311.AppImage
+  freecadPath: ${HOME}/freecad-app-link
+  xvfbRun: false
+  singleInstance: true
+  offscreen: true
+  useWeston: true
+---
 
 client.js.path: ''
 bootstrap.js.tag: '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" async crossorigin="anonymous"></script>'
