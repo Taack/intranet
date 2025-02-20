@@ -218,7 +218,8 @@ final class AttachmentUiService implements WebAttributes {
     UiFormSpecifier buildAttachmentForm(Attachment attachment, String selectActionUrl = null) {
         new UiFormSpecifier().ui attachment, {
             section tr("file.metadata.label"), {
-                field attachment.originalName_
+                if (attachment.originalName)
+                    field attachment.originalName_
                 field attachment.filePath_
                 field attachment.writeAccess_
                 ajaxField attachment.documentCategory_, AttachmentController.&selectDocumentCategory as MC, attachment.documentCategory_
