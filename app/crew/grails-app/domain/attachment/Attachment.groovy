@@ -70,7 +70,7 @@ class Attachment extends TaackDocument implements IDomainHistory<Attachment> {
     Attachment cloneDirectObjectData() {
         if (this.id) {
             Attachment oldValue = new Attachment()
-            oldValue.userCreated = userUpdated
+            oldValue.userCreated = userUpdated ?: userCreated
             log.info "Attachment::cloneDirectObjectData ${version} ${userCreated}: ${dateCreated}, ${userUpdated}: ${lastUpdated} for ${name}"
             oldValue.filePath = filePath
             oldValue.originalName = originalName
