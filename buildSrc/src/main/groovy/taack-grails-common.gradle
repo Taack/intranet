@@ -76,7 +76,7 @@ dependencies {
 
     implementation "org.taack:taack-ui:${taackUiVersion}"
     implementation "org.grails.plugins:spring-security-core:${grailsSpringSecurity}"
-    implementation 'com.google.protobuf:protobuf-java:3.21.9'
+    implementation "com.google.protobuf:protobuf-java:${protobufVersion}"
     implementation 'org.questdb:questdb:8.2.1'
 }
 
