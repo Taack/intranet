@@ -1,8 +1,5 @@
 package taack.domain
 
-import attachment.Attachment
-import attachment.DocumentAccess
-import attachment.DocumentCategory
 import attachment.config.AttachmentContentType
 import crew.User
 import grails.artefact.controller.support.ResponseRenderer
@@ -10,11 +7,11 @@ import grails.compiler.GrailsCompileStatic
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.web.api.ServletAttributes
 import grails.web.databinding.DataBinder
-import grails.web.servlet.mvc.GrailsParameterMap
-import org.codehaus.groovy.runtime.MethodClosure
+import org.codehaus.groovy.runtime.MethodClosure as MC
 import org.grails.datastore.gorm.GormEnhancer
 import org.grails.datastore.gorm.GormEntity
 import org.grails.datastore.gorm.GormStaticApi
+import org.grails.orm.hibernate.cfg.GrailsHibernateUtil
 import org.grails.plugins.web.taglib.ApplicationTagLib
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.i18n.LocaleContextHolder
@@ -56,11 +53,27 @@ class TaackSaveService implements ResponseRenderer, ServletAttributes, DataBinde
         grailsApplication.mainContext.getBean(ApplicationTagLib).createLink(controller: controller, action: action, params: p)
     }
 
+    static Class beanRealClass(Object entity) {
+        beanReal(entity).class
+    }
+
+    static Object beanReal(Object entity) {
+        if (entity instanceof GeneratedGroovyProxy) {
+            return entity.proxyTarget
+        } else {
+            GrailsHibernateUtil.unwrapIfProxy(entity)
+        }
+    }
+
     private static <D extends GormEntity> D getGorm(Long id, Class<D> classD) {
         // TODO: Find another way compatible with compileStatic
         GormEntity gormEntity = ((GormStaticApi<D>) GormEnhancer.findStaticApi(classD)).get(id)
-        if (!gormEntity) gormEntity = classD.getDeclaredConstructor().newInstance()
+        if (!gormEntity) gormEntity = classD.newInstance()
         return gormEntity
+    }
+
+    final <T extends GormEntity> T prepareSave(final Class<T> aClass, final FieldInfo[] lockedFields = null) {
+        save(aClass, lockedFields, true)
     }
 
     final <T extends GormEntity> T save(final Class<T> aClass, final FieldInfo[] lockedFields = null, final boolean doNotSave = false) {
@@ -86,8 +99,9 @@ class TaackSaveService implements ResponseRenderer, ServletAttributes, DataBinde
             }
         }
 
-        long c2 = System.currentTimeMillis()
+        long c1 = System.currentTimeMillis()
 
+        long c2 = System.currentTimeMillis()
         if (gormEntity instanceof IDomainHistory && gormEntity.ident() != null) {
             T oldEntity = (gormEntity as IDomainHistory<T>).cloneDirectObjectData()
             save(oldEntity, lockedFields, doNotSave, true)
@@ -112,59 +126,6 @@ class TaackSaveService implements ResponseRenderer, ServletAttributes, DataBinde
                 }
             } else {
                 boolean hasFilePath = gormEntity.hasProperty("filePath")
-
-                List<String> names = gormEntity.class.declaredFields.findAll {
-                    it.name.endsWith('AttachmentList')
-                }*.name
-                Set<String> toRemove = []
-                params.keySet().each {
-                    String k = it
-                    if (k.endsWith('File')) {
-                        String n = names.find {
-                            k.startsWith(it - 'AttachmentList')
-                        }
-                        toRemove.add k
-
-                        final List<MultipartFile> mfl = (request as MultipartHttpServletRequest).getFiles(k)
-                        mfl.each { mf ->
-                            final String sha1ContentSum = MessageDigest.getInstance("SHA1").digest(mf.bytes).encodeHex().toString()
-                            final String p = sha1ContentSum + fileExtension(mf.originalFilename)
-                            final String d = attachmentStorePath
-                            File target = new File(d + "/" + p)
-                            log.info("create file ${target.path}")
-                            mf.transferTo(target)
-                            Attachment a = new Attachment()
-                            if (gormEntity.hasProperty('documentAccess') && params['documentAccess'])
-                                a.documentAccess = DocumentAccess.read(params['documentAccess'] as Long)
-                            else
-                                a.documentAccess = DocumentAccess.findOrCreateWhere(isInternal: false, isRestrictedToEmbeddingObjects: true, isRestrictedToMyBusinessUnit: false, isRestrictedToMyManagers: false, isRestrictedToMySubsidiary: false)
-                            a.userCreated = springSecurityService.currentUser as User
-                            a.userUpdated = a.userCreated
-                            a.filePath = p
-                            a.fileSize = target.size()
-                            a.contentShaOne = sha1ContentSum
-                            a.documentCategory = new DocumentCategory()
-                            a.contentType = mf.contentType
-                            a.originalName = mf.originalFilename
-                            a.contentTypeEnum = AttachmentContentType.fromMimeType(mf.contentType)
-                            a.save(flush: true, failOnError: true)
-                            if (a.hasErrors()) {
-                                log.error("${a.errors}")
-                            } else {
-                                log.info "link $a to $n field on $gormEntity"
-                                gormEntity.addTo(n, a)
-                            }
-                        }
-                    }
-                }
-
-                toRemove.each {
-                    int ptIndex = it.indexOf('.')
-                    if (ptIndex != -1) {
-                        (params[it.substring(0, ptIndex)] as GrailsParameterMap).remove(it.substring(ptIndex + 1))
-                    }
-                    params.remove(it)
-                }
 
                 if (hasFilePath) {
                     final List<MultipartFile> mfl = (request as MultipartHttpServletRequest).getFiles("filePath")
@@ -220,6 +181,7 @@ class TaackSaveService implements ResponseRenderer, ServletAttributes, DataBinde
 
                         }
                     }
+                    params.remove('filePath')
                 }
                 if (includeOrExclude) bindData(gormEntity, params, includeOrExclude)
                 else bindData(gormEntity, params)
@@ -227,12 +189,14 @@ class TaackSaveService implements ResponseRenderer, ServletAttributes, DataBinde
 
         long c3 = System.currentTimeMillis()
 
+        User currentUser = User.read(springSecurityService.currentUserId as Long)
         if (gormEntity.hasChanged()) {
             if (gormEntity.hasProperty("userCreated") && gormEntity["userCreated"] == null) {
-                gormEntity["userCreated"] = springSecurityService.currentUser
+                gormEntity["userCreated"] = currentUser
             }
+
             if (gormEntity.hasProperty("userUpdated")) {
-                gormEntity["userUpdated"] = springSecurityService.currentUser
+                gormEntity["userUpdated"] = currentUser
             }
         }
 
@@ -243,7 +207,7 @@ class TaackSaveService implements ResponseRenderer, ServletAttributes, DataBinde
 
         long c5 = System.currentTimeMillis()
 
-        log.info "bindingName: ${c3 - c2}ms, gormEntity.hasChanged: ${c4 - c3}ms, save: ${c5 - c4}ms: ELAPSED:${c5 - c2}ms"
+        log.info "constrainedProperties: ${c2 - c1}ms, bindingName: ${c3 - c2}ms, gormEntity.hasChanged: ${c4 - c3}ms, save: ${c5 - c4}ms: ELAPSED:${c5 - c1}ms"
 
         if (!doNotSave && gormEntity.hasErrors()) {
             log.error "${gormEntity.errors}"
@@ -251,11 +215,23 @@ class TaackSaveService implements ResponseRenderer, ServletAttributes, DataBinde
         } else return gormEntity
     }
 
-    def redirectOrRenderErrors(final GormEntity gormEntity, final MethodClosure redirectAction = null) {
+    def redirectOrRenderErrors(final GormEntity gormEntity, final MC redirectAction = null) {
         if (gormEntity.hasErrors()) {
             Errors errors = gormEntity.errors
-            return processErrors(errors)
+
+            Map<String, List<String>> fieldErrors = [:]
+            errors.fieldErrors.each {
+                if (fieldErrors.get(it.field)) {
+                    fieldErrors.get(it.field).add(grailsAttributes.messageSource.getMessage(it, LocaleContextHolder.locale))
+                } else {
+                    fieldErrors.put(it.field, [grailsAttributes.messageSource.getMessage(it, LocaleContextHolder.locale)])
+                }
+            }
+            return fieldErrors.collect {
+                render """__ErrorKeyStart__${it.key}:<ul class="errorKey">${it.value.collect { """<li class="errorEntry">$it</li>""" }.join('')}</ul>__ErrorKeyEnd__"""
+            }.join('')
         } else {
+
             if (redirectAction) {
                 render """__redirect__${urlMapped(Utils.getControllerName(redirectAction), redirectAction.method)}/${params.id ?: gormEntity.ident() ?: ''}"""
             } else render """__reload__"""
@@ -263,7 +239,7 @@ class TaackSaveService implements ResponseRenderer, ServletAttributes, DataBinde
     }
 
     // TODO: Implement cases where formSpecifier is not null
-    void saveThenRedirectOrRenderErrors(final Class<? extends GormEntity> aClass, final MethodClosure redirectAction, final FieldInfo[] lockedFields = null) {
+    void saveThenRedirectOrRenderErrors(final Class<? extends GormEntity> aClass, final MC redirectAction, final FieldInfo[] lockedFields = null) {
         redirectOrRenderErrors(save(aClass, lockedFields), redirectAction)
     }
 
@@ -271,24 +247,21 @@ class TaackSaveService implements ResponseRenderer, ServletAttributes, DataBinde
         redirectOrRenderErrors(save(aClass, lockedFields), null)
     }
 
-    private def processErrors(Errors errors) {
-        Map<String, List<String>> fieldErrors = [:]
-        errors.fieldErrors.each {
-            if (fieldErrors.get(it.field)) {
-                fieldErrors.get(it.field).add(grailsAttributes.messageSource.getMessage(it, LocaleContextHolder.locale))
-            } else {
-                fieldErrors.put(it.field, [grailsAttributes.messageSource.getMessage(it, LocaleContextHolder.locale)])
-            }
-        }
-        return fieldErrors.collect {
-            render """__ErrorKeyStart__${it.key}:<ul class="errorKey">${it.value.collect { """<li class="errorEntry">$it</li>""" }.join('')}</ul>__ErrorKeyEnd__"""
-        }.join('')
-    }
-
     def displayBlockOrRenderErrors(final GormEntity gormEntity, final UiBlockSpecifier blockSpecifier) {
         if (gormEntity.hasErrors()) {
             Errors errors = gormEntity.errors
-            return processErrors(errors)
+
+            Map<String, List<String>> fieldErrors = [:]
+            errors.fieldErrors.each {
+                if (fieldErrors.get(it.field)) {
+                    fieldErrors.get(it.field).add(grailsAttributes.messageSource.getMessage(it, LocaleContextHolder.locale))
+                } else {
+                    fieldErrors.put(it.field, [grailsAttributes.messageSource.getMessage(it, LocaleContextHolder.locale)])
+                }
+            }
+            return fieldErrors.collect {
+                render """__ErrorKeyStart__${it.key}:<ul class="errorKey">${it.value.collect { """<li class="errorEntry">$it</li>""" }.join('')}</ul>__ErrorKeyEnd__"""
+            }.join('')
         } else {
             render taackUiService.visit(blockSpecifier)
         }
