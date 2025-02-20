@@ -77,6 +77,8 @@ class Attachment extends TaackDocument implements IDomainHistory<Attachment> {
             oldValue.contentTypeEnum = contentTypeEnum
             oldValue.contentTypeCategoryEnum = contentTypeCategoryEnum
             oldValue.contentType = contentType
+            oldValue.documentCategory = documentCategory
+            oldValue.documentAccess = documentAccess
             oldValue.active = active
             oldValue.fileSize = fileSize
             oldValue.contentShaOne = contentShaOne
