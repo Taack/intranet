@@ -1,4 +1,4 @@
-import org.apache.tools.ant.taskdefs.condition.Os
+//import org.apache.tools.ant.taskdefs.condition.Os
 
 plugins {
     id 'taack-grails-plugin'
@@ -7,14 +7,14 @@ plugins {
 }
 
 dependencies {
-    if (Os.isFamily(Os.FAMILY_MAC)) {
-        runtimeOnly 'net.java.dev.jna:jna:5.14.0'
-        implementation 'io.methvin:directory-watcher:0.18.0'
-    }
+//    if (Os.isFamily(Os.FAMILY_MAC)) {
+//        runtimeOnly 'net.java.dev.jna:jna:5.14.0'
+//        implementation 'io.methvin:directory-watcher:0.18.0'
+//    }
 
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    console 'org.grails:grails-console'
-    implementation 'org.grails.plugins:gsp'
+//    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+//    console 'org.grails:grails-console'
     profile 'org.grails.profiles:web'
+//    implementation 'org.grails.plugins:gsp'
 }
 

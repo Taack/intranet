@@ -13,6 +13,7 @@ import grails.plugin.springsecurity.SpringSecurityService
 import grails.util.Pair
 import grails.web.api.WebAttributes
 import grails.web.databinding.DataBinder
+import jakarta.annotation.PostConstruct
 import org.apache.commons.io.FileUtils
 import org.apache.tika.metadata.Metadata
 import org.apache.tika.parser.AutoDetectParser
@@ -27,11 +28,11 @@ import taack.ui.TaackUi
 import taack.ui.TaackUiConfiguration
 import taack.ui.dsl.UiMenuSpecifier
 
-import javax.annotation.PostConstruct
 import java.security.MessageDigest
 
 @GrailsCompileStatic
 class TaackAttachmentService implements WebAttributes, DataBinder {
+
     SpringSecurityService springSecurityService
 
     final Object imageConverter = new Object()
@@ -43,6 +44,7 @@ class TaackAttachmentService implements WebAttributes, DataBinder {
     String intranetRoot
 
     String getStorePath() {
+        println intranetRoot
         intranetRoot + "/attachment/store"
     }
 

@@ -10,6 +10,7 @@ import crew.config.SupportedLanguage
 import grails.compiler.GrailsCompileStatic
 import grails.util.Triple
 import grails.web.api.WebAttributes
+import jakarta.annotation.PostConstruct
 import org.codehaus.groovy.runtime.MethodClosure
 import org.codehaus.groovy.runtime.MethodClosure as MC
 import org.grails.datastore.gorm.GormEntity
@@ -29,8 +30,6 @@ import taack.ui.dsl.common.Style
 import taack.ui.dsl.filter.expression.FilterExpression
 import taack.ui.dsl.filter.expression.Operator
 import taack.ui.dsl.helper.Utils
-
-import javax.annotation.PostConstruct
 
 import static taack.render.TaackUiService.tr
 
@@ -237,7 +236,7 @@ final class AttachmentUiService implements WebAttributes {
                 ajaxField term.parent_, AttachmentController.&selectTermM2O as MC
                 tabs BlockSpec.Width.MAX, {
                     for (SupportedLanguage language : SupportedLanguage.values()) {
-                        tabLabel "Translation ${language.name}", {
+                        tabLabel "Translation ${language.name()}", {
                             fieldFromMap "Translation ${language.toString().toLowerCase()}", term.translations_, language.toString().toLowerCase()
                         }
                     }
@@ -276,7 +275,7 @@ final class AttachmentUiService implements WebAttributes {
                 for (Term term in termList) {
                     rowIndent {
                         List<Term> children = Term.findAllByActiveAndParent(true, term)
-                        boolean hasChildren = children.size() > 0 && this.params['_filterExpression_parent_EQ'] != "0"
+                        boolean hasChildren = children.size() > 0 && this.params._filterExpression_parent_EQ != "0"
                         rowTree hasChildren, {
                             rowColumn {
                                 if (selectMode)

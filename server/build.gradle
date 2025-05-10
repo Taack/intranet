@@ -30,13 +30,6 @@ bootJar {
     }
 }
 
-tasks.register('generateTaackAppTask', generateTaackApp.GenerateTaackAppTask) {
-    group = 'help'
-    description = 'Create a Taack app module'
-    outputDirectory = file('../app')
-    appName = System.getProperty("modName")
-}
-
 grails {
     exploded = true
     pathingJar = false

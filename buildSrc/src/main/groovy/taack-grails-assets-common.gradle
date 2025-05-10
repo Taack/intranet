@@ -4,8 +4,8 @@ plugins {
 }
 
 dependencies {
-    implementation 'org.graalvm.polyglot:polyglot:24.1.1'
-    runtimeOnly("com.bertramlabs.plugins:asset-pipeline-grails:${assetPipelineGrails}")
+//    implementation 'org.graalvm.polyglot:polyglot:24.1.1'
+    runtimeOnly("com.bertramlabs.plugins:asset-pipeline-grails")
 }
 
 assets {

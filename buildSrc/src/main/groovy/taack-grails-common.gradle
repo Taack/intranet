@@ -1,5 +1,4 @@
 plugins {
-    id 'java-library'
     id "groovy"
     id "org.grails.grails-web"
     id "org.grails.grails-gsp"
@@ -13,6 +12,7 @@ group = "org.taack"
 repositories {
     mavenLocal()
     mavenCentral()
+    maven { url = 'https://repository.apache.org/content/groups/snapshots' }
     maven { url "https://repo.grails.org/grails/core/" }
     gradlePluginPortal()
 }
@@ -37,52 +37,48 @@ dependencyManagement {
 }
 
 dependencies {
-    compileOnly("io.micronaut:micronaut-inject-groovy")
-    implementation("org.grails:grails-core")
-    implementation("org.grails:grails-logging")
-    implementation("org.grails:grails-plugin-databinding")
-    implementation("org.grails:grails-plugin-i18n")
-    implementation("org.grails:grails-plugin-interceptors")
-    implementation("org.grails.plugins:async")
-    implementation("org.grails:grails-plugin-rest")
-    implementation("org.grails:grails-plugin-services")
-    implementation("org.grails:grails-plugin-url-mappings")
-    implementation("org.grails:grails-web-boot")
-    implementation("org.grails.plugins:gsp")
-    implementation("org.grails.plugins:hibernate5")
-//    implementation("org.hibernate:hibernate-core:5.6.14.Final")
-//    implementation "org.grails.plugins:events"
-    implementation("org.springframework.boot:spring-boot-autoconfigure")
-    implementation("org.springframework.boot:spring-boot-starter")
-    implementation("org.springframework.boot:spring-boot-starter-actuator")
-    implementation("org.springframework.boot:spring-boot-starter-logging")
-    implementation("org.springframework.boot:spring-boot-starter-tomcat")
-    implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation platform("org.apache.grails:grails-bom:$grailsVersion")
+    implementation "org.apache.grails:grails-core"
+    implementation "org.apache.grails:grails-data-hibernate5"
+    implementation "org.apache.grails:grails-databinding"
+    implementation "org.apache.grails:grails-gsp"
+    implementation "org.apache.grails:grails-i18n"
+    implementation "org.apache.grails:grails-interceptors"
+    implementation "org.apache.grails:grails-logging"
+    implementation "org.apache.grails:grails-rest-transforms"
+    implementation "org.apache.grails:grails-scaffolding"
+    implementation "org.apache.grails:grails-services"
+    implementation "org.apache.grails:grails-url-mappings"
+    implementation "org.apache.grails:grails-web-boot"
+    implementation "org.hibernate.validator:hibernate-validator"
+    implementation "org.springframework.boot:spring-boot-autoconfigure"
+    implementation "org.springframework.boot:spring-boot-starter"
+    implementation "org.springframework.boot:spring-boot-starter-actuator"
+    implementation "org.springframework.boot:spring-boot-starter-logging"
+    implementation "org.springframework.boot:spring-boot-starter-tomcat"
+    implementation "org.springframework.boot:spring-boot-starter-validation"
+//    console "org.apache.grails:grails-console"
+    runtimeOnly "com.bertramlabs.plugins:asset-pipeline-grails"
+    runtimeOnly "com.zaxxer:HikariCP"
+    runtimeOnly "org.fusesource.jansi:jansi"
     runtimeOnly("com.h2database:h2")
-//    runtimeOnly("javax.xml.bind:jaxb-api:2.3.1")
-    runtimeOnly("org.apache.tomcat:tomcat-jdbc")
-//    runtimeOnly("org.glassfish.web:el-impl:2.2.1-b05")
-    testImplementation("io.micronaut:micronaut-inject-groovy")
-    testImplementation("org.grails:grails-gorm-testing-support")
-    testImplementation("org.grails:grails-web-testing-support")
-    testImplementation("org.grails.plugins:geb")
-    testImplementation("org.mockito:mockito-core")
-    testImplementation("org.seleniumhq.selenium:selenium-api:${selenium}")
-    testImplementation("org.seleniumhq.selenium:selenium-remote-driver:${selenium}")
-    testImplementation("org.seleniumhq.selenium:selenium-support:${selenium}")
-    testRuntimeOnly("org.seleniumhq.selenium:selenium-chrome-driver:${selenium}")
-    testRuntimeOnly("org.seleniumhq.selenium:selenium-firefox-driver:${selenium}")
-    testImplementation("io.micronaut:micronaut-http-client")
+//    integrationTestImplementation testFixtures("org.apache.grails:grails-geb")
+//    testImplementation "org.apache.grails:grails-testing-support-datamapping"
+//    testImplementation "org.apache.grails:grails-testing-support-web"
+//    testImplementation "org.spockframework:spock-core"
+//    testImplementation "org.testcontainers:postgresql"
+//    testImplementation "org.testcontainers:spock"
+//    testImplementation "org.testcontainers:testcontainers"
 
     implementation "org.taack:taack-ui:${taackUiVersion}"
     implementation "org.grails.plugins:spring-security-core:${grailsSpringSecurity}"
     implementation "com.google.protobuf:protobuf-java:${protobufVersion}"
     implementation 'org.questdb:questdb:8.2.1'
 }
-
-java {
-    sourceCompatibility = JavaVersion.toVersion("17")
-}
+//
+//java {
+//    sourceCompatibility = JavaVersion.toVersion("17")
+//}
 
 tasks.withType(Test) {
     useJUnitPlatform()

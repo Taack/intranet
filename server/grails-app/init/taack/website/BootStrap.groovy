@@ -21,7 +21,7 @@ class BootStrap {
     String adminPassword
 
     def init = { servletContext ->
-        createDefaultRoleAndUser()
+//        createDefaultRoleAndUser()
     }
     def destroy = {
     }

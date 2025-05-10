@@ -41,7 +41,7 @@ class RootController {
                         show(new UiShowSpecifier().ui {
                             inlineHtml(
                                     """\
-                                    <a href="${Parameter.urlMapped(a.entryPoint)}">
+                                    <a href="${new Parameter().urlMapped(a.entryPoint)}">
                                         <div class="taack-app" style="width: 220px; padding: 35px; text-align: center;display: inline-grid;">${a.svg}<div><b>${a.label}</b><br>${a.desc}</div></div>
                                     </a>
                                     """.stripIndent())

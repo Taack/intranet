@@ -3,13 +3,12 @@ package crew
 import grails.compiler.GrailsCompileStatic
 import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.SpringSecurityService
+import jakarta.annotation.PostConstruct
 import org.codehaus.groovy.runtime.MethodClosure as MC
 import attachment.DocumentAccess
 import taack.app.TaackApp
 import taack.app.TaackAppRegisterService
 import taack.render.TaackUiEnablerService
-
-import javax.annotation.PostConstruct
 
 @GrailsCompileStatic
 class CrewSecurityService {
