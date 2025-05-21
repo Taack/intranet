@@ -9,14 +9,13 @@ import grails.compiler.GrailsCompileStatic
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import taack.ast.annotation.TaackFieldEnum
+import taack.user.TaackUser
 
 @GrailsCompileStatic
 @TaackFieldEnum
 @EqualsAndHashCode(includes = 'username')
 @ToString(includes = 'username', includeNames = true, includePackage = false)
-class User implements Serializable {
-
-    private static final long serialVersionUID = 1
+class User extends TaackUser {
     User userCreated
     Date dateCreated
 
