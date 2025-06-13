@@ -1,11 +1,12 @@
 plugins {
     id 'taack-grails-plugin'
+    id 'org.apache.grails.gradle.grails-gsp'
     id 'com.bertramlabs.asset-pipeline'
 }
 
 dependencies {
-    implementation 'org.graalvm.polyglot:polyglot:24.1.1'
-    runtimeOnly("com.bertramlabs.plugins:asset-pipeline-grails:${assetPipelineGrails}")
+    implementation "org.apache.grails:grails-gsp"
+    runtimeOnly "com.bertramlabs.plugins:asset-pipeline-grails"
 }
 
 assets {

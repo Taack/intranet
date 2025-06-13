@@ -1,8 +1,8 @@
 plugins {
     id 'java-library'
     id "groovy"
-    id "org.grails.grails-web"
-    id "org.grails.grails-gsp"
+    id 'org.apache.grails.gradle.grails-web'
+    id 'org.apache.grails.gradle.grails-gsp'
     id "idea"
     id "eclipse"
 }
@@ -13,43 +13,45 @@ group = "org.taack"
 repositories {
     mavenLocal()
     mavenCentral()
+    maven { url "https://repository.apache.org/content/groups/public" }
+    maven { url "https://repo.grails.org/grails/restricted" }
     maven { url "https://repo.grails.org/grails/core/" }
     gradlePluginPortal()
 }
 
-// https://docs.spring.io/spring-boot/index.html
-dependencyManagement {
-    dependencies {
-        dependency "org.apache.solr:solr-solrj:${solrj}"
-
-        // 9.4.53.v20231009
-        dependency "org.eclipse.jetty.http2:http2-common:${jetty}"
-        dependency "org.eclipse.jetty.http2:http2-client:${jetty}"
-        dependency "org.eclipse.jetty.http2:http2-hpack:${jetty}"
-        dependency "org.eclipse.jetty.http2:http2-http-client-transport:${jetty}"
-        dependency "org.eclipse.jetty:jetty-alpn-client:${jetty}"
-        dependency "org.eclipse.jetty:jetty-http:${jetty}"
-        dependency "org.eclipse.jetty:jetty-io:${jetty}"
-        dependency "org.eclipse.jetty:jetty-util:${jetty}"
-        dependency "org.eclipse.jetty:jetty-client:${jetty}"
-        dependency "org.eclipse.jetty:jetty-alpn-java-client:${jetty}"
-    }
-}
+//// https://docs.spring.io/spring-boot/index.html
+//dependencyManagement {
+//    dependencies {
+//        dependency "org.apache.solr:solr-solrj:${solrj}"
+//
+//        // 9.4.53.v20231009
+//        dependency "org.eclipse.jetty.http2:http2-common:${jetty}"
+//        dependency "org.eclipse.jetty.http2:http2-client:${jetty}"
+//        dependency "org.eclipse.jetty.http2:http2-hpack:${jetty}"
+//        dependency "org.eclipse.jetty.http2:http2-http-client-transport:${jetty}"
+//        dependency "org.eclipse.jetty:jetty-alpn-client:${jetty}"
+//        dependency "org.eclipse.jetty:jetty-http:${jetty}"
+//        dependency "org.eclipse.jetty:jetty-io:${jetty}"
+//        dependency "org.eclipse.jetty:jetty-util:${jetty}"
+//        dependency "org.eclipse.jetty:jetty-client:${jetty}"
+//        dependency "org.eclipse.jetty:jetty-alpn-java-client:${jetty}"
+//    }
+//}
 
 dependencies {
-    compileOnly("io.micronaut:micronaut-inject-groovy")
-    implementation("org.grails:grails-core")
-    implementation("org.grails:grails-logging")
-    implementation("org.grails:grails-plugin-databinding")
-    implementation("org.grails:grails-plugin-i18n")
-    implementation("org.grails:grails-plugin-interceptors")
-    implementation("org.grails.plugins:async")
-    implementation("org.grails:grails-plugin-rest")
-    implementation("org.grails:grails-plugin-services")
-    implementation("org.grails:grails-plugin-url-mappings")
-    implementation("org.grails:grails-web-boot")
-    implementation("org.grails.plugins:gsp")
-    implementation("org.grails.plugins:hibernate5")
+    implementation platform("org.apache.grails:grails-bom:$grailsVersion")
+    implementation("org.apache.grails:grails-core")
+    implementation("org.apache.grails:grails-logging")
+    implementation("org.apache.grails:grails-databinding")
+    implementation("org.apache.grails:grails-i18n")
+    implementation("org.apache.grails:grails-interceptors")
+    implementation("org.apache.grails:grails-async")
+//    implementation("org.apache.grails:grails-rest")
+    implementation("org.apache.grails:grails-services")
+    implementation("org.apache.grails:grails-url-mappings")
+    implementation("org.apache.grails:grails-web-boot")
+    implementation("org.apache.grails:grails-gsp")
+    implementation("org.apache.grails:grails-data-hibernate5")
 //    implementation("org.hibernate:hibernate-core:5.6.14.Final")
 //    implementation "org.grails.plugins:events"
     implementation("org.springframework.boot:spring-boot-autoconfigure")
@@ -63,8 +65,8 @@ dependencies {
     runtimeOnly("org.apache.tomcat:tomcat-jdbc")
 //    runtimeOnly("org.glassfish.web:el-impl:2.2.1-b05")
     testImplementation("io.micronaut:micronaut-inject-groovy")
-    testImplementation("org.grails:grails-gorm-testing-support")
-    testImplementation("org.grails:grails-web-testing-support")
+    testImplementation("org.apache.grails:grails-gorm-testing-support")
+    testImplementation("org.apache.grails:grails-web-testing-support")
     testImplementation("org.grails.plugins:geb")
     testImplementation("org.mockito:mockito-core")
     testImplementation("org.seleniumhq.selenium:selenium-api:${selenium}")
@@ -75,7 +77,11 @@ dependencies {
     testImplementation("io.micronaut:micronaut-http-client")
 
     implementation "org.taack:taack-ui:${taackUiVersion}"
-    implementation "org.grails.plugins:spring-security-core:${grailsSpringSecurity}"
+    implementation "org.taack:taack-ui-pdf:${taackUiVersion}"
+    implementation "org.taack:taack-ui-jdbc:${taackUiVersion}"
+    implementation "org.taack:taack-ui-search:${taackUiVersion}"
+    implementation "org.taack:taack-ui-ssh:${taackUiVersion}"
+    implementation "org.apache.grails:grails-spring-security:${grailsSpringSecurity}"
     implementation "com.google.protobuf:protobuf-java:${protobufVersion}"
     implementation 'org.questdb:questdb:8.2.1'
 }

@@ -1,6 +1,6 @@
 plugins {
     id 'taack-grails-common'
-    id 'org.grails.grails-plugin'
+    id 'org.apache.grails.gradle.grails-plugin'
 }
 
 bootJar.enabled = false

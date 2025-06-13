@@ -3,6 +3,7 @@ package attachement
 import attachment.config.AttachmentContentTypeCategory
 import crew.AttachmentController
 import grails.compiler.GrailsCompileStatic
+import jakarta.annotation.PostConstruct
 import org.codehaus.groovy.runtime.MethodClosure
 import org.grails.datastore.gorm.GormEntity
 import attachment.Attachment
@@ -12,7 +13,6 @@ import taack.solr.SolrFieldType
 import taack.solr.SolrSpecifier
 import taack.ui.dsl.UiBlockSpecifier
 
-import javax.annotation.PostConstruct
 
 @GrailsCompileStatic
 class AttachmentSearchService implements TaackSearchService.IIndexService {

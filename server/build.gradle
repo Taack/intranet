@@ -39,7 +39,7 @@ tasks.register('generateTaackAppTask', generateTaackApp.GenerateTaackAppTask) {
 
 grails {
     exploded = true
-    pathingJar = false
+//    pathingJar = false
 
     plugins {
         gradle.ext.taackPlugins.each {
