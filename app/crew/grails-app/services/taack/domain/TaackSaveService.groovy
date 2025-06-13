@@ -89,7 +89,7 @@ class TaackSaveService implements ResponseRenderer, ServletAttributes, DataBinde
     final <T extends GormEntity> T save(final T gormEntity, final FieldInfo[] lockedFields = null, final boolean doNotSave = false, boolean doNotBindParams = false) {
         final id = gormEntity.ident()
         if (lockedFields && lockedFields.size() == 0) return null
-        final String bindingName = params["fieldName"]
+        final String bindingName = params.get("fieldName")
         Map includeOrExclude = null
         if (lockedFields) {
             if (lockedFields[0]) {

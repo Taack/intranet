@@ -226,7 +226,7 @@ class AttachmentController {
 
     def editAttachment(Attachment attachment) {
         taackUiService.show(new UiBlockSpecifier().ui {
-            String selectActionUrl = params["selectActionUrl"]
+            String selectActionUrl = params.get("selectActionUrl")
             if (!selectActionUrl) {
                 modal {
                     form attachmentUiService.buildAttachmentForm(attachment ?: new Attachment()), TaackAttachmentService.additionalCreate?.closure
@@ -244,7 +244,7 @@ class AttachmentController {
     def saveAttachment() {
         Attachment a = taackSaveService.save(Attachment)
         if (a.validate()) {
-            String selectActionUrl = params["selectActionUrl"]
+            String selectActionUrl = params.get("selectActionUrl")
             if (selectActionUrl) {
                 redirect url: selectActionUrl.replace("&#61;", "=") + "&id=${a.id}&isAjax=true"
             } else {
@@ -297,7 +297,7 @@ class AttachmentController {
     }
 
     def downloadBinExtensionForAttachment(Attachment attachment) {
-        String ext = (params['extension'] as String)?.toLowerCase()
+        String ext = (params.get('extension') as String)?.toLowerCase()
         def f = TaackAttachmentService.convertExtension(attachment, ext)
         if (f?.exists()) {
             response.setContentType("application/${ext}")

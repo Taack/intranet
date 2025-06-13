@@ -20,7 +20,7 @@ class MarkdownController {
     }
 
     def selectAttachment() {
-        if (params['directUpload'] == "true") {
+        if (params.get('directUpload') == "true") {
             redirect action: "uploadAttachment", params: [directUpload: true, isAjax: true]
             return
         }

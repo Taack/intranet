@@ -276,7 +276,7 @@ final class AttachmentUiService implements WebAttributes {
                 for (Term term in termList) {
                     rowIndent {
                         List<Term> children = Term.findAllByActiveAndParent(true, term)
-                        boolean hasChildren = children.size() > 0 && this.params['_filterExpression_parent_EQ'] != "0"
+                        boolean hasChildren = children.size() > 0 && this.params.get('_filterExpression_parent_EQ') != "0"
                         rowTree hasChildren, {
                             rowColumn {
                                 if (selectMode)

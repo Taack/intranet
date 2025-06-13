@@ -1,21 +1,16 @@
 package taack.website
 
-import crew.config.BusinessUnit
-import grails.plugin.springsecurity.SpringSecurityService
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Component
 import crew.Role
 import crew.User
+import crew.UserRole
+import crew.config.BusinessUnit
 import grails.compiler.GrailsCompileStatic
 import org.springframework.beans.factory.annotation.Value
-import crew.UserRole
+import org.springframework.stereotype.Component
 
 @GrailsCompileStatic
 @Component
 class BootStrap {
-
-    @Autowired
-    SpringSecurityService springSecurityService
 
     @Value('${taack.admin.password}')
     String adminPassword
@@ -27,7 +22,7 @@ class BootStrap {
     }
 
     def createDefaultRoleAndUser() {
-        log.info "Creating default user and role ..."
+        log.info "Creating default user and role ... $adminPassword"
         User.withNewTransaction {
             def r = Role.findByAuthority("ROLE_ADMIN")
             if (!r) {
@@ -37,7 +32,7 @@ class BootStrap {
             }
             def u = User.findByUsername("admin")
             if (!u) {
-                u = new User(username: "admin", password: springSecurityService.encodePassword(adminPassword), businessUnit: BusinessUnit.IT)
+                u = new User(username: "admin", password: "{noop}$adminPassword", businessUnit: BusinessUnit.IT)
                 u.save(flush: true)
                 if (u.hasErrors()) log.error "${u.errors}"
                 def ur = UserRole.create(u, r, true)

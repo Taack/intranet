@@ -367,8 +367,8 @@ class CrewController implements WebAttributes {
     @Secured(["ROLE_ADMIN", "ROLE_SWITCH_USER"])
     @Transactional
     def doReplaceUser() {
-        User userFrom = User.findByUsername(params['userFrom'])
-        User userTo = User.findByUsername(params['userTo'])
+        User userFrom = User.findByUsername(params.get("userFrom") as String)
+        User userTo = User.findByUsername(params.get('userTo') as String)
         User.withNewTransaction {
             (UserRole.findAllByUser(userFrom) as List<UserRole>)*.delete()
         }
