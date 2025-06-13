@@ -4,6 +4,7 @@ plugins {
 }
 
 dependencies {
+
 //    implementation 'org.graalvm.polyglot:polyglot:24.1.1'
     runtimeOnly("com.bertramlabs.plugins:asset-pipeline-grails")
 }
@@ -13,19 +14,19 @@ assets {
     minifyCss = true
     skipNonDigests = true
 
-//    configOptions = [
-//            commonJs: false,
-//            babel: [
-//                    enabled: false,
-//                    processJsFiles: false
-//            ]
-//    ] //useful for custom config on extension libraries
-//
-//    excludes = ['reveal.js/plugin/*/plugin.js', '**/*esm*']
+    configOptions = [
+            commonJs: false,
+            babel: [
+                    enabled: false,
+                    processJsFiles: false
+            ]
+    ] //useful for custom config on extension libraries
+
+    excludes = ['reveal.js/plugin/*/plugin.js', '**/*esm*', 'nomin/**']
 
     //developmentRuntime can be turned off
-//    developmentRuntime = false
+    developmentRuntime = false
 
     //if you want to customize the jar task this task runs on you can specify a jarTaskName
-//    jarTaskName = null
+    jarTaskName = null
 }

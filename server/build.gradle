@@ -1,7 +1,5 @@
 plugins {
     id 'taack-grails-webapp'
-//    id "com.github.erdi.webdriver-binaries" version "3.2"
-
 }
 
 application {

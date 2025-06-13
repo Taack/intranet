@@ -1,9 +1,7 @@
 plugins {
-    id "groovy"
-    id "org.grails.grails-web"
-    id "org.grails.grails-gsp"
-    id "idea"
-    id "eclipse"
+    id 'java-library'
+    id 'org.apache.grails.gradle.grails-gsp'
+    id 'org.apache.grails.gradle.grails-plugin'
 }
 
 version = "0.6"
@@ -12,81 +10,85 @@ group = "org.taack"
 repositories {
     mavenLocal()
     mavenCentral()
-    maven { url = 'https://repository.apache.org/content/groups/snapshots' }
-    maven { url "https://repo.grails.org/grails/core/" }
     gradlePluginPortal()
+    maven { url "https://repository.apache.org/content/groups/public" }
+    maven { url "https://repo.grails.org/grails/restricted" }
 }
 
 // https://docs.spring.io/spring-boot/index.html
-dependencyManagement {
-    dependencies {
-        dependency "org.apache.solr:solr-solrj:${solrj}"
-
-        // 9.4.53.v20231009
-        dependency "org.eclipse.jetty.http2:http2-common:${jetty}"
-        dependency "org.eclipse.jetty.http2:http2-client:${jetty}"
-        dependency "org.eclipse.jetty.http2:http2-hpack:${jetty}"
-        dependency "org.eclipse.jetty.http2:http2-http-client-transport:${jetty}"
-        dependency "org.eclipse.jetty:jetty-alpn-client:${jetty}"
-        dependency "org.eclipse.jetty:jetty-http:${jetty}"
-        dependency "org.eclipse.jetty:jetty-io:${jetty}"
-        dependency "org.eclipse.jetty:jetty-util:${jetty}"
-        dependency "org.eclipse.jetty:jetty-client:${jetty}"
-        dependency "org.eclipse.jetty:jetty-alpn-java-client:${jetty}"
-    }
-}
+//dependencyManagement {
+//    dependencies {
+//        dependency "org.apache.solr:solr-solrj:${solrj}"
+//
+//        // 9.4.53.v20231009
+//        dependency "org.eclipse.jetty.http2:http2-common:${jetty}"
+//        dependency "org.eclipse.jetty.http2:http2-client:${jetty}"
+//        dependency "org.eclipse.jetty.http2:http2-hpack:${jetty}"
+//        dependency "org.eclipse.jetty.http2:http2-http-client-transport:${jetty}"
+//        dependency "org.eclipse.jetty:jetty-alpn-client:${jetty}"
+//        dependency "org.eclipse.jetty:jetty-http:${jetty}"
+//        dependency "org.eclipse.jetty:jetty-io:${jetty}"
+//        dependency "org.eclipse.jetty:jetty-util:${jetty}"
+//        dependency "org.eclipse.jetty:jetty-client:${jetty}"
+//        dependency "org.eclipse.jetty:jetty-alpn-java-client:${jetty}"
+//    }
+//}
 
 dependencies {
     implementation platform("org.apache.grails:grails-bom:$grailsVersion")
-    implementation "org.apache.grails:grails-core"
-    implementation "org.apache.grails:grails-data-hibernate5"
-    implementation "org.apache.grails:grails-databinding"
-    implementation "org.apache.grails:grails-gsp"
-    implementation "org.apache.grails:grails-i18n"
-    implementation "org.apache.grails:grails-interceptors"
-    implementation "org.apache.grails:grails-logging"
+    implementation("org.apache.grails:grails-core")
+    implementation("org.apache.grails:grails-logging")
     implementation "org.apache.grails:grails-rest-transforms"
-    implementation "org.apache.grails:grails-scaffolding"
-    implementation "org.apache.grails:grails-services"
-    implementation "org.apache.grails:grails-url-mappings"
-    implementation "org.apache.grails:grails-web-boot"
-    implementation "org.hibernate.validator:hibernate-validator"
-    implementation "org.springframework.boot:spring-boot-autoconfigure"
-    implementation "org.springframework.boot:spring-boot-starter"
-    implementation "org.springframework.boot:spring-boot-starter-actuator"
-    implementation "org.springframework.boot:spring-boot-starter-logging"
-    implementation "org.springframework.boot:spring-boot-starter-tomcat"
-    implementation "org.springframework.boot:spring-boot-starter-validation"
-//    console "org.apache.grails:grails-console"
-    runtimeOnly "com.bertramlabs.plugins:asset-pipeline-grails"
-    runtimeOnly "com.zaxxer:HikariCP"
-    runtimeOnly "org.fusesource.jansi:jansi"
+    implementation("org.apache.grails:grails-databinding")
+    implementation("org.apache.grails:grails-i18n")
+    implementation("org.apache.grails:grails-interceptors")
+    implementation("org.apache.grails:grails-async")
+//    implementation("org.apache.grails:grails-rest")
+    implementation("org.apache.grails:grails-services")
+    implementation("org.apache.grails:grails-url-mappings")
+    implementation("org.apache.grails:grails-web-boot")
+    implementation("org.apache.grails:grails-gsp")
+    implementation("org.apache.grails:grails-converters")
+    implementation("org.apache.grails:grails-data-hibernate5")
+//    implementation "org.apache.grails:grails-rest-transform"
+
+//    implementation("org.hibernate:hibernate-core:5.6.14.Final")
+    implementation "org.apache.grails:grails-events"
+    implementation("org.springframework.boot:spring-boot-autoconfigure")
+    implementation("org.springframework.boot:spring-boot-starter")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("org.springframework.boot:spring-boot-starter-logging")
+    implementation("org.springframework.boot:spring-boot-starter-tomcat")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
     runtimeOnly("com.h2database:h2")
-//    integrationTestImplementation testFixtures("org.apache.grails:grails-geb")
-//    testImplementation "org.apache.grails:grails-testing-support-datamapping"
-//    testImplementation "org.apache.grails:grails-testing-support-web"
-//    testImplementation "org.spockframework:spock-core"
-//    testImplementation "org.testcontainers:postgresql"
-//    testImplementation "org.testcontainers:spock"
-//    testImplementation "org.testcontainers:testcontainers"
+    runtimeOnly("javax.xml.bind:jaxb-api:2.3.1")
+    implementation("org.apache.tomcat:tomcat-jdbc")
+    runtimeOnly("org.glassfish.web:el-impl:2.2.1-b05")
+//    testImplementation("io.micronaut:micronaut-inject-groovy")
+    testImplementation("org.apache.grails:grails-gorm-testing-support")
+    testImplementation("org.apache.grails:grails-web-testing-support")
+    testImplementation("org.grails.plugins:geb")
+    testImplementation("org.mockito:mockito-core")
+    testImplementation("org.seleniumhq.selenium:selenium-api:${selenium}")
+    testImplementation("org.seleniumhq.selenium:selenium-remote-driver:${selenium}")
+    testImplementation("org.seleniumhq.selenium:selenium-support:${selenium}")
+    testRuntimeOnly("org.seleniumhq.selenium:selenium-chrome-driver:${selenium}")
+    testRuntimeOnly("org.seleniumhq.selenium:selenium-firefox-driver:${selenium}")
+    testImplementation("io.micronaut:micronaut-http-client")
 
     implementation "org.taack:taack-ui:${taackUiVersion}"
-    implementation "org.grails.plugins:spring-security-core:${grailsSpringSecurity}"
+    implementation "org.taack:taack-ui-pdf:${taackUiVersion}"
+    implementation "org.taack:taack-ui-search:${taackUiVersion}"
+    implementation "org.taack:taack-ui-jdbc:${taackUiVersion}"
+    implementation "org.apache.grails:grails-spring-security:${grailsSpringSecurity}"
+//    implementation "org.grails.plugins:spring-security-rest:${grailsSpringSecurityRest}"
     implementation "com.google.protobuf:protobuf-java:${protobufVersion}"
     implementation 'org.questdb:questdb:8.2.1'
 }
-//
+
 //java {
 //    sourceCompatibility = JavaVersion.toVersion("17")
 //}
-
-tasks.withType(Test) {
-    useJUnitPlatform()
-    systemProperty "geb.env", System.getProperty('geb.env')
-    systemProperty "geb.build.reportsDir", reporting.file("geb/integrationTest")
-    systemProperty 'webdriver.chrome.driver', "${System.getenv('CHROMEWEBDRIVER')}/chromedriver"
-    systemProperty 'webdriver.gecko.driver', "${System.getenv('GECKOWEBDRIVER')}/geckodriver"
-}
 
 tasks.named("jar") {
     duplicatesStrategy = 'include'

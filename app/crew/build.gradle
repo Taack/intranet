@@ -8,6 +8,10 @@ dependencies {
     implementation "org.apache.tika:tika-parsers-standard:${tika}"
     implementation "org.apache.tika:tika-parser-ocr-module:${tika}"
     implementation "org.apache.tika:tika-parser-html-module:${tika}"
+
+    implementation "org.taack:taack-ui-search:${taackUiVersion}"
+    implementation "org.taack:taack-ui-ssh:${taackUiVersion}"
+
 }
 
 grails {
