@@ -2,14 +2,6 @@ plugins {
     id 'groovy-gradle-plugin'
 }
 
-repositories {
-    mavenLocal()
-    mavenCentral()
-    gradlePluginPortal() // so that external plugins can be resolved in dependencies section
-    maven { url "https://repository.apache.org/content/groups/public" }
-    maven { url "https://repo.grails.org/grails/restricted" }
-}
-
 Properties properties = new Properties()
 FileInputStream input = new FileInputStream(file('../gradle.properties'))
 properties.load(input)
@@ -19,10 +11,18 @@ for (String key : properties.stringPropertyNames()) {
     ext.set(key, properties.getProperty(key))
 }
 
+repositories {
+    mavenLocal()
+    mavenCentral()
+    gradlePluginPortal() // so that external plugins can be resolved in dependencies section
+    maven { url "https://repository.apache.org/content/groups/public" }
+    maven { url "https://repo.grails.org/grails/restricted" }
+}
+
 dependencies {
-//    implementation platform("org.apache.grails:grails-bom:$grailsVersion")
+    implementation platform("org.apache.grails:grails-bom:$grailsVersion")
     implementation "org.grails:grails-gradle-plugin:7.0.0-M4"
-//    implementation "com.bertramlabs.plugins:asset-pipeline-gradle"
+    implementation "com.bertramlabs.plugins:asset-pipeline-gradle"
 //    implementation 'org.openjdk.nashorn:nashorn-core:15.4'
 //    implementation "org.grails.plugins:hibernate5"
 }

@@ -2,9 +2,11 @@ plugins {
     id 'taack-grails-webapp'
 }
 
-application {
-    mainClass.set("taack.website.Application")
+dependencies {
+    implementation "org.apache.grails:grails-spring-security:${grailsSpringSecurity}"
 }
+
+compileJava.options.release = 17
 
 bootRun {
     ignoreExitValue true
@@ -30,13 +32,17 @@ bootJar {
 
 grails {
     exploded = true
-    pathingJar = false
 
     plugins {
         gradle.ext.taackPlugins.each {
             implementation project(':' + it)
         }
     }
+}
+
+assets {
+    minifyJs = true
+    minifyCss = true
 }
 
 //webdriverBinaries {
