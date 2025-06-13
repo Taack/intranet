@@ -1,9 +1,9 @@
 import org.apache.tools.ant.taskdefs.condition.Os
 
 plugins {
-    id 'taack-grails-plugin'
+    id 'taack-grails-common'
+    id 'org.apache.grails.gradle.grails-app'
     id 'taack-grails-assets-app'
-    id 'application'
 }
 
 dependencies {
@@ -16,7 +16,11 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-logging")
     implementation("org.springframework.boot:spring-boot-starter-tomcat")
     implementation("org.springframework.boot:spring-boot-starter-validation")
-    runtimeOnly("com.h2database:h2")
+
+    profile "org.apache.grails.profiles:web"
+    runtimeOnly "com.h2database:h2"
+    runtimeOnly "com.zaxxer:HikariCP"
+    runtimeOnly "com.bertramlabs.plugins:asset-pipeline-grails"
     runtimeOnly("org.apache.tomcat:tomcat-jdbc")
 }
 

@@ -59,3 +59,7 @@ grails {
 //    geckodriver '0.33.0'
 //    edgedriver '110.0.1587.57'
 //}
+assets {
+    minifyJs = true
+    minifyCss = true
+}

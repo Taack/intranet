@@ -1,8 +1,7 @@
 plugins {
     id 'java-library'
-    id "groovy"
-    id 'org.apache.grails.gradle.grails-app'
     id 'org.apache.grails.gradle.grails-gsp'
+    id 'org.apache.grails.gradle.grails-plugin'
 }
 
 version = "0.6"
