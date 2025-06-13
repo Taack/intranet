@@ -4,23 +4,25 @@ plugins {
 
 }
 
-application {
-    mainClass.set("taack.website.Application")
-}
+group = "server"
 
-bootRun {
-    ignoreExitValue true
-    jvmArgs(
-            '-Dspring.output.ansi.enabled=always',
-            '-noverify',
-            '-XX:TieredStopAtLevel=1',
-            '-Xmx1024m',
-            '-Xss8m'
-    )
-    sourceResources sourceSets.main
-    String springProfilesActive = 'spring.profiles.active'
-    systemProperty springProfilesActive, System.getProperty(springProfilesActive)
-}
+//application {
+//    mainClass.set("taack.website.Application")
+//}
+
+//bootRun {
+//    ignoreExitValue true
+//    jvmArgs(
+//            '-Dspring.output.ansi.enabled=always',
+//            '-noverify',
+//            '-XX:TieredStopAtLevel=1',
+//            '-Xmx1024m',
+//            '-Xss8m'
+//    )
+//    sourceResources sourceSets.main
+//    String springProfilesActive = 'spring.profiles.active'
+//    systemProperty springProfilesActive, System.getProperty(springProfilesActive)
+//}
 
 bootJar {
     enabled = true
@@ -30,18 +32,22 @@ bootJar {
     }
 }
 
-tasks.register('generateTaackAppTask', generateTaackApp.GenerateTaackAppTask) {
-    group = 'help'
-    description = 'Create a Taack app module'
-    outputDirectory = file('../app')
-    appName = System.getProperty("modName")
-}
+//tasks.register('generateTaackAppTask', generateTaackApp.GenerateTaackAppTask) {
+//    group = 'help'
+//    description = 'Create a Taack app module'
+//    outputDirectory = file('../app')
+//    appName = System.getProperty("modName")
+//}
 
 grails {
     exploded = true
 //    pathingJar = false
 
     plugins {
+        implementation 'org.taack:taack-ui'
+        implementation 'org.taack:taack-ui-pdf'
+        implementation 'org.taack:taack-ui-jdbc'
+
         gradle.ext.taackPlugins.each {
             implementation project(':' + it)
         }

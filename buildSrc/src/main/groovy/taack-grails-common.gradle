@@ -1,10 +1,8 @@
 plugins {
     id 'java-library'
     id "groovy"
-    id 'org.apache.grails.gradle.grails-web'
+    id 'org.apache.grails.gradle.grails-app'
     id 'org.apache.grails.gradle.grails-gsp'
-    id "idea"
-    id "eclipse"
 }
 
 version = "0.6"
@@ -19,28 +17,20 @@ repositories {
     gradlePluginPortal()
 }
 
-//// https://docs.spring.io/spring-boot/index.html
-//dependencyManagement {
-//    dependencies {
-//        dependency "org.apache.solr:solr-solrj:${solrj}"
-//
-//        // 9.4.53.v20231009
-//        dependency "org.eclipse.jetty.http2:http2-common:${jetty}"
-//        dependency "org.eclipse.jetty.http2:http2-client:${jetty}"
-//        dependency "org.eclipse.jetty.http2:http2-hpack:${jetty}"
-//        dependency "org.eclipse.jetty.http2:http2-http-client-transport:${jetty}"
-//        dependency "org.eclipse.jetty:jetty-alpn-client:${jetty}"
-//        dependency "org.eclipse.jetty:jetty-http:${jetty}"
-//        dependency "org.eclipse.jetty:jetty-io:${jetty}"
-//        dependency "org.eclipse.jetty:jetty-util:${jetty}"
-//        dependency "org.eclipse.jetty:jetty-client:${jetty}"
-//        dependency "org.eclipse.jetty:jetty-alpn-java-client:${jetty}"
-//    }
-//}
-
 dependencies {
     implementation platform("org.apache.grails:grails-bom:$grailsVersion")
-    implementation("org.apache.grails:grails-core")
+    developmentOnly("org.springframework.boot:spring-boot-devtools")
+    console "org.apache.grails:grails-console"
+
+    implementation "org.springframework.boot:spring-boot-starter-logging"
+    implementation "org.springframework.boot:spring-boot-starter-validation"
+    implementation "org.springframework.boot:spring-boot-autoconfigure"
+    implementation "org.springframework.boot:spring-boot-starter"
+    implementation "org.apache.grails:grails-core"
+    implementation "org.apache.grails:grails-gsp"
+
+    profile "org.apache.grails.profiles:web-plugin"
+
     implementation("org.apache.grails:grails-logging")
     implementation("org.apache.grails:grails-databinding")
     implementation("org.apache.grails:grails-i18n")
@@ -48,33 +38,7 @@ dependencies {
     implementation("org.apache.grails:grails-async")
     implementation("org.apache.grails:grails-rest-transforms")
     implementation("org.apache.grails:grails-services")
-    implementation("org.apache.grails:grails-url-mappings")
-    implementation("org.apache.grails:grails-web-boot")
-    implementation("org.apache.grails:grails-gsp")
     implementation("org.apache.grails:grails-data-hibernate5")
-//    implementation("org.hibernate:hibernate-core:5.6.14.Final")
-//    implementation "org.grails.plugins:events"
-    implementation("org.springframework.boot:spring-boot-autoconfigure")
-    implementation("org.springframework.boot:spring-boot-starter")
-    implementation("org.springframework.boot:spring-boot-starter-actuator")
-    implementation("org.springframework.boot:spring-boot-starter-logging")
-    implementation("org.springframework.boot:spring-boot-starter-tomcat")
-    implementation("org.springframework.boot:spring-boot-starter-validation")
-    runtimeOnly("com.h2database:h2")
-//    runtimeOnly("javax.xml.bind:jaxb-api:2.3.1")
-    runtimeOnly("org.apache.tomcat:tomcat-jdbc")
-//    runtimeOnly("org.glassfish.web:el-impl:2.2.1-b05")
-    testImplementation("io.micronaut:micronaut-inject-groovy")
-    testImplementation("org.apache.grails:grails-gorm-testing-support")
-    testImplementation("org.apache.grails:grails-web-testing-support")
-    testImplementation("org.grails.plugins:geb")
-    testImplementation("org.mockito:mockito-core")
-    testImplementation("org.seleniumhq.selenium:selenium-api:${selenium}")
-    testImplementation("org.seleniumhq.selenium:selenium-remote-driver:${selenium}")
-    testImplementation("org.seleniumhq.selenium:selenium-support:${selenium}")
-    testRuntimeOnly("org.seleniumhq.selenium:selenium-chrome-driver:${selenium}")
-    testRuntimeOnly("org.seleniumhq.selenium:selenium-firefox-driver:${selenium}")
-    testImplementation("io.micronaut:micronaut-http-client")
 
     implementation "org.taack:taack-ui:${taackUiVersion}"
     implementation "org.taack:taack-ui-pdf:${taackUiVersion}"

@@ -7,9 +7,16 @@ plugins {
 }
 
 dependencies {
-//    developmentOnly 'org.springframework.boot:spring-boot-devtools'
-//    console 'org.grails:grails-console'
-    implementation "org.apache.grails:grails-gsp"
-    profile 'org.grails.profiles:web'
+    implementation("org.apache.grails:grails-web-boot")
+    implementation("org.apache.grails:grails-gsp")
+
+    implementation("org.springframework.boot:spring-boot-autoconfigure")
+    implementation("org.springframework.boot:spring-boot-starter")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("org.springframework.boot:spring-boot-starter-logging")
+    implementation("org.springframework.boot:spring-boot-starter-tomcat")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
+    runtimeOnly("com.h2database:h2")
+    runtimeOnly("org.apache.tomcat:tomcat-jdbc")
 }
 
