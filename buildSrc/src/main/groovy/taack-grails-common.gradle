@@ -49,9 +49,9 @@ dependencies {
     implementation 'org.questdb:questdb:8.2.1'
 }
 
-java {
-    sourceCompatibility = JavaVersion.toVersion("17")
-}
+//java {
+//    sourceCompatibility = JavaVersion.toVersion("17")
+//}
 
 tasks.withType(Test) {
     useJUnitPlatform()
