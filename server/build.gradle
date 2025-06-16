@@ -20,7 +20,7 @@ bootRun {
             '-Xss8m'
     )
 //    sourceResources sourceSets.main
-    String springProfilesActive = 'spring.profiles.active'
+//    String springProfilesActive = 'spring.profiles.active'
 //    systemProperty springProfilesActive, System.getProperty(springProfilesActive)
 }
 

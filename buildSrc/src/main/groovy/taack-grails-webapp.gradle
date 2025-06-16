@@ -1,5 +1,3 @@
-import org.apache.tools.ant.taskdefs.condition.Os
-
 plugins {
     id 'taack-grails-common'
     id 'org.apache.grails.gradle.grails-app'

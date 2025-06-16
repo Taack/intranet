@@ -25,5 +25,4 @@ dependencies {
     implementation "org.apache.grails:grails-gradle-plugins"
 //    implementation "org.apache.grails:grails-data-hibernate5"
     implementation "com.bertramlabs.plugins:asset-pipeline-gradle"
-
 }
