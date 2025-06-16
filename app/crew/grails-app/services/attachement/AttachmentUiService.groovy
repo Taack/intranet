@@ -84,7 +84,7 @@ final class AttachmentUiService implements WebAttributes {
         """<div style="text-align: center;"><img style="max-height: 420px" src="${applicationTagLib.createLink(controller: 'attachment', action: 'previewFull', id: id)}${p ? "?$p" : ""}"></div>"""
     }
 
-    UiTableSpecifier buildAttachmentsTable(final UiFilterSpecifier f, final MC selectMC = null, final Long objectId = null) {
+    UiTableSpecifier buildAttachmentsTable(final UiFilterSpecifier f, final MC selectMC = null, final Long objectId = null, Long... ids) {
         Attachment a = new Attachment(active: true, userCreated: new User())
         UiTableSpecifier t = new UiTableSpecifier()
         t.ui {
@@ -108,6 +108,7 @@ final class AttachmentUiService implements WebAttributes {
             iterate(taackFilterService.getBuilder(Attachment)
                     .setMaxNumberOfLine(8)
                     .addFilter(f)
+                    .addRestrictedIds(ids)
                     .setSortOrder(TaackFilter.Order.DESC, a.dateCreated_)
                     .build()) { Attachment att ->
                 rowColumn {

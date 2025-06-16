@@ -20,7 +20,6 @@ import org.apache.tika.parser.AutoDetectParser
 import org.apache.tika.parser.ParseContext
 import org.apache.tika.parser.ocr.TesseractOCRConfig
 import org.apache.tika.sax.BodyContentHandler
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.web.multipart.MultipartFile
 import org.taack.*
@@ -35,9 +34,6 @@ class TaackAttachmentService implements WebAttributes, DataBinder {
     SpringSecurityService springSecurityService
 
     final Object imageConverter = new Object()
-
-    @Autowired
-    TaackUiConfiguration taackUiConfiguration
 
     @Value('${intranet.root}')
     String intranetRoot
@@ -188,7 +184,7 @@ class TaackAttachmentService implements WebAttributes, DataBinder {
     }
 
     File attachmentPreview(final Attachment attachment, PreviewFormat previewFormat = PreviewFormat.DEFAULT) {
-        if (!attachment) return new File("${taackUiConfiguration.resources}/noPreview.${previewFormat.previewExtension}")
+        if (!attachment) return new File("${TaackUiConfiguration.resources}/noPreview.${previewFormat.previewExtension}")
         final File preview = new File(attachmentPreviewPath(previewFormat, attachment))
         if (preview.exists()) {
             return preview
@@ -229,7 +225,7 @@ class TaackAttachmentService implements WebAttributes, DataBinder {
                 log.error "attachmentPreview killed before finishing for ${attachment.name} ${eio}"
             }
         }
-        return new File("${taackUiConfiguration.resources}/noPreview.${previewFormat.previewExtension}")
+        return new File("${TaackUiConfiguration.resources}/noPreview.${previewFormat.previewExtension}")
     }
 
     static void registerPreviewConverter(IAttachmentPreviewConverter previewConverter) {
