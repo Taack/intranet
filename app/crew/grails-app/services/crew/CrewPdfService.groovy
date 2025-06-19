@@ -87,14 +87,14 @@ class CrewPdfService implements WebAttributes {
         new UiPrintableSpecifier().ui {
             printableHeaderLeft('5.5cm') {
                 show new UiShowSpecifier().ui {
-//                    field null, """<img src="data:image/svg+xml;base64, ${Base64.getEncoder().encodeToString(this.taackUiService.dumpAsset("taack-logo-small-web.svg").bytes)}"/>"""
-//                    field null, """<img src="data:image/png;base64, ${Base64.getEncoder().encodeToString(this.taackUiService.dumpAssetBin("taack-logo-small-web.png"))}"/>"""
-                    field "Printed For", """${cu.firstName} ${cu.lastName}"""
+//                    field null, '''<img src='data:image/svg+xml;base64, ${Base64.getEncoder().encodeToString(this.taackUiService.dumpAsset('taack-logo-small-web.svg').bytes)}'/>'''
+//                    field null, '''<img src='data:image/png;base64, ${Base64.getEncoder().encodeToString(this.taackUiService.dumpAssetBin('taack-logo-small-web.png'))}'/>'''
+                    field 'Printed For', """${cu.firstName} ${cu.lastName}"""
                 }, BlockSpec.Width.THIRD
                 show new UiShowSpecifier().ui {
                     field """\
-                        <div style="text-align: center;">
-                            <img src="data:image/svg+xml;base64, ${Base64.getEncoder().encodeToString(this.taackUiService.dumpAsset("taack-logo-small-web.svg").bytes)}"/>
+                        <div style='text-align: center;'>
+                            <img src="data:image/svg+xml;base64, ${Base64.getEncoder().encodeToString(this.taackUiService.dumpAsset('taack-logo-small-web.svg').bytes)}"/>
                         </div>
                     """.stripIndent()
                 }, BlockSpec.Width.THIRD
@@ -115,7 +115,7 @@ class CrewPdfService implements WebAttributes {
             }
             printableFooter {
                 show new UiShowSpecifier().ui {
-                    field "<b>Taackly</b> Powered"
+                    field '<b>Taackly</b> Powered'
                 }, BlockSpec.Width.MAX
             }
 

@@ -45,7 +45,7 @@ class AttachmentSecurityService {
                 AttachmentController.&inlineEdition as MC,
                 AttachmentController.&saveAttachment as MC
         )
-        TaackAppRegisterService.register(new TaackApp(AttachmentController.&index as MC, new String(AttachmentSecurityService.getResourceAsStream("/att/att.svg").readAllBytes())))
+        TaackAppRegisterService.register(new TaackApp(AttachmentController.&index as MC, new String(AttachmentSecurityService.getResourceAsStream('/att/att.svg').readAllBytes())))
     }
 
     boolean canEditFile(Attachment attachment, User user) {

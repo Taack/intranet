@@ -8,14 +8,14 @@ TODO: put user extra configuration accessible to server to centralize configurat
 @GrailsCompileStatic
 class CrewGrailsPlugin extends Plugin {
     // the version or versions of Grails the plugin is designed for
-    def grailsVersion = "4.0.3 > *"
+    def grailsVersion = '4.0.3 > *'
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
-            "grails-app/views/error.gsp"
+            'grails-app/views/error.gsp'
     ]
 
     // TODO Fill in these fields
-    def title = "Crew" // Headline display name of the plugin
+    def title = 'Crew' // Headline display name of the plugin
 
     def profiles = ['web']
 

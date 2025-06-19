@@ -39,15 +39,15 @@ class TaackAttachmentService implements WebAttributes, DataBinder {
     String intranetRoot
 
     String getStorePath() {
-        intranetRoot + "/attachment/store"
+        intranetRoot + '/attachment/store'
     }
 
     String getAttachmentTmpPath() {
-        intranetRoot + "/attachment/tmp"
+        intranetRoot + '/attachment/tmp'
     }
 
     String getAttachmentTxtPath() {
-        intranetRoot + "/attachment/txt"
+        intranetRoot + '/attachment/txt'
     }
 
     enum PreviewFormat {
@@ -66,7 +66,7 @@ class TaackAttachmentService implements WebAttributes, DataBinder {
         }
 
         String getPreviewExtension() {
-            isPdf ? "png" : "webp"
+            isPdf ? 'png' : 'webp'
         }
 
         String attachmentPreviewFileName(Attachment attachment) {
@@ -88,7 +88,7 @@ class TaackAttachmentService implements WebAttributes, DataBinder {
         if (attachment.originalName.contains('.'))
             attachment.contentShaOne + attachment.originalName.substring(attachment.originalName.lastIndexOf('.'))
         else
-            attachment.contentShaOne + ".NONE"
+            attachment.contentShaOne + '.NONE'
     }
 
     String attachmentPath(final Attachment attachment) {
@@ -101,9 +101,9 @@ class TaackAttachmentService implements WebAttributes, DataBinder {
 
     String attachmentTxtPath(final Attachment attachment) {
         if (attachment.originalName.contains('.'))
-            attachmentTxtPath + '/' + attachment.contentShaOne + attachment.originalName.substring(attachment.originalName.lastIndexOf('.')) + ".txt"
+            attachmentTxtPath + '/' + attachment.contentShaOne + attachment.originalName.substring(attachment.originalName.lastIndexOf('.')) + '.txt'
         else
-            attachmentTxtPath + '/' + attachment.contentShaOne + ".NONE" + ".txt"
+            attachmentTxtPath + '/' + attachment.contentShaOne + '.NONE' + '.txt'
     }
 
     String attachmentPreviewPath(final PreviewFormat previewFormat, final Attachment attachment) {
@@ -113,9 +113,9 @@ class TaackAttachmentService implements WebAttributes, DataBinder {
     enum ConvertMode {
         DIRECT_CONVERT,
         UNO_CONVERTER,
-        LO_CONVERT_TEXT_DOCUMENT("writer_pdf_Export"),
-        LO_CONVERT_SPREADSHEET("calc_pdf_Export"),
-        LO_CONVERT_PRESENTATION("impress_pdf_Export")
+        LO_CONVERT_TEXT_DOCUMENT('writer_pdf_Export'),
+        LO_CONVERT_SPREADSHEET('calc_pdf_Export'),
+        LO_CONVERT_PRESENTATION('impress_pdf_Export')
 
         ConvertMode(final String pdfFilter = null) {
             this.pdfFilter = pdfFilter
@@ -125,26 +125,26 @@ class TaackAttachmentService implements WebAttributes, DataBinder {
     }
 
     enum ConvertExtensions {
-        ICO(".ico", "image.webp", ConvertMode.DIRECT_CONVERT),
-        WEBP(".webp", "image.webp", ConvertMode.DIRECT_CONVERT),
-        JPG(".jpg", "image.webp", ConvertMode.DIRECT_CONVERT),
-        JPEG(".jpeg", "image.webp", ConvertMode.DIRECT_CONVERT),
-        PNM(".pnm", "image.webp", ConvertMode.DIRECT_CONVERT),
-        PNG(".png", "image.webp", ConvertMode.DIRECT_CONVERT),
-        PIX(".pix", "image.webp", ConvertMode.DIRECT_CONVERT),
-        PDF(".pdf", "image.webp", ConvertMode.DIRECT_CONVERT),
-        TIF(".tif", "image.webp", ConvertMode.DIRECT_CONVERT),
-        SVG(".svg", "image.webp", ConvertMode.DIRECT_CONVERT, false),
-        ODT(".odt", "doc.webp", ConvertMode.UNO_CONVERTER),
-        DOCX(".docx", "doc.webp", ConvertMode.UNO_CONVERTER),
-        DOC(".doc", "doc.webp", ConvertMode.UNO_CONVERTER),
-        XLS(".xls", "ods.webp", ConvertMode.UNO_CONVERTER),
-        XLSM(".xlsm", "ods.webp", ConvertMode.UNO_CONVERTER),
-        XLSX(".xlsx", "ods.webp", ConvertMode.UNO_CONVERTER),
-        ODS(".ods", "ods.webp", ConvertMode.UNO_CONVERTER),
-        PPT(".ppt", "odp.webp", ConvertMode.UNO_CONVERTER),
-        PPTX(".pptx", "odp.webp", ConvertMode.UNO_CONVERTER),
-        ODP(".odp", "odp.webp", ConvertMode.UNO_CONVERTER)
+        ICO('.ico', 'image.webp', ConvertMode.DIRECT_CONVERT),
+        WEBP('.webp', 'image.webp', ConvertMode.DIRECT_CONVERT),
+        JPG('.jpg', 'image.webp', ConvertMode.DIRECT_CONVERT),
+        JPEG('.jpeg', 'image.webp', ConvertMode.DIRECT_CONVERT),
+        PNM('.pnm', 'image.webp', ConvertMode.DIRECT_CONVERT),
+        PNG('.png', 'image.webp', ConvertMode.DIRECT_CONVERT),
+        PIX('.pix', 'image.webp', ConvertMode.DIRECT_CONVERT),
+        PDF('.pdf', 'image.webp', ConvertMode.DIRECT_CONVERT),
+        TIF('.tif', 'image.webp', ConvertMode.DIRECT_CONVERT),
+        SVG('.svg', 'image.webp', ConvertMode.DIRECT_CONVERT, false),
+        ODT('.odt', 'doc.webp', ConvertMode.UNO_CONVERTER),
+        DOCX('.docx', 'doc.webp', ConvertMode.UNO_CONVERTER),
+        DOC('.doc', 'doc.webp', ConvertMode.UNO_CONVERTER),
+        XLS('.xls', 'ods.webp', ConvertMode.UNO_CONVERTER),
+        XLSM('.xlsm', 'ods.webp', ConvertMode.UNO_CONVERTER),
+        XLSX('.xlsx', 'ods.webp', ConvertMode.UNO_CONVERTER),
+        ODS('.ods', 'ods.webp', ConvertMode.UNO_CONVERTER),
+        PPT('.ppt', 'odp.webp', ConvertMode.UNO_CONVERTER),
+        PPTX('.pptx', 'odp.webp', ConvertMode.UNO_CONVERTER),
+        ODP('.odp', 'odp.webp', ConvertMode.UNO_CONVERTER)
 
         ConvertExtensions(final String extension, final String icon,
                           final ConvertMode convertMode,
@@ -174,7 +174,7 @@ class TaackAttachmentService implements WebAttributes, DataBinder {
 
     @PostConstruct
     void init() {
-        log.info "init"
+        log.info 'init'
         FileUtils.forceMkdir(new File(storePath))
         FileUtils.forceMkdir(new File(attachmentTmpPath))
         FileUtils.forceMkdir(new File(attachmentTxtPath))
@@ -205,7 +205,7 @@ class TaackAttachmentService implements WebAttributes, DataBinder {
                 } else if (ce && ce.convertMode == ConvertMode.UNO_CONVERTER) {
                     log.info "AUO TaackSimpleAttachmentService executing unoconv -f pdf -e PageRange=1-1 --stdout ${attachmentPath(attachment)}"
                     synchronized (imageConverter) {
-                        def p = "unoconv -f pdf -e PageRange=1-1 --stdout ${attachmentPath(attachment)}".execute() | "convert -resize ${previewFormat.pixelWidth + 'x' + previewFormat.pixelHeight} - ${preview.path}".execute()
+                        def p = "unoconv -f pdf -e PageRange=1-1 --stdout ${attachmentPath(attachment)}'.execute() | 'convert -resize ${previewFormat.pixelWidth + 'x' + previewFormat.pixelHeight} - ${preview.path}".execute()
                         p.waitForOrKill(30 * 1000)
                     }
                     if (preview.exists()) {
@@ -288,7 +288,7 @@ class TaackAttachmentService implements WebAttributes, DataBinder {
         if (!attachment) return
         def response = webRequest.currentResponse
         response.setContentType(attachment.contentType)
-        response.setHeader("Content-disposition", "${inline ? 'inline' : 'attachment'};filename=${URLEncoder.encode(attachment.getName(), "UTF-8")}")
+        response.setHeader('Content-disposition', "${inline ? 'inline' : 'attachment'};filename=${URLEncoder.encode(attachment.getName(), 'UTF-8')}")
         response.outputStream << new File(attachmentPath(attachment)).bytes
     }
 
@@ -350,10 +350,10 @@ class TaackAttachmentService implements WebAttributes, DataBinder {
         if (!f || f.empty) {
             return null
         }
-        final String sha1ContentSum = MessageDigest.getInstance("SHA1").digest(f.bytes).encodeHex().toString()
-        final String p = sha1ContentSum + "." + (f.originalFilename.substring(f.originalFilename.lastIndexOf('.') + 1) ?: "NONE")
+        final String sha1ContentSum = MessageDigest.getInstance('SHA1').digest(f.bytes).encodeHex().toString()
+        final String p = sha1ContentSum + '.' + (f.originalFilename.substring(f.originalFilename.lastIndexOf('.') + 1) ?: 'NONE')
         final String d = (storePath)
-        File target = new File(d + "/" + p)
+        File target = new File(d + '/' + p)
         f.transferTo(target)
 
         Attachment attachment = new Attachment()
@@ -374,10 +374,10 @@ class TaackAttachmentService implements WebAttributes, DataBinder {
     }
 
     Attachment updateContentSameContentType(Attachment attachment, byte[] content) {
-        final String sha1ContentSum = MessageDigest.getInstance("SHA1").digest(content).encodeHex().toString()
-        final String p = sha1ContentSum + "." + (attachment.originalName.substring(attachment.originalName.lastIndexOf('.') + 1) ?: "NONE")
+        final String sha1ContentSum = MessageDigest.getInstance('SHA1').digest(content).encodeHex().toString()
+        final String p = sha1ContentSum + '.' + (attachment.originalName.substring(attachment.originalName.lastIndexOf('.') + 1) ?: 'NONE')
         final String d = (storePath)
-        File target = new File(d + "/" + p)
+        File target = new File(d + '/' + p)
         FileOutputStream fo = new FileOutputStream(target)
         fo.write(content)
 

@@ -25,10 +25,10 @@ class CrewSearchService implements TaackSearchService.IIndexService {
             indexField SolrFieldType.TXT_GENERAL, u.username_
             indexField SolrFieldType.TXT_NO_ACCENT, u.firstName_
             indexField SolrFieldType.TXT_NO_ACCENT, u.lastName_
-            indexField SolrFieldType.POINT_STRING, "mainSubsidiary", true, u.subsidiary?.toString()
-            indexField SolrFieldType.POINT_STRING, "businessUnit", true, u.businessUnit?.toString()
+            indexField SolrFieldType.POINT_STRING, 'mainSubsidiary', true, u.subsidiary?.toString()
+            indexField SolrFieldType.POINT_STRING, 'businessUnit', true, u.businessUnit?.toString()
             indexField SolrFieldType.DATE, 0.5f, true, u.dateCreated_
-            indexField SolrFieldType.POINT_STRING, "userCreated", 0.5f, true, u.userCreated?.username
+            indexField SolrFieldType.POINT_STRING, 'userCreated', 0.5f, true, u.userCreated?.username
         }))
     }
 

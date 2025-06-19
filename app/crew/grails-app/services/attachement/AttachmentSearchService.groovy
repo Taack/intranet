@@ -29,10 +29,10 @@ class AttachmentSearchService implements TaackSearchService.IIndexService {
             String content = taackAttachmentService.attachmentContent(a)
             indexField SolrFieldType.TXT_GENERAL, a.originalName_
             if (content || !a.id)
-                indexField SolrFieldType.TXT_GENERAL, "fileContent", content
-            indexField SolrFieldType.POINT_STRING, "contentTypeCategoryEnum", true, a.contentTypeCategoryEnum?.toString()
+                indexField SolrFieldType.TXT_GENERAL, 'fileContent', content
+            indexField SolrFieldType.POINT_STRING, 'contentTypeCategoryEnum', true, a.contentTypeCategoryEnum?.toString()
             indexField SolrFieldType.DATE, 0.5f, true, a.dateCreated_
-            indexField SolrFieldType.POINT_STRING, "userCreated", 0.5f, true, a.userCreated?.username
+            indexField SolrFieldType.POINT_STRING, 'userCreated', 0.5f, true, a.userCreated?.username
         }))
     }
 

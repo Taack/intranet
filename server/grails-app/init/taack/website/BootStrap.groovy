@@ -24,15 +24,15 @@ class BootStrap {
     def createDefaultRoleAndUser() {
         log.info "Creating default user and role ... $adminPassword"
         User.withNewTransaction {
-            def r = Role.findByAuthority("ROLE_ADMIN")
+            def r = Role.findByAuthority('ROLE_ADMIN')
             if (!r) {
-                r = new Role(authority: "ROLE_ADMIN")
+                r = new Role(authority: 'ROLE_ADMIN')
                 r.save(flush: true)
                 if (r.hasErrors()) log.error "${r.errors}"
             }
-            def u = User.findByUsername("admin")
+            def u = User.findByUsername('admin')
             if (!u) {
-                u = new User(username: "admin", password: "{noop}$adminPassword", businessUnit: BusinessUnit.IT)
+                u = new User(username: 'admin', password: "{noop}$adminPassword", businessUnit: BusinessUnit.IT)
                 u.save(flush: true)
                 if (u.hasErrors()) log.error "${u.errors}"
                 def ur = UserRole.create(u, r, true)

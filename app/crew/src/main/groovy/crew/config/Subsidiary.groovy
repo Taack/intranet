@@ -54,7 +54,7 @@ enum SupportedLanguage implements IEnumOptions, IEnumOption {
 
     static SupportedLanguage fromContext() {
         try {
-            SupportedLanguage language = LocaleContextHolder.locale.language.split("_")[0]?.toUpperCase()?.replace("ZH", "CN") as SupportedLanguage
+            SupportedLanguage language = LocaleContextHolder.locale.language.split('_')[0]?.toUpperCase()?.replace('ZH', 'CN') as SupportedLanguage
             language ?: EN
         } catch (ignored) {
             return EN
@@ -99,7 +99,7 @@ enum SupportedLanguage implements IEnumOptions, IEnumOption {
 
 @CompileStatic
 enum Address {
-    YOUR_ADDRESS(Country.US, "City", "ZIPCODE", "Street")
+    YOUR_ADDRESS(Country.US, 'City', 'ZIPCODE', 'Street')
 
     Address(final Country country, final String city, final String zipCode, final String street, final String countryLocalName = null) {
         this.country = country
@@ -131,7 +131,7 @@ enum AdministrativeTax {
 
 @CompileStatic
 enum AdministrativeIdentifier {
-    YOUR_COMPANY_IDENTIFIER("SIRET", "123123123123")
+    YOUR_COMPANY_IDENTIFIER('SIRET', '123123123123')
 
     AdministrativeIdentifier(final String idLabel, final String idCode) {
         this.idCode = idCode

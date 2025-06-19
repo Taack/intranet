@@ -29,21 +29,21 @@ class Attachment extends TaackDocument implements IDomainHistory<Attachment> {
         documentAccess nullable: true
         contentTypeEnum nullable: true
         contentTypeCategoryEnum nullable: true
-        filePath widget: "filePath"
+        filePath widget: 'filePath'
         lastUpdated nullable: true
         nextVersion nullable: true
         active validator: { boolean val, Attachment obj ->
             if (val && obj.nextVersion)
-                return "attachment.active.hasNextVersion.error"
+                return 'attachment.active.hasNextVersion.error'
         }
     }
 
     def beforeValidate() {
-        if (isDirty("filePath")) {
+        if (isDirty('filePath')) {
             if (filePath == null)  {
-                filePath = this.getPersistentValue("filePath")
-                contentTypeEnum = this.getPersistentValue("contentTypeEnum") as AttachmentContentType
-                contentTypeCategoryEnum = this.getPersistentValue("contentTypeCategoryEnum") as AttachmentContentTypeCategory
+                filePath = this.getPersistentValue('filePath')
+                contentTypeEnum = this.getPersistentValue('contentTypeEnum') as AttachmentContentType
+                contentTypeCategoryEnum = this.getPersistentValue('contentTypeCategoryEnum') as AttachmentContentTypeCategory
             }
         }
     }

@@ -30,7 +30,7 @@ class CrewSecurityService {
                 this.&securityClosure,
                 CrewController.&editUser as MC,
                 CrewController.&saveUser as MC)
-        TaackAppRegisterService.register(new TaackApp(CrewController.&index as MC, new String(this.class.getResourceAsStream("/crew/crew.svg").readAllBytes())))
+        TaackAppRegisterService.register(new TaackApp(CrewController.&index as MC, new String(this.class.getResourceAsStream('/crew/crew.svg').readAllBytes())))
 
     }
 

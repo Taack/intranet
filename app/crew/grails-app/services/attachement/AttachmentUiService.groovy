@@ -54,9 +54,9 @@ final class AttachmentUiService implements WebAttributes {
 
 
     String preview(final Long id) {
-        if (!id) return "<span/>"
-        if (params.boolean("isPdf")) """<img style="max-height: 64px; max-width: 64px;" src="file://${taackAttachmentService.attachmentPreview(Attachment.read(id)).path}">"""
-        else """<div style="text-align: center;"><img class='preview-img' style="max-height: 64px; max-width: 64px;" src="${applicationTagLib.createLink(controller: 'attachment', action: 'preview', id: id)}"></div>"""
+        if (!id) return '<span/>'
+        if (params.boolean('isPdf')) """<img style="max-height: 64px; max-width: 64px;" src="file://${taackAttachmentService.attachmentPreview(Attachment.read(id)).path}">"""
+        else """<div style="text-align: center;"><img class="preview-img" style="max-height: 64px; max-width: 64px;" src="${applicationTagLib.createLink(controller: 'attachment', action: 'preview', id: id)}"></div>"""
     }
 
     String previewInline(Long id, boolean isInline) {
@@ -74,13 +74,13 @@ final class AttachmentUiService implements WebAttributes {
     }
 
     String preview(final Long id, TaackAttachmentService.PreviewFormat format) {
-        if (!id) return "<span/>"
+        if (!id) return '<span/>'
         if (format.isPdf) """<div style="text-align: center;"><img style="max-height: 64px; max-width: 64px;" src="file://${taackAttachmentService.attachmentPreview(Attachment.get(id), format).path}"></div>"""
         else """<div style="text-align: center;"><img style="max-height: ${format.previewPixelHeight}px; max-width: ${format.previewPixelWidth}px;" src="${applicationTagLib.createLink(controller: 'attachment', action: 'preview', id: id, params: [format: format.toString()])}"></div>"""
     }
 
     String previewFull(Long id, String p = null) {
-        if (!id) return "<span/>"
+        if (!id) return '<span/>'
         """<div style="text-align: center;"><img style="max-height: 420px" src="${applicationTagLib.createLink(controller: 'attachment', action: 'previewFull', id: id)}${p ? "?$p" : ""}"></div>"""
     }
 
@@ -90,7 +90,7 @@ final class AttachmentUiService implements WebAttributes {
         t.ui {
             header {
                 column {
-                    label tr("default.preview.label")
+                    label tr('default.preview.label')
                 }
                 column {
                     sortableFieldHeader a.originalName_
@@ -100,7 +100,7 @@ final class AttachmentUiService implements WebAttributes {
                     sortableFieldHeader a.contentTypeEnum_
                 }
                 column {
-                    sortableFieldHeader tr("default.userCreated.label"), a.userCreated_, a.userCreated.username_
+                    sortableFieldHeader tr('default.userCreated.label'), a.userCreated_, a.userCreated.username_
                     sortableFieldHeader a.userCreated_, a.userCreated.subsidiary_
                 }
             }
@@ -120,7 +120,7 @@ final class AttachmentUiService implements WebAttributes {
                     } else {
                         rowAction ActionIcon.DOWNLOAD * IconStyle.SCALE_DOWN, AttachmentController.&downloadBinAttachment as MC, att.id
                     }
-                    rowAction tr("default.preview.label"), ActionIcon.SHOW * IconStyle.SCALE_DOWN, AttachmentController.&showAttachmentIFrame as MC, att.id
+                    rowAction tr('default.preview.label'), ActionIcon.SHOW * IconStyle.SCALE_DOWN, AttachmentController.&showAttachmentIFrame as MC, att.id
                     rowAction(att.originalName, AttachmentController.&showAttachment as MC, att.id)
                     rowField att.dateCreated_
                 }
@@ -145,7 +145,7 @@ final class AttachmentUiService implements WebAttributes {
                 filterField a.contentTypeCategoryEnum_
                 filterField tr('default.userCreated.label'), a.userCreated_, a.userCreated.username_
                 filterField a.userCreated_, a.userCreated.subsidiary_
-                filterFieldExpressionBool tr("default.active.label"), new FilterExpression(true, Operator.EQ, a.active_)
+                filterFieldExpressionBool tr('default.active.label'), new FilterExpression(true, Operator.EQ, a.active_)
             }
             section tr('default.documentCategory.label'), {
                 filterField a.documentCategory_, a.documentCategory.category_
@@ -157,7 +157,7 @@ final class AttachmentUiService implements WebAttributes {
 
         BlockSpec.buildBlockSpec {
             if (selectMC) {
-                ajaxBlock "selectingAttachmentBlock", { // Avoid opening a new modal: The current LIST page will be covered by EDIT page
+                ajaxBlock 'selectingAttachmentBlock', { // Avoid opening a new modal: The current LIST page will be covered by EDIT page
                     tableFilter f, t, {
                         String selectUrl = "/${Utils.getControllerName(selectMC)}/${selectMC.method}?objectId=${objectId}"
                         menuIcon ActionIcon.CREATE, AttachmentController.&editAttachment as MC, [selectActionUrl: selectUrl]
@@ -174,28 +174,28 @@ final class AttachmentUiService implements WebAttributes {
     UiShowSpecifier buildShowAttachment(final Attachment attachment, boolean hasPreview = true) {
         new UiShowSpecifier().ui {
             if (hasPreview)
-                section "Preview", {
+                section 'Preview', {
                     field this.previewFull(attachment.id)
                 }
-            section "File Meta", {
+            section 'File Meta', {
                 fieldLabeled attachment.originalName_
                 fieldLabeled attachment.dateCreated_
                 fieldLabeled attachment.userCreated_
                 fieldLabeled attachment.fileSize_
                 fieldLabeled attachment.contentTypeEnum_
             }
-            section "Attachment Meta", {
+            section 'Attachment Meta', {
                 fieldLabeled attachment.documentCategory_, attachment.documentCategory?.category_
                 fieldLabeled attachment.documentCategory_, attachment.documentCategory?.tags_
                 fieldLabeled attachment.documentAccess_
             }
-            showAction tr("default.relatedData.label"), AttachmentController.&showLinkedData as MC, attachment.id
+            showAction tr('default.relatedData.label'), AttachmentController.&showLinkedData as MC, attachment.id
         }
     }
 
     UiFormSpecifier buildDocumentAccessForm(DocumentAccess docAccess) {
         new UiFormSpecifier().ui new DocumentAccess(), {
-            section tr("default.documentAccess.label"), {
+            section tr('default.documentAccess.label'), {
                 field docAccess.isInternal_
                 field docAccess.isRestrictedToMyBusinessUnit_
                 field docAccess.isRestrictedToMyManagers_
@@ -208,7 +208,7 @@ final class AttachmentUiService implements WebAttributes {
 
     UiFormSpecifier buildDocumentCategoryForm(DocumentCategory docCat) {
         new UiFormSpecifier().ui docCat, {
-            section tr("documentCategory.category.label"), {
+            section tr('documentCategory.category.label'), {
                 field docCat.category_
                 ajaxField docCat.tags_, AttachmentController.&selectTermM2O as MC
             }
@@ -218,7 +218,7 @@ final class AttachmentUiService implements WebAttributes {
 
     UiFormSpecifier buildAttachmentForm(Attachment attachment, String selectActionUrl = null) {
         new UiFormSpecifier().ui attachment, {
-            section tr("file.metadata.label"), {
+            section tr('file.metadata.label'), {
                 if (attachment.originalName)
                     field attachment.originalName_
                 field attachment.filePath_
@@ -232,7 +232,7 @@ final class AttachmentUiService implements WebAttributes {
 
     UiFormSpecifier buildTermForm(Term term) {
         new UiFormSpecifier().ui term, {
-            section "Term", {
+            section 'Term', {
                 field term.name_
                 field term.termGroupConfig_
                 ajaxField term.parent_, AttachmentController.&selectTermM2O as MC
@@ -253,12 +253,12 @@ final class AttachmentUiService implements WebAttributes {
     UiFilterSpecifier buildTermFilter() {
         Term t = new Term()
         new UiFilterSpecifier().ui Term, {
-            section "Term", {
+            section 'Term', {
                 filterField t.name_
                 filterField t.termGroupConfig_
-                filterFieldExpressionBool "Display", new FilterExpression(true, Operator.EQ, t.display_)
-                filterFieldExpressionBool "Active", new FilterExpression(true, Operator.EQ, t.active_)
-                filterFieldExpressionBool "Hierarchy Showing Mode", new FilterExpression(null, Operator.EQ, t.parent_)
+                filterFieldExpressionBool 'Display', new FilterExpression(true, Operator.EQ, t.display_)
+                filterFieldExpressionBool 'Active', new FilterExpression(true, Operator.EQ, t.active_)
+                filterFieldExpressionBool 'Hierarchy Showing Mode', new FilterExpression(null, Operator.EQ, t.parent_)
             }
         }
     }
@@ -277,7 +277,7 @@ final class AttachmentUiService implements WebAttributes {
                 for (Term term in termList) {
                     rowIndent {
                         List<Term> children = Term.findAllByActiveAndParent(true, term)
-                        boolean hasChildren = children.size() > 0 && this.params.get('_filterExpression_parent_EQ') != "0"
+                        boolean hasChildren = children.size() > 0 && this.params.get('_filterExpression_parent_EQ') != '0'
                         rowTree hasChildren, {
                             rowColumn {
                                 if (selectMode)
@@ -320,7 +320,7 @@ final class AttachmentUiService implements WebAttributes {
         new UiTableSpecifier().ui {
             header {
                 column {
-                    label tr("default.preview.label")
+                    label tr('default.preview.label')
                 }
                 column {
                     sortableFieldHeader a.originalName_
@@ -330,11 +330,11 @@ final class AttachmentUiService implements WebAttributes {
                     sortableFieldHeader a.contentTypeEnum_
                 }
                 column {
-                    sortableFieldHeader tr("default.userCreated.label"), a.userCreated_, a.userCreated.username_
+                    sortableFieldHeader tr('default.userCreated.label'), a.userCreated_, a.userCreated.username_
                     sortableFieldHeader a.userCreated_, a.userCreated.subsidiary_
                 }
                 column {
-                    label tr("default.actions.label")
+                    label tr('default.actions.label')
                 }
             }
 
@@ -349,13 +349,13 @@ final class AttachmentUiService implements WebAttributes {
                             if (addFileMC) {
                                 rowAction ActionIcon.CREATE * IconStyle.SCALE_DOWN, addFileMC as MethodClosure, [objectId: linkedObject.ident()]
                             }
-                            rowField linkedObject.toString() + " :", Style.BOLD + Style.BLUE
+                            rowField linkedObject.toString() + ' :', Style.BOLD + Style.BLUE
                         }
                     }
                     if (attachments.size() == 0) {
                         row {
                             rowColumn {
-                                rowField tr("attachment.no.label"), Style.TAG + Style.GREY_TAG
+                                rowField tr('attachment.no.label'), Style.TAG + Style.GREY_TAG
                             }
                             rowColumn {}
                             rowColumn {}
