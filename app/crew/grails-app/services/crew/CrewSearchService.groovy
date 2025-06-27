@@ -19,7 +19,7 @@ class CrewSearchService implements TaackSearchService.IIndexService {
 
     @PostConstruct
     private void init() {
-        taackSearchService.registerSolrSpecifier(this, new SolrSpecifier(User, CrewController.&showUserFromSearch as MethodClosure, this.&labeling as MethodClosure, { User u ->
+        taackSearchService.registerSolrSpecifier(this, new SolrSpecifier(User, { User u ->
             u ?= new User()
             indexField SolrFieldType.TXT_NO_ACCENT, u.username_
             indexField SolrFieldType.TXT_GENERAL, u.username_

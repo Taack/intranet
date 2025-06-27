@@ -1,12 +1,12 @@
 plugins {
     id 'taack-grails-plugin'
     id 'org.apache.grails.gradle.grails-web'
-    id 'com.bertramlabs.asset-pipeline'
+    id 'cloud.wondrify.asset-pipeline'
 }
 
 dependencies {
     implementation "org.apache.grails:grails-gsp"
-    runtimeOnly "com.bertramlabs.plugins:asset-pipeline-grails"
+    runtimeOnly "cloud.wondrify:asset-pipeline-grails"
 }
 
 assets {
