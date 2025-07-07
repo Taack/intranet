@@ -1,6 +1,8 @@
+group = 'org.taack'
+version = '0.6'
+
 buildscript {
     repositories {
-        mavenLocal()
         mavenCentral()
         maven { url "https://repository.apache.org/content/groups/public" }
         maven { url "https://repo.grails.org/grails/restricted" }
@@ -14,7 +16,3 @@ buildscript {
         classpath "cloud.wondrify:asset-pipeline-gradle"
     }
 }
-
-
-group = 'org.taack'
-version = '0.6'

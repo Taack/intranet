@@ -56,12 +56,20 @@ dependencies {
     implementation "org.taack:taack-ui-ssh:${taackUiVersion}"
     implementation "org.apache.grails:grails-spring-security:${grailsSpringSecurity}"
     implementation "com.google.protobuf:protobuf-java:${protobufVersion}"
-    implementation 'org.questdb:questdb:8.3.2'
+    implementation 'org.questdb:questdb:8.2.1'
 }
 
 //java {
 //    sourceCompatibility = JavaVersion.toVersion("17")
 //}
+
+tasks.withType(Test) {
+    useJUnitPlatform()
+    systemProperty "geb.env", System.getProperty('geb.env')
+    systemProperty "geb.build.reportsDir", reporting.file("geb/integrationTest")
+    systemProperty 'webdriver.chrome.driver', "${System.getenv('CHROMEWEBDRIVER')}/chromedriver"
+    systemProperty 'webdriver.gecko.driver', "${System.getenv('GECKOWEBDRIVER')}/geckodriver"
+}
 
 tasks.named("jar") {
     duplicatesStrategy = 'include'
