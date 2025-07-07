@@ -14,13 +14,12 @@ pluginManagement {
         mavenCentral()
         maven { url "https://repository.apache.org/content/groups/public" }
         maven { url "https://repo.grails.org/grails/restricted" }
+        maven { url "https://central.sonatype.com/repository/maven-snapshots" }
         gradlePluginPortal()
     }
 //    plugins {
-//        id "org.grails.grails-web" version "${grailsGradlePluginVersion}"
-//        id "com.bertramlabs.asset-pipeline" version "${assetPipeline}"
-//        id "org.grails.grails-gsp" version "${grailsGradlePluginVersion}"
+//        id "org.grails.grails-web"
+//        id "com.bertramlabs.asset-pipeline"
+//        id "org.grails.grails-gsp"
 //    }
 }
-
-rootProject.name="taack-grails-gradle"

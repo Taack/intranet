@@ -2,8 +2,10 @@ include 'server'
 
 gradle.ext.taackPlugins = []
 
-file('app').eachDir { dir ->
-    include dir.name
-    gradle.ext.taackPlugins << dir.name
-    project(":${dir.name}").projectDir = dir
+file('app').eachDir { File dir ->
+//    if (!dir.name.contains('base-prod')) {
+        include dir.name
+        gradle.ext.taackPlugins << dir.name
+        project(":${dir.name}").projectDir = dir
+//    }
 }

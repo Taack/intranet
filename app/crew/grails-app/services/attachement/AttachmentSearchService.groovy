@@ -24,7 +24,7 @@ class AttachmentSearchService implements TaackSearchService.IIndexService {
 
     @PostConstruct
     private void init() {
-        taackSearchService.registerSolrSpecifier(this, new SolrSpecifier(Attachment, AttachmentController.&showAttachment as MethodClosure, this.&labeling as MethodClosure, { Attachment a ->
+        taackSearchService.registerSolrSpecifier(this, new SolrSpecifier(Attachment, { Attachment a ->
             a ?= new Attachment()
             String content = taackAttachmentService.attachmentContent(a)
             indexField SolrFieldType.TXT_GENERAL, a.originalName_

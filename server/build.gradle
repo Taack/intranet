@@ -1,11 +1,11 @@
 plugins {
     id 'taack-grails-webapp'
-//    id "com.github.erdi.webdriver-binaries" version "3.2"
-
 }
 
-group = "server"
 
+dependencies {
+    implementation("org.apache.tomcat:tomcat-jdbc")
+}
 //application {
 //    mainClass.set("taack.website.Application")
 //}
@@ -15,20 +15,27 @@ bootRun {
     jvmArgs(
             '-Dspring.output.ansi.enabled=always',
             '-XX:TieredStopAtLevel=1',
-            '-Xmx1024m',
-            '-Xss8m'
+            '--enable-native-access=ALL-UNNAMED',
+            '-Xss4m'
+            // '-Xss10m'
     )
 //    sourceResources sourceSets.main
 //    String springProfilesActive = 'spring.profiles.active'
 //    systemProperty springProfilesActive, System.getProperty(springProfilesActive)
+//    systemProperty 'server.port', '8443'
+//    systemProperty 'server.ssl.enabled', 'true'
+//    systemProperty 'server.ssl.key-store', './localkeystore'
+//    systemProperty 'server.ssl.key-store-password', 'mysecret'
+//    systemProperty 'server.ssl.key-password', 'mysecret'
 }
 
 bootJar {
     enabled = true
-
+    requiresUnpack '**/asciidoctorj*.jar'
     manifest {
         attributes["Add-Opens"] = "java.base/java.io java.base/sun.nio.ch"
     }
+
 }
 
 //tasks.register('generateTaackAppTask', generateTaackApp.GenerateTaackAppTask) {
@@ -40,7 +47,6 @@ bootJar {
 
 grails {
     exploded = true
-//    pathingJar = false
 
     plugins {
         implementation 'org.taack:taack-ui'
@@ -53,12 +59,26 @@ grails {
     }
 }
 
-//webdriverBinaries {
-//    chromedriver '122.0.6260.0'
-//    geckodriver '0.33.0'
-//    edgedriver '110.0.1587.57'
-//}
 assets {
     minifyJs = true
     minifyCss = true
+}
+
+bootBuildImage {
+    builder = "paketobuildpacks/builder-noble-java-tiny:latest"
+    buildpacks.add("paketo-buildpacks/java-native-image@11.12.0")
+
+    environment = [
+            "BPL_SPRING_AOT_ENABLED": "true",
+            "BP_SPRING_AOT_ENABLED": "true",
+            "BP_JVM_VERSION": "24",
+            "BP_NATIVE_IMAGE_BUILD_ARGUMENTS": """
+				-march=compatibility
+				--gc=serial
+				-R:MaxHeapSize=256m
+				-O3
+				-J-XX:MaxRAMPercentage=80.0
+			""",
+            "BP_HEALTH_CHECKER_ENABLED": "true"
+    ]
 }
