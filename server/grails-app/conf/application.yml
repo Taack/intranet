@@ -91,6 +91,11 @@ grails:
 ---
 server:
   port: 9442                                            # The port to listen on
+  tomcat:
+      max-part-header-size: 8192
+      max-part-count: 80
+  max-http-request-header-size: 32KB
+
 ---
 hibernate:
   cache:
