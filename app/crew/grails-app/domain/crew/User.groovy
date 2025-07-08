@@ -8,13 +8,15 @@ import crew.config.SupportedLanguage
 import grails.compiler.GrailsCompileStatic
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
+import org.grails.datastore.gorm.GormEntity
 import taack.ast.annotation.TaackFieldEnum
+import taack.user.TaackUser
 
 @GrailsCompileStatic
 @TaackFieldEnum
 @EqualsAndHashCode(includes = 'username')
 @ToString(includes = 'username', includeNames = true, includePackage = false)
-class User implements Serializable {
+class User extends TaackUser {
 
     private static final long serialVersionUID = 1
     User userCreated
@@ -101,4 +103,18 @@ class User implements Serializable {
         res
     }
 
+    @Override
+    Map<GormEntity, Date> getNotificationRelatedDataList(Boolean aBoolean) {
+        return null
+    }
+
+    @Override
+    void addToUnreadRelatedDataList(GormEntity gormEntity) {
+
+    }
+
+    @Override
+    void markRelatedDataAsRead(GormEntity gormEntity) {
+
+    }
 }
