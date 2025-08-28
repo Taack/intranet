@@ -51,6 +51,7 @@ dependencies {
 
     implementation "org.taack:taack-ui:${taackUiVersion}"
     implementation "org.taack:taack-ui-pdf:${taackUiVersion}"
+    implementation "org.taack:taack-ui-asciidoc:${taackUiVersion}"
     implementation "org.taack:taack-ui-jdbc:${taackUiVersion}"
     implementation "org.taack:taack-ui-search:${taackUiVersion}"
     implementation "org.taack:taack-ui-ssh:${taackUiVersion}"

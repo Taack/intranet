@@ -51,6 +51,7 @@ grails {
     plugins {
         implementation 'org.taack:taack-ui'
         implementation 'org.taack:taack-ui-pdf'
+        implementation 'org.taack:taack-ui-asciidoc'
         implementation 'org.taack:taack-ui-jdbc'
 
         gradle.ext.taackPlugins.each {

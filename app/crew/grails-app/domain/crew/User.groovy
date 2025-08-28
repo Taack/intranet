@@ -103,18 +103,4 @@ class User extends TaackUser {
         res
     }
 
-    @Override
-    Map<GormEntity, Date> getNotificationRelatedDataList(Boolean aBoolean) {
-        return null
-    }
-
-    @Override
-    void addToUnreadRelatedDataList(GormEntity gormEntity) {
-
-    }
-
-    @Override
-    void markRelatedDataAsRead(GormEntity gormEntity) {
-
-    }
 }
