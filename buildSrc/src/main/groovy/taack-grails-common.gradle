@@ -60,9 +60,8 @@ dependencies {
     implementation 'org.questdb:questdb:8.2.1'
 }
 
-//java {
-//    sourceCompatibility = JavaVersion.toVersion("17")
-//}
+// Not compatible with Protobuf
+//compileJava.options.release = 24
 
 tasks.withType(Test) {
     useJUnitPlatform()

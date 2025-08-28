@@ -21,8 +21,12 @@ for (String key : properties.stringPropertyNames()) {
 }
 
 dependencies {
+    implementation("cloud.wondrify:asset-pipeline-gradle")
     implementation platform("org.apache.grails:grails-bom:$grailsVersion")
     implementation "org.apache.grails:grails-gradle-plugins"
 //    implementation "org.apache.grails:grails-data-hibernate5"
-    implementation "cloud.wondrify:asset-pipeline-gradle"
+//    implementation("cloud.wondrify:asset-pipeline-gradle") {
+//        // TODO: to remove; compile only with Java 24
+//        implementation 'com.google.javascript:closure-compiler-unshaded:v20250706'
+//    }
 }

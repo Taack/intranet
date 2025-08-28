@@ -13,6 +13,6 @@ buildscript {
         classpath platform("org.apache.grails:grails-bom:$grailsVersion")
         classpath "org.apache.grails:grails-gradle-plugins"
         classpath "org.apache.grails:grails-data-hibernate5"
-        classpath "cloud.wondrify:asset-pipeline-gradle"
+//        classpath "cloud.wondrify:asset-pipeline-gradle"
     }
 }
