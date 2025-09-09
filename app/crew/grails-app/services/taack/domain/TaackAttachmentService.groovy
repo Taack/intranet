@@ -348,12 +348,12 @@ class TaackAttachmentService implements WebAttributes, DataBinder {
     @Transactional
     Attachment createAttachment(String path, byte[] contentBytes) {
         final String sha1ContentSum = MessageDigest.getInstance('SHA1').digest(contentBytes).encodeHex().toString()
-        Attachment attachment = Attachment.findOrCreateByContentShaOneAndOriginalName(sha1ContentSum, path)
+        Attachment attachment = Attachment.findByContentShaOneAndOriginalName(sha1ContentSum, path)
         if (attachment)
             return attachment
+        attachment = new Attachment()
         final String p = sha1ContentSum + '.' + (path.substring(path.lastIndexOf('.') + 1) ?: 'NONE')
-        final String d = (storePath)
-        File target = new File(d + '/' + p)
+        File target = new File(storePath + '/' + p)
         target.bytes = contentBytes
 
         attachment.filePath = p

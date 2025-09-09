@@ -13,6 +13,8 @@ import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.annotation.Secured
 import org.codehaus.groovy.runtime.MethodClosure as MC
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.web.multipart.MultipartFile
+import org.springframework.web.multipart.MultipartHttpServletRequest
 import org.taack.IAttachmentEditorIFrame
 import org.taack.IAttachmentShowIFrame
 import taack.domain.TaackAttachmentService
@@ -490,5 +492,14 @@ class AttachmentController {
             }
         }
         taackUiService.show(b)
+    }
+
+    @Transactional
+    def onDrop() {
+        final List<MultipartFile> mfl = (request as MultipartHttpServletRequest).getFiles('filePath')
+        mfl.each {
+            taackAttachmentService.createAttachment(it)
+        }
+        taackUiService.ajaxReload()
     }
 }

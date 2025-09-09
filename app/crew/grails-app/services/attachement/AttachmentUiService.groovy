@@ -30,7 +30,7 @@ import taack.ui.dsl.common.Style
 import taack.ui.dsl.filter.expression.FilterExpression
 import taack.ui.dsl.filter.expression.Operator
 import taack.ui.dsl.helper.Utils
-
+import taack.ui.dsl.table.TableOption
 
 import static taack.render.TaackUiService.tr
 
@@ -87,7 +87,7 @@ final class AttachmentUiService implements WebAttributes {
     UiTableSpecifier buildAttachmentsTable(final UiFilterSpecifier f, final MC selectMC = null, final Long objectId = null, Long... ids) {
         Attachment a = new Attachment(active: true, userCreated: new User())
         UiTableSpecifier t = new UiTableSpecifier()
-        t.ui {
+        t.ui(new TableOption.TableOptionBuilder().onDropAction(AttachmentController.&onDrop as MC).build()) {
             header {
                 column {
                     label tr('default.preview.label')
@@ -108,7 +108,7 @@ final class AttachmentUiService implements WebAttributes {
             iterate(taackFilterService.getBuilder(Attachment)
                     .setMaxNumberOfLine(8)
                     .addFilter(f)
-                    .addRestrictedIds(ids)
+                    //.addRestrictedIds(ids)
                     .setSortOrder(TaackFilter.Order.DESC, a.dateCreated_)
                     .build()) { Attachment att ->
                 rowColumn {
