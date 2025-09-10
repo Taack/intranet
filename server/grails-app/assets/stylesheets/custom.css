@@ -96,3 +96,8 @@ div[blockid='login-auth'] {
 .app-desc hr {
     margin: 0;
 }
+
+em {
+    font-weight: bold;
+    color: darkred;
+}
