@@ -467,13 +467,11 @@ class TaackAttachmentService implements WebAttributes, DataBinder, ServletAttrib
         attachment.originalName = f.name
         attachment.contentShaOne = sha1ContentSum
         attachment.fileSize = target.length()
-        attachment.type = AttachmentType.other
         User currentUser = User.read(springSecurityService.currentUserId as Long)
         attachment.userCreated = currentUser
         attachment.userUpdated = currentUser
         attachment.documentCategory = DocumentCategory.findOrCreateByCategory(DocumentCategoryEnum.OTHER)
         attachment.documentAccess = DocumentAccess.findOrCreateByIsInternalAndIsRestrictedToMyBusinessUnitAndIsRestrictedToMySubsidiaryAndIsRestrictedToMyManagersAndIsRestrictedToEmbeddingObjects(false, false, false, false, false)
-        attachment.isInternal = true
         if (save) attachment.save(flush: true, failOnError: true)
         return attachment
 
