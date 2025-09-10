@@ -15,7 +15,6 @@ import grails.web.api.ServletAttributes
 import grails.web.api.WebAttributes
 import grails.web.databinding.DataBinder
 import jakarta.annotation.PostConstruct
-import org.apache.commons.io.FileUtils
 import org.apache.tika.metadata.Metadata
 import org.apache.tika.parser.AutoDetectParser
 import org.apache.tika.parser.ParseContext
@@ -190,11 +189,11 @@ class TaackAttachmentService implements WebAttributes, DataBinder, ServletAttrib
     @PostConstruct
     void init() {
         log.info 'init'
-        FileUtils.forceMkdir(new File(storePath))
-        FileUtils.forceMkdir(new File(attachmentTmpPath))
-        FileUtils.forceMkdir(new File(attachmentTxtPath))
+        new File(storePath).mkdirs()
+        new File(attachmentTmpPath).mkdirs()
+        new File(attachmentTxtPath).mkdirs()
         for (PreviewFormat f : PreviewFormat.values()) {
-            FileUtils.forceMkdir(new File(previewPath(f)))
+            new File(previewPath(f)).mkdirs()
         }
 
         TaackSaveService.registerFieldCustomSavingClosure('filePath', { GormEntity gormEntity, Map params ->
@@ -452,29 +451,38 @@ class TaackAttachmentService implements WebAttributes, DataBinder, ServletAttrib
     }
 
     @Transactional
-    Attachment createAttachment(File f, boolean save = false) {
-        final String sha1ContentSum = MessageDigest.getInstance('SHA1').digest(f.bytes).encodeHex().toString()
-        final String p = sha1ContentSum + '.' + (f.name.substring(f.name.lastIndexOf('.') + 1) ?: 'NONE')
-        final String d = (storePath)
-        File target = new File(d + '/' + p)
-        Files.copy(f.toPath(), target.toPath())
-        String mimeType = Files.probeContentType(target.toPath())
-        Attachment attachment = new Attachment()
+    Attachment createAttachment(String path, byte[] contentBytes, boolean save = false) {
+        final String sha1ContentSum = MessageDigest.getInstance('SHA1').digest(contentBytes).encodeHex().toString()
+        Attachment attachment = Attachment.findByContentShaOneAndOriginalName(sha1ContentSum, path)
+        if (attachment)
+            return attachment
+        attachment = new Attachment()
+        final String p = sha1ContentSum + '.' + (path.substring(path.lastIndexOf('.') + 1) ?: 'NONE')
+        File target = new File(storePath + '/' + p)
+        target.bytes = contentBytes
+
         attachment.filePath = p
-        attachment.contentType = mimeType
-        attachment.contentTypeEnum = AttachmentContentType.fromMimeType(mimeType)
+        attachment.contentType = Files.probeContentType(target.toPath())
+        attachment.contentTypeEnum = AttachmentContentType.fromMimeType(attachment.contentType)
         attachment.contentTypeCategoryEnum = AttachmentContentTypeCategory.DOCUMENT
-        attachment.originalName = f.name
+        attachment.originalName = path
         attachment.contentShaOne = sha1ContentSum
-        attachment.fileSize = target.length()
+        attachment.fileSize = contentBytes.length
         User currentUser = User.read(springSecurityService.currentUserId as Long)
         attachment.userCreated = currentUser
         attachment.userUpdated = currentUser
         attachment.documentCategory = DocumentCategory.findOrCreateByCategory(DocumentCategoryEnum.OTHER)
-        attachment.documentAccess = DocumentAccess.findOrCreateByIsInternalAndIsRestrictedToMyBusinessUnitAndIsRestrictedToMySubsidiaryAndIsRestrictedToMyManagersAndIsRestrictedToEmbeddingObjects(false, false, false, false, false)
-        if (save) attachment.save(flush: true, failOnError: true)
+        attachment.documentAccess = DocumentAccess.findOrCreateByIsInternalAndIsRestrictedToMyBusinessUnitAndIsRestrictedToMySubsidiaryAndIsRestrictedToMyManagersAndIsRestrictedToEmbeddingObjects(false, false, false, false, true)
+        if (save) {
+            attachment.save(flush: true, failOnError: true)
+            if (attachment.hasErrors()) log.error("${attachment.errors}")
+        }
         return attachment
+    }
 
+    @Transactional
+    Attachment createAttachment(File f, boolean save = false) {
+        createAttachment(f.name, f.bytes, save)
     }
 
     @Transactional
@@ -482,27 +490,7 @@ class TaackAttachmentService implements WebAttributes, DataBinder, ServletAttrib
         if (!f || f.empty) {
             return null
         }
-        final String sha1ContentSum = MessageDigest.getInstance('SHA1').digest(f.bytes).encodeHex().toString()
-        final String p = sha1ContentSum + '.' + (f.originalFilename.substring(f.originalFilename.lastIndexOf('.') + 1) ?: 'NONE')
-        final String d = (storePath)
-        File target = new File(d + '/' + p)
-        f.transferTo(target)
-
-        Attachment attachment = new Attachment()
-        attachment.filePath = p
-        attachment.contentType = f.contentType
-        attachment.contentTypeEnum = AttachmentContentType.fromMimeType(f.contentType)
-        attachment.contentTypeCategoryEnum = AttachmentContentTypeCategory.DOCUMENT
-        attachment.originalName = f.originalFilename
-        attachment.contentShaOne = sha1ContentSum
-        attachment.fileSize = f.size
-        User currentUser = User.read(springSecurityService.currentUserId as Long)
-        attachment.userCreated = currentUser
-        attachment.userUpdated = currentUser
-        attachment.documentCategory = DocumentCategory.findOrCreateByCategory(DocumentCategoryEnum.OTHER)
-        attachment.documentAccess = DocumentAccess.findOrCreateByIsInternalAndIsRestrictedToMyBusinessUnitAndIsRestrictedToMySubsidiaryAndIsRestrictedToMyManagersAndIsRestrictedToEmbeddingObjects(false, false, false, false, false)
-        attachment.save(flush: true, failOnError: true)
-        return attachment
+        createAttachment(f.originalFilename, f.bytes, true)
     }
 
     Attachment updateContentSameContentType(Attachment attachment, byte[] content) {
