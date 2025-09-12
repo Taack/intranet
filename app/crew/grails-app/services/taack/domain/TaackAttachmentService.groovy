@@ -486,11 +486,11 @@ class TaackAttachmentService implements WebAttributes, DataBinder, ServletAttrib
     }
 
     @Transactional
-    Attachment createAttachment(MultipartFile f) {
+    Attachment createAttachment(MultipartFile f, boolean save = true) {
         if (!f || f.empty) {
             return null
         }
-        createAttachment(f.originalFilename, f.bytes, true)
+        createAttachment(f.originalFilename, f.bytes, save)
     }
 
     Attachment updateContentSameContentType(Attachment attachment, byte[] content) {
