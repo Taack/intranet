@@ -105,12 +105,13 @@ final class AttachmentUiService implements WebAttributes {
                 }
             }
 
-            iterate(taackFilterService.getBuilder(Attachment)
+            TaackFilter.FilterBuilder tfb = taackFilterService.getBuilder(Attachment)
                     .setMaxNumberOfLine(8)
                     .addFilter(f)
-                    //.addRestrictedIds(ids)
                     .setSortOrder(TaackFilter.Order.DESC, a.dateCreated_)
-                    .build()) { Attachment att ->
+            if (ids) tfb.addRestrictedIds(ids)
+
+            iterate(tfb.build()) { Attachment att ->
                 rowColumn {
                     rowFieldRaw this.preview(att.id)
                 }
