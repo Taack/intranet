@@ -11,13 +11,12 @@ repositories {
     maven { url "https://central.sonatype.com/repository/maven-snapshots" }
 }
 
-Properties properties = new Properties()
-FileInputStream input = new FileInputStream(file('../gradle.properties'))
-properties.load(input)
-input.close()
-
-for (String key : properties.stringPropertyNames()) {
-    ext.set(key, properties.getProperty(key))
+def props = new Properties()
+file('../gradle.properties').withInputStream { props.load(it) }
+props.each { key, val ->
+    if (!project.hasProperty(key)) {
+        project.ext."$key" = val
+    }
 }
 
 dependencies {
