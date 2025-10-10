@@ -11,6 +11,18 @@ dependencies {
 //}
 
 bootRun {
+    doFirst {
+        classpath = classpath.filter { file ->
+            boolean r = true
+            gradle.ext.taackPlugins.each { p ->
+                r = r && !file.path.contains(p + '-' + version + '.jar')  // Exclude the JAR to avoid duplicates
+            }
+            r
+        }
+        gradle.ext.taackPlugins.each { p ->
+            classpath = classpath + project(':' + p).sourceSets.main.output  // Add classes and resources output
+        }
+    }
     ignoreExitValue true
     jvmArgs(
             '-Dspring.output.ansi.enabled=always',
