@@ -1,6 +1,7 @@
 plugins {
     id 'taack-grails-plugin'
     id 'org.apache.grails.gradle.grails-web'
+    id 'org.apache.grails.gradle.grails-gsp'
     id 'cloud.wondrify.asset-pipeline'
 }
 
@@ -9,20 +10,31 @@ dependencies {
     runtimeOnly 'cloud.wondrify:asset-pipeline-grails'
 }
 
+//assets {
+//    minifyJs = true
+//    minifyCss = true
+//    skipNonDigests = true
+//
+//    configOptions = [
+//            commonJs: false,
+//            babel: [
+//                    enabled: false,
+//                    processJsFiles: false
+//            ]
+//    ] //useful for custom config on extension libraries
+//
+//    excludes = ['reveal.js/plugin/*/plugin.js', '**/*esm*', 'nomin/**']
+//
+//    //developmentRuntime can be turned off
+//    developmentRuntime = false
+//
+//    //if you want to customize the jar task this task runs on you can specify a jarTaskName
+//    jarTaskName = null
+//}
 assets {
-    minifyJs = true
+    minifyJs = false
     minifyCss = true
     skipNonDigests = true
-
-    configOptions = [
-            commonJs: false,
-            babel: [
-                    enabled: false,
-                    processJsFiles: false
-            ]
-    ] //useful for custom config on extension libraries
-
-    excludes = ['reveal.js/plugin/*/plugin.js', '**/*esm*', 'nomin/**']
 
     //developmentRuntime can be turned off
     developmentRuntime = false

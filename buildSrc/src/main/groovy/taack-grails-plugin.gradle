@@ -3,4 +3,8 @@ plugins {
     id 'org.apache.grails.gradle.grails-plugin'
 }
 
+dependencies {
+    profile "org.apache.grails.profiles:plugin"
+}
+
 bootJar.enabled = false

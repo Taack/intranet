@@ -1,10 +1,13 @@
 plugins {
-    id 'taack-grails-common'
+    id 'taack-grails-assets-common'
     id 'org.apache.grails.gradle.grails-app'
-    id 'taack-grails-assets-app'
 }
 
 dependencies {
+    profile "org.apache.grails.profiles:web"
+    developmentOnly("org.springframework.boot:spring-boot-devtools")
+    console "org.apache.grails:grails-console"
+
     implementation("org.apache.grails:grails-web-boot")
     implementation("org.apache.grails:grails-gsp")
 
@@ -15,7 +18,6 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-tomcat")
     implementation("org.springframework.boot:spring-boot-starter-validation")
 
-    profile "org.apache.grails.profiles:web"
     runtimeOnly "cloud.wondrify:asset-pipeline-grails"
     runtimeOnly("org.apache.tomcat:tomcat-jdbc")
 }
