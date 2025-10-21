@@ -12,14 +12,17 @@ dependencies {
 
 bootRun {
     doFirst {
+        List<String> taackPlugins = gradle.ext.taackPlugins
+
         classpath = classpath.filter { file ->
             boolean r = true
-            gradle.ext.taackPlugins.each { p ->
+            for (String p in taackPlugins) {
                 r = r && !file.path.contains(p + '-' + version + '.jar')  // Exclude the JAR to avoid duplicates
             }
             r
         }
-        gradle.ext.taackPlugins.each { p ->
+
+        for (String p in taackPlugins) {
             classpath = classpath + project(':' + p).sourceSets.main.output  // Add classes and resources output
         }
     }
@@ -63,18 +66,12 @@ grails {
     plugins {
         implementation 'org.taack:taack-ui'
         implementation 'org.taack:taack-ui-pdf'
-        implementation 'org.taack:taack-ui-asciidoc'
         implementation 'org.taack:taack-ui-jdbc'
 
-        gradle.ext.taackPlugins.each {
-            implementation project(':' + it)
+        for (String p in gradle.ext.taackPlugins) {
+            implementation project(':' + p)
         }
     }
-}
-
-assets {
-    minifyJs = true
-    minifyCss = true
 }
 
 bootBuildImage {
@@ -82,9 +79,9 @@ bootBuildImage {
     buildpacks.add("paketo-buildpacks/java-native-image@11.12.0")
 
     environment = [
-            "BPL_SPRING_AOT_ENABLED": "true",
-            "BP_SPRING_AOT_ENABLED": "true",
-            "BP_JVM_VERSION": "24",
+            "BPL_SPRING_AOT_ENABLED"         : "true",
+            "BP_SPRING_AOT_ENABLED"          : "true",
+            "BP_JVM_VERSION"                 : "24",
             "BP_NATIVE_IMAGE_BUILD_ARGUMENTS": """
 				-march=compatibility
 				--gc=serial
@@ -92,6 +89,6 @@ bootBuildImage {
 				-O3
 				-J-XX:MaxRAMPercentage=80.0
 			""",
-            "BP_HEALTH_CHECKER_ENABLED": "true"
+            "BP_HEALTH_CHECKER_ENABLED"      : "true"
     ]
 }

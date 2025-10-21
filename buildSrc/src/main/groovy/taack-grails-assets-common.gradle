@@ -1,6 +1,6 @@
 plugins {
-    id 'taack-grails-plugin'
-    id 'org.apache.grails.gradle.grails-web'
+    id 'taack-grails-common'
+//    id 'org.apache.grails.gradle.grails-web'
     id 'org.apache.grails.gradle.grails-gsp'
     id 'cloud.wondrify.asset-pipeline'
 }

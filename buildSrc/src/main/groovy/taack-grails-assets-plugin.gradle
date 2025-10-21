@@ -1,5 +1,6 @@
 plugins {
     id 'taack-grails-assets-common'
+    id 'org.apache.grails.gradle.grails-plugin'
 }
 
 dependencies {

@@ -1,6 +1,7 @@
 plugins {
     id 'taack-grails-assets-common'
-    id 'org.apache.grails.gradle.grails-app'
+    id 'org.apache.grails.gradle.grails-web'
+    id 'war'
 }
 
 dependencies {
