@@ -1,9 +1,0 @@
-plugins {
-    id "taack-grails-assets-common"
-}
-
-apply plugin: "org.apache.grails.gradle.grails-web"
-apply plugin: "org.apache.grails.gradle.grails-gsp"
-apply plugin: "cloud.wondrify.asset-pipeline"
-
-assets.packagePlugin = false
