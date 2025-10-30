@@ -24,7 +24,7 @@ dependencies {
 
     implementation("org.apache.grails:grails-logging")
     implementation("org.apache.grails:grails-databinding")
-//    implementation("org.apache.grails:grails-i18n")
+    implementation("org.apache.grails.i18n:grails-i18n")
     implementation("org.apache.grails:grails-interceptors")
     implementation("org.apache.grails:grails-async")
     implementation("org.apache.grails:grails-rest-transforms")
