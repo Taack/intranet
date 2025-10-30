@@ -14,7 +14,8 @@ import org.codehaus.groovy.runtime.MethodClosure as MC
 import taack.domain.TaackFilter
 import taack.domain.TaackFilterService
 import taack.domain.TaackMetaModelService
-import taack.domain.TaackSaveService
+import taack.render.TaackSaveService
+import taack.render.TaackUiPdfService
 import taack.render.TaackUiService
 import taack.ui.dsl.*
 import taack.ui.dsl.common.ActionIcon
@@ -24,6 +25,7 @@ import taack.ui.dsl.common.IconStyle
 @Secured(['isAuthenticated()'])
 class CrewController implements WebAttributes {
     TaackUiService taackUiService
+    TaackUiPdfService taackUiPdfService
     TaackFilterService taackFilterService
     TaackSaveService taackSaveService
     SpringSecurityService springSecurityService
@@ -169,7 +171,7 @@ class CrewController implements WebAttributes {
         UiFormSpecifier f = new UiFormSpecifier().ui user, {
             row {
                 col {
-                    section "User", {
+                    section 'User', {
                         field user.username_
                         field user.firstName_
                         field user.lastName_
@@ -179,14 +181,14 @@ class CrewController implements WebAttributes {
                     }
                 }
                 col {
-                    section "Coords", {
+                    section 'Coords', {
                         field user.businessUnit_
                         field user.mail_
                         field user.subsidiary_
                     }
                 }
                 col {
-                    section "Status", {
+                    section 'Status', {
                         field user.enabled_
                         field user.accountExpired_
                         field user.accountLocked_
@@ -204,17 +206,13 @@ class CrewController implements WebAttributes {
         }
     }
 
-    @Secured("ROLE_ADMIN")
+    @Secured('ROLE_ADMIN')
     @Transactional
     def saveUser() {
-        User u = User.get(params.long('id'))
-        if ((u && u.password != params.password) || !u) {
-            params.password = springSecurityService.encodePassword(params.password as String)
-        }
         taackSaveService.saveThenReloadOrRenderErrors(User)
     }
 
-    @Secured("ROLE_ADMIN")
+    @Secured('ROLE_ADMIN')
     def editUserRoles(User user) {
         taackUiService.show(new UiBlockSpecifier().ui {
             modal {
@@ -225,19 +223,19 @@ class CrewController implements WebAttributes {
         })
     }
 
-    @Secured("ROLE_ADMIN")
+    @Secured('ROLE_ADMIN')
     @Transactional
     def addRoleToUser() {
-        def ur = UserRole.create(User.read(params.long("userId")), Role.read(params.long("roleId")))
+        def ur = UserRole.create(User.read(params.long('userId')), Role.read(params.long('roleId')))
         if (ur.hasErrors()) log.error "${ur.errors}"
-        chain(action: "editUserRoles", id: params.long("userId"), params: [isAjax: true, refresh: true])
+        chain(action: 'editUserRoles', id: params.long('userId'), params: [isAjax: true, refresh: true])
     }
 
-    @Secured("ROLE_ADMIN")
+    @Secured('ROLE_ADMIN')
     @Transactional
     def removeRoleToUser() {
-        UserRole.remove(User.read(params.long("userId")), Role.read(params.long("roleId")))
-        chain(action: "editUserRoles", id: params.long("userId"), params: [isAjax: true, refresh: true])
+        UserRole.remove(User.read(params.long('userId')), Role.read(params.long('roleId')))
+        chain(action: 'editUserRoles', id: params.long('userId'), params: [isAjax: true, refresh: true])
     }
 
     @Transactional
@@ -281,11 +279,11 @@ class CrewController implements WebAttributes {
                     sortableFieldHeader new Role().authority_
                 }
                 column {
-                    label "Users"
+                    label 'Users'
                 }
                 if (hasActions) {
                     column {
-                        label "Edit"
+                        label 'Edit'
                     }
                 }
             }
@@ -317,7 +315,7 @@ class CrewController implements WebAttributes {
     }
 
     def roleForm() {
-        Role role = Role.read(params.long("id")) ?: new Role(params)
+        Role role = Role.read(params.long('id')) ?: new Role(params)
 
         UiFormSpecifier f = new UiFormSpecifier()
         f.ui role, {
@@ -333,7 +331,7 @@ class CrewController implements WebAttributes {
         taackUiService.show(b)
     }
 
-    @Secured(["ROLE_ADMIN", "ROLE_SWITCH_USER"])
+    @Secured(['ROLE_ADMIN', 'ROLE_SWITCH_USER'])
     def switchUser(User user) {
         render """\
    <!doctype html>
@@ -346,14 +344,14 @@ class CrewController implements WebAttributes {
    """.stripIndent()
     }
 
-    @Secured(["ROLE_ADMIN", "ROLE_SWITCH_USER"])
+    @Secured(['ROLE_ADMIN', 'ROLE_SWITCH_USER'])
     def replaceUser(User user) {
         render """\
    <!doctype html>
    <html>
    <form action='doReplaceUser' method='POST'>
       Replace user: <input type='text' name='userFrom' value="${user.username}"/> <br/>
-      By user: <input type='text' name='userTo' value=""/> <br/>
+      By user: <input type='text' name='userTo' value=''/> <br/>
       <input type='submit' value='Replace'/>
    </form>
    </html>
@@ -362,11 +360,11 @@ class CrewController implements WebAttributes {
 
     TaackMetaModelService taackMetaModelService
 
-    @Secured(["ROLE_ADMIN", "ROLE_SWITCH_USER"])
+    @Secured(['ROLE_ADMIN', 'ROLE_SWITCH_USER'])
     @Transactional
     def doReplaceUser() {
-        User userFrom = User.findByUsername(params['userFrom'])
-        User userTo = User.findByUsername(params['userTo'])
+        User userFrom = User.findByUsername(params.get('userFrom') as String)
+        User userTo = User.findByUsername(params.get('userTo') as String)
         User.withNewTransaction {
             (UserRole.findAllByUser(userFrom) as List<UserRole>)*.delete()
         }
@@ -374,7 +372,7 @@ class CrewController implements WebAttributes {
         render 'Done'
     }
 
-    @Secured(["ROLE_ADMIN", "ROLE_SWITCH_USER"])
+    @Secured(['ROLE_ADMIN', 'ROLE_SWITCH_USER'])
     def deleteUser(User user) {
         try {
             User.withNewTransaction {
@@ -387,17 +385,17 @@ class CrewController implements WebAttributes {
         render 'Done'
     }
 
-    @Secured("ROLE_ADMIN")
+    @Secured('ROLE_ADMIN')
     @Transactional
     def saveRole() {
         taackSaveService.saveThenRedirectOrRenderErrors(Role, this.&listRoles as MC)
     }
 
     def downloadBinPdf() {
-        taackUiService.downloadPdf(crewPdfService.buildPdfHierarchy(), 'UserHierarchy', true)
+        taackUiPdfService.downloadPdf(crewPdfService.buildPdfHierarchy(), 'UserHierarchy', true)
     }
 
     def downloadBinPdf2() {
-        taackUiService.downloadPdf(crewPdfService.buildPdfHierarchy(), 'UserHierarchy', false)
+        taackUiPdfService.downloadPdf(crewPdfService.buildPdfHierarchy(), 'UserHierarchy', false)
     }
 }

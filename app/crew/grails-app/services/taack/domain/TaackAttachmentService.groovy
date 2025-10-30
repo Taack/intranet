@@ -11,47 +11,57 @@ import grails.compiler.GrailsCompileStatic
 import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.util.Pair
+import grails.web.api.ServletAttributes
 import grails.web.api.WebAttributes
 import grails.web.databinding.DataBinder
-import org.apache.commons.io.FileUtils
+import jakarta.annotation.PostConstruct
 import org.apache.tika.metadata.Metadata
 import org.apache.tika.parser.AutoDetectParser
 import org.apache.tika.parser.ParseContext
 import org.apache.tika.parser.ocr.TesseractOCRConfig
 import org.apache.tika.sax.BodyContentHandler
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
+import org.grails.datastore.gorm.GormEntity
 import org.springframework.web.multipart.MultipartFile
+import org.springframework.web.multipart.MultipartHttpServletRequest
 import org.taack.*
+import taack.render.TaackSaveService
 import taack.ui.TaackUi
 import taack.ui.TaackUiConfiguration
 import taack.ui.dsl.UiMenuSpecifier
 
-import javax.annotation.PostConstruct
+import javax.imageio.ImageIO
+import javax.imageio.ImageReader
+import javax.imageio.stream.FileImageInputStream
+import javax.imageio.stream.ImageInputStream
+import java.nio.file.Files
 import java.security.MessageDigest
 
 @GrailsCompileStatic
-class TaackAttachmentService implements WebAttributes, DataBinder {
+class TaackAttachmentService implements WebAttributes, DataBinder, ServletAttributes {
     SpringSecurityService springSecurityService
 
     final Object imageConverter = new Object()
 
-    @Autowired
+    static Map<String, File> filePaths = [:]
+
     TaackUiConfiguration taackUiConfiguration
 
-    @Value('${intranet.root}')
-    String intranetRoot
+    final String intranetRoot = TaackUiConfiguration.root
 
     String getStorePath() {
-        intranetRoot + "/attachment/store"
+        intranetRoot + '/attachment/store'
     }
 
     String getAttachmentTmpPath() {
-        intranetRoot + "/attachment/tmp"
+        intranetRoot + '/attachment/tmp'
     }
 
     String getAttachmentTxtPath() {
-        intranetRoot + "/attachment/txt"
+        intranetRoot + '/attachment/txt'
+    }
+
+    String getAttachmentStorePath() {
+        intranetRoot + '/attachment/store'
     }
 
     enum PreviewFormat {
@@ -70,7 +80,7 @@ class TaackAttachmentService implements WebAttributes, DataBinder {
         }
 
         String getPreviewExtension() {
-            isPdf ? "png" : "webp"
+            isPdf ? 'png' : 'webp'
         }
 
         String attachmentPreviewFileName(Attachment attachment) {
@@ -92,7 +102,7 @@ class TaackAttachmentService implements WebAttributes, DataBinder {
         if (attachment.originalName.contains('.'))
             attachment.contentShaOne + attachment.originalName.substring(attachment.originalName.lastIndexOf('.'))
         else
-            attachment.contentShaOne + ".NONE"
+            attachment.contentShaOne + '.NONE'
     }
 
     String attachmentPath(final Attachment attachment) {
@@ -105,9 +115,9 @@ class TaackAttachmentService implements WebAttributes, DataBinder {
 
     String attachmentTxtPath(final Attachment attachment) {
         if (attachment.originalName.contains('.'))
-            attachmentTxtPath + '/' + attachment.contentShaOne + attachment.originalName.substring(attachment.originalName.lastIndexOf('.')) + ".txt"
+            attachmentTxtPath + '/' + attachment.contentShaOne + attachment.originalName.substring(attachment.originalName.lastIndexOf('.')) + '.txt'
         else
-            attachmentTxtPath + '/' + attachment.contentShaOne + ".NONE" + ".txt"
+            attachmentTxtPath + '/' + attachment.contentShaOne + '.NONE' + '.txt'
     }
 
     String attachmentPreviewPath(final PreviewFormat previewFormat, final Attachment attachment) {
@@ -117,9 +127,9 @@ class TaackAttachmentService implements WebAttributes, DataBinder {
     enum ConvertMode {
         DIRECT_CONVERT,
         UNO_CONVERTER,
-        LO_CONVERT_TEXT_DOCUMENT("writer_pdf_Export"),
-        LO_CONVERT_SPREADSHEET("calc_pdf_Export"),
-        LO_CONVERT_PRESENTATION("impress_pdf_Export")
+        LO_CONVERT_TEXT_DOCUMENT('writer_pdf_Export'),
+        LO_CONVERT_SPREADSHEET('calc_pdf_Export'),
+        LO_CONVERT_PRESENTATION('impress_pdf_Export')
 
         ConvertMode(final String pdfFilter = null) {
             this.pdfFilter = pdfFilter
@@ -129,26 +139,26 @@ class TaackAttachmentService implements WebAttributes, DataBinder {
     }
 
     enum ConvertExtensions {
-        ICO(".ico", "image.webp", ConvertMode.DIRECT_CONVERT),
-        WEBP(".webp", "image.webp", ConvertMode.DIRECT_CONVERT),
-        JPG(".jpg", "image.webp", ConvertMode.DIRECT_CONVERT),
-        JPEG(".jpeg", "image.webp", ConvertMode.DIRECT_CONVERT),
-        PNM(".pnm", "image.webp", ConvertMode.DIRECT_CONVERT),
-        PNG(".png", "image.webp", ConvertMode.DIRECT_CONVERT),
-        PIX(".pix", "image.webp", ConvertMode.DIRECT_CONVERT),
-        PDF(".pdf", "image.webp", ConvertMode.DIRECT_CONVERT),
-        TIF(".tif", "image.webp", ConvertMode.DIRECT_CONVERT),
-        SVG(".svg", "image.webp", ConvertMode.DIRECT_CONVERT, false),
-        ODT(".odt", "doc.webp", ConvertMode.UNO_CONVERTER),
-        DOCX(".docx", "doc.webp", ConvertMode.UNO_CONVERTER),
-        DOC(".doc", "doc.webp", ConvertMode.UNO_CONVERTER),
-        XLS(".xls", "ods.webp", ConvertMode.UNO_CONVERTER),
-        XLSM(".xlsm", "ods.webp", ConvertMode.UNO_CONVERTER),
-        XLSX(".xlsx", "ods.webp", ConvertMode.UNO_CONVERTER),
-        ODS(".ods", "ods.webp", ConvertMode.UNO_CONVERTER),
-        PPT(".ppt", "odp.webp", ConvertMode.UNO_CONVERTER),
-        PPTX(".pptx", "odp.webp", ConvertMode.UNO_CONVERTER),
-        ODP(".odp", "odp.webp", ConvertMode.UNO_CONVERTER)
+        ICO('.ico', 'image.webp', ConvertMode.DIRECT_CONVERT),
+        WEBP('.webp', 'image.webp', ConvertMode.DIRECT_CONVERT),
+        JPG('.jpg', 'image.webp', ConvertMode.DIRECT_CONVERT),
+        JPEG('.jpeg', 'image.webp', ConvertMode.DIRECT_CONVERT),
+        PNM('.pnm', 'image.webp', ConvertMode.DIRECT_CONVERT),
+        PNG('.png', 'image.webp', ConvertMode.DIRECT_CONVERT),
+        PIX('.pix', 'image.webp', ConvertMode.DIRECT_CONVERT),
+        PDF('.pdf', 'image.webp', ConvertMode.DIRECT_CONVERT),
+        TIF('.tif', 'image.webp', ConvertMode.DIRECT_CONVERT),
+        SVG('.svg', 'image.webp', ConvertMode.DIRECT_CONVERT, false),
+        ODT('.odt', 'doc.webp', ConvertMode.UNO_CONVERTER),
+        DOCX('.docx', 'doc.webp', ConvertMode.UNO_CONVERTER),
+        DOC('.doc', 'doc.webp', ConvertMode.UNO_CONVERTER),
+        XLS('.xls', 'ods.webp', ConvertMode.UNO_CONVERTER),
+        XLSM('.xlsm', 'ods.webp', ConvertMode.UNO_CONVERTER),
+        XLSX('.xlsx', 'ods.webp', ConvertMode.UNO_CONVERTER),
+        ODS('.ods', 'ods.webp', ConvertMode.UNO_CONVERTER),
+        PPT('.ppt', 'odp.webp', ConvertMode.UNO_CONVERTER),
+        PPTX('.pptx', 'odp.webp', ConvertMode.UNO_CONVERTER),
+        ODP('.odp', 'odp.webp', ConvertMode.UNO_CONVERTER)
 
         ConvertExtensions(final String extension, final String icon,
                           final ConvertMode convertMode,
@@ -178,13 +188,100 @@ class TaackAttachmentService implements WebAttributes, DataBinder {
 
     @PostConstruct
     void init() {
-        log.info "init"
-        FileUtils.forceMkdir(new File(storePath))
-        FileUtils.forceMkdir(new File(attachmentTmpPath))
-        FileUtils.forceMkdir(new File(attachmentTxtPath))
+        log.info 'init'
+        new File(storePath).mkdirs()
+        new File(attachmentTmpPath).mkdirs()
+        new File(attachmentTxtPath).mkdirs()
         for (PreviewFormat f : PreviewFormat.values()) {
-            FileUtils.forceMkdir(new File(previewPath(f)))
+            new File(previewPath(f)).mkdirs()
         }
+
+        TaackSaveService.registerFieldCustomSavingClosure('filePath', { GormEntity gormEntity, Map params ->
+            if (gormEntity.hasProperty('filePath')) {
+                final List<MultipartFile> mfl = (request as MultipartHttpServletRequest).getFiles('filePath')
+                final mf = mfl.first()
+                if (mf.size > 0) {
+                    final String sha1ContentSum = MessageDigest.getInstance('SHA1').digest(mf.bytes).encodeHex().toString()
+                    final String p = sha1ContentSum + '.' + (mf.originalFilename.substring(mf.originalFilename.lastIndexOf('.') + 1) ?: 'NONE')
+                    final String d = (filePaths.get(controllerName) ?: attachmentStorePath)
+                    File target = new File(d + '/' + p)
+                    mf.transferTo(target)
+
+                    gormEntity['filePath'] = p
+                    if (gormEntity.hasProperty('contentType')) {
+                        gormEntity['contentType'] = mf.contentType
+                        if (gormEntity.hasProperty('contentTypeEnum')) {
+                            AttachmentContentType attachmentContentType = AttachmentContentType.fromMimeType(mf.contentType)
+                            gormEntity['contentTypeEnum'] = attachmentContentType
+                            if (gormEntity.hasProperty('contentTypeCategoryEnum'))
+                                gormEntity['contentTypeCategoryEnum'] = attachmentContentType.category
+                        }
+                    }
+                    if (gormEntity.hasProperty('originalName')) {
+                        gormEntity['originalName'] = mf.originalFilename
+                    }
+                    if (gormEntity.hasProperty('md5sum')) {
+                        gormEntity['md5sum'] = MessageDigest.getInstance('MD5').digest(mf.bytes).encodeHex().toString()
+                    }
+                    if (gormEntity.hasProperty('contentShaOne')) {
+                        gormEntity['contentShaOne'] = sha1ContentSum
+                    }
+                    if (gormEntity.hasProperty('fileSize')) {
+                        gormEntity['fileSize'] = mf.size
+                    }
+                    if (gormEntity.hasProperty('width')) {
+                        final String suffix = mf.name.substring(mf.name.lastIndexOf('.') + 1)
+                        Iterator<ImageReader> iter = ImageIO.getImageReadersBySuffix(suffix)
+                        while (iter.hasNext()) {
+                            ImageReader reader = iter.next()
+                            try {
+                                ImageInputStream stream = new FileImageInputStream(target)
+                                reader.setInput(stream)
+                                int width = reader.getWidth(reader.getMinIndex())
+                                int height = reader.getHeight(reader.getMinIndex())
+                                gormEntity['width'] = width
+                                if (gormEntity.hasProperty('height')) gormEntity['height'] = height
+                                break
+                            } catch (IOException e) {
+                                log.warn 'Error reading: ' + mf.name, e
+                            } finally {
+                                reader.dispose()
+                            }
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    String imageHtmlAttributes(final Attachment attachment, PreviewFormat previewFormat = PreviewFormat.DEFAULT) {
+        if (!attachment) return new File("${taackUiConfiguration.resources}/noPreview.${previewFormat.previewExtension}")
+        final File preview = new File(attachmentPreviewPath(previewFormat, attachment))
+        if (preview.exists() && preview.length() > 8 * 4) {
+            // https://developers.google.com/speed/webp/docs/riff_container?hl=fr#webp_file_header
+            byte[] s = new byte[8 * 4]
+            new FileInputStream(preview).read(s, 0, 8 * 4)
+            String header = new String(s)
+            if (header.contains('VP8X')) {
+                int w = s[6 * 4 + 0] & 0xFF + (s[6 * 4 + 1] & 0xFF) * 256
+                int h = s[6 * 4 + 3] & 0xFF + (s[6 * 4 + 4] & 0xFF) * 256
+
+                w++
+                h++
+                if (w == h && w > 64) {
+                    h = 64
+                    w = 64
+                } else if (w > h && w > 64) {
+                    h = h * 64 / w as int
+                    w = 64
+                } else if (h > w && h > 64) {
+                    w = w * 64 / h as int
+                    h = 64
+                }
+                return """ width="${w}" height="${h}" """
+            }
+        }
+        null
     }
 
     File attachmentPreview(final Attachment attachment, PreviewFormat previewFormat = PreviewFormat.DEFAULT) {
@@ -207,7 +304,7 @@ class TaackAttachmentService implements WebAttributes, DataBinder {
                         return preview
                     }
                 } else if (ce && ce.convertMode == ConvertMode.UNO_CONVERTER) {
-                    log.info "AUO TaackSimpleAttachmentService executing unoconv -f pdf -e PageRange=1-1 --stdout ${attachmentPath(attachment)}"
+                    log.info "AUO TaackSimpleAttachmentService executing unoconv -f pdf -e PageRange=1-1 --stdout ${attachmentPath(attachment)}'.execute() | 'convert -resize ${previewFormat.pixelWidth + 'x' + previewFormat.pixelHeight} - ${preview.path}"
                     synchronized (imageConverter) {
                         def p = "unoconv -f pdf -e PageRange=1-1 --stdout ${attachmentPath(attachment)}".execute() | "convert -resize ${previewFormat.pixelWidth + 'x' + previewFormat.pixelHeight} - ${preview.path}".execute()
                         p.waitForOrKill(30 * 1000)
@@ -230,6 +327,10 @@ class TaackAttachmentService implements WebAttributes, DataBinder {
             }
         }
         return new File("${taackUiConfiguration.resources}/noPreview.${previewFormat.previewExtension}")
+    }
+
+    File restrictedAccessPreview() {
+        return new File("${taackUiConfiguration.resources}/restricted-icon.webp")
     }
 
     static void registerPreviewConverter(IAttachmentPreviewConverter previewConverter) {
@@ -292,7 +393,7 @@ class TaackAttachmentService implements WebAttributes, DataBinder {
         if (!attachment) return
         def response = webRequest.currentResponse
         response.setContentType(attachment.contentType)
-        response.setHeader("Content-disposition", "${inline ? 'inline' : 'attachment'};filename=${URLEncoder.encode(attachment.getName(), "UTF-8")}")
+        response.setHeader('Content-disposition', "${inline ? 'inline' : 'attachment'};filename=${URLEncoder.encode(attachment.getName(), 'UTF-8')}")
         response.outputStream << new File(attachmentPath(attachment)).bytes
     }
 
@@ -350,38 +451,53 @@ class TaackAttachmentService implements WebAttributes, DataBinder {
     }
 
     @Transactional
-    Attachment createAttachment(MultipartFile f) {
-        if (!f || f.empty) {
-            return null
-        }
-        final String sha1ContentSum = MessageDigest.getInstance("SHA1").digest(f.bytes).encodeHex().toString()
-        final String p = sha1ContentSum + "." + (f.originalFilename.substring(f.originalFilename.lastIndexOf('.') + 1) ?: "NONE")
-        final String d = (storePath)
-        File target = new File(d + "/" + p)
-        f.transferTo(target)
+    Attachment createAttachment(String path, byte[] contentBytes, boolean save = false) {
+        final String sha1ContentSum = MessageDigest.getInstance('SHA1').digest(contentBytes).encodeHex().toString()
+        Attachment attachment = Attachment.findByContentShaOneAndOriginalName(sha1ContentSum, path)
+        if (attachment)
+            return attachment
+        attachment = new Attachment()
+        final String p = sha1ContentSum + '.' + (path.substring(path.lastIndexOf('.') + 1) ?: 'NONE')
+        File target = new File(storePath + '/' + p)
+        target.bytes = contentBytes
 
-        Attachment attachment = new Attachment()
         attachment.filePath = p
-        attachment.contentType = f.contentType
-        attachment.contentTypeEnum = AttachmentContentType.fromMimeType(f.contentType)
+        attachment.contentType = Files.probeContentType(target.toPath())
+        attachment.contentTypeEnum = AttachmentContentType.fromMimeType(attachment.contentType)
         attachment.contentTypeCategoryEnum = AttachmentContentTypeCategory.DOCUMENT
-        attachment.originalName = f.originalFilename
+        attachment.originalName = path
         attachment.contentShaOne = sha1ContentSum
-        attachment.fileSize = f.size
+        attachment.fileSize = contentBytes.length
         User currentUser = User.read(springSecurityService.currentUserId as Long)
         attachment.userCreated = currentUser
         attachment.userUpdated = currentUser
         attachment.documentCategory = DocumentCategory.findOrCreateByCategory(DocumentCategoryEnum.OTHER)
         attachment.documentAccess = DocumentAccess.findOrCreateByIsInternalAndIsRestrictedToMyBusinessUnitAndIsRestrictedToMySubsidiaryAndIsRestrictedToMyManagersAndIsRestrictedToEmbeddingObjects(false, false, false, false, true)
-        attachment.save(flush: true, failOnError: true)
+        if (save) {
+            attachment.save(flush: true, failOnError: true)
+            if (attachment.hasErrors()) log.error("${attachment.errors}")
+        }
         return attachment
     }
 
+    @Transactional
+    Attachment createAttachment(File f, boolean save = false) {
+        createAttachment(f.name, f.bytes, save)
+    }
+
+    @Transactional
+    Attachment createAttachment(MultipartFile f, boolean save = true) {
+        if (!f || f.empty) {
+            return null
+        }
+        createAttachment(f.originalFilename, f.bytes, save)
+    }
+
     Attachment updateContentSameContentType(Attachment attachment, byte[] content) {
-        final String sha1ContentSum = MessageDigest.getInstance("SHA1").digest(content).encodeHex().toString()
-        final String p = sha1ContentSum + "." + (attachment.originalName.substring(attachment.originalName.lastIndexOf('.') + 1) ?: "NONE")
+        final String sha1ContentSum = MessageDigest.getInstance('SHA1').digest(content).encodeHex().toString()
+        final String p = sha1ContentSum + '.' + (attachment.originalName.substring(attachment.originalName.lastIndexOf('.') + 1) ?: 'NONE')
         final String d = (storePath)
-        File target = new File(d + "/" + p)
+        File target = new File(d + '/' + p)
         FileOutputStream fo = new FileOutputStream(target)
         fo.write(content)
 

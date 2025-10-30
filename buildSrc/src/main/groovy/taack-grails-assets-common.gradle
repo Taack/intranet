@@ -1,18 +1,20 @@
 plugins {
-    id 'taack-grails-plugin'
-    id 'com.bertramlabs.asset-pipeline'
+    id 'taack-grails-common'
+//    id 'org.apache.grails.gradle.grails-web'
+    id 'org.apache.grails.gradle.grails-gsp'
+    id 'cloud.wondrify.asset-pipeline'
 }
 
 dependencies {
-    implementation 'org.graalvm.polyglot:polyglot:24.1.1'
-    runtimeOnly("com.bertramlabs.plugins:asset-pipeline-grails:${assetPipelineGrails}")
+    implementation 'org.apache.grails:grails-gsp'
+    runtimeOnly 'cloud.wondrify:asset-pipeline-grails'
 }
 
-assets {
-    minifyJs = true
-    minifyCss = true
-    skipNonDigests = true
-
+//assets {
+//    minifyJs = true
+//    minifyCss = true
+//    skipNonDigests = true
+//
 //    configOptions = [
 //            commonJs: false,
 //            babel: [
@@ -21,11 +23,22 @@ assets {
 //            ]
 //    ] //useful for custom config on extension libraries
 //
-//    excludes = ['reveal.js/plugin/*/plugin.js', '**/*esm*']
+//    excludes = ['reveal.js/plugin/*/plugin.js', '**/*esm*', 'nomin/**']
+//
+//    //developmentRuntime can be turned off
+//    developmentRuntime = false
+//
+//    //if you want to customize the jar task this task runs on you can specify a jarTaskName
+//    jarTaskName = null
+//}
+assets {
+    minifyJs = false
+    minifyCss = true
+    skipNonDigests = true
 
     //developmentRuntime can be turned off
-//    developmentRuntime = false
+    developmentRuntime = false
 
     //if you want to customize the jar task this task runs on you can specify a jarTaskName
-//    jarTaskName = null
+    jarTaskName = null
 }

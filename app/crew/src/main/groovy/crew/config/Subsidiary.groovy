@@ -11,7 +11,7 @@ import taack.ui.dsl.common.IStyled
 import taack.ui.dsl.common.Style
 
 @CompileStatic
-final enum SupportedCurrency {
+enum SupportedCurrency {
     EUR(2),
     USD(2),
     INR(0),
@@ -54,7 +54,7 @@ enum SupportedLanguage implements IEnumOptions, IEnumOption {
 
     static SupportedLanguage fromContext() {
         try {
-            SupportedLanguage language = LocaleContextHolder.locale.language.split("_")[0]?.toUpperCase()?.replace("ZH", "CN") as SupportedLanguage
+            SupportedLanguage language = LocaleContextHolder.locale.language.split('_')[0]?.toUpperCase()?.replace('ZH', 'CN') as SupportedLanguage
             language ?: EN
         } catch (ignored) {
             return EN
@@ -99,7 +99,7 @@ enum SupportedLanguage implements IEnumOptions, IEnumOption {
 
 @CompileStatic
 enum Address {
-    YOUR_ADDRESS(Country.US, "City", "ZIPCODE", "Street")
+    YOUR_ADDRESS(Country.US, 'City', 'ZIPCODE', 'Street')
 
     Address(final Country country, final String city, final String zipCode, final String street, final String countryLocalName = null) {
         this.country = country
@@ -117,7 +117,7 @@ enum Address {
 }
 
 @CompileStatic
-final enum AdministrativeTax {
+enum AdministrativeTax {
     YOUR_TAX('TAX LABEL', 'TAX CODE')
 
     AdministrativeTax(final String taxLabel, final String taxCode) {
@@ -130,8 +130,8 @@ final enum AdministrativeTax {
 }
 
 @CompileStatic
-final enum AdministrativeIdentifier {
-    YOUR_COMPANY_IDENTIFIER("SIRET", "123123123123")
+enum AdministrativeIdentifier {
+    YOUR_COMPANY_IDENTIFIER('SIRET', '123123123123')
 
     AdministrativeIdentifier(final String idLabel, final String idCode) {
         this.idCode = idCode
@@ -143,7 +143,7 @@ final enum AdministrativeIdentifier {
 }
 
 @CompileStatic
-final enum Subsidiary implements IStyled {
+enum Subsidiary implements IStyled {
     YOUR_SUBSIDIARY1(null, 'Your Subsidiary US', Address.YOUR_ADDRESS, SupportedCurrency.USD, SupportedLanguage.EN),
     YOUR_SUBSIDIARY2(null, 'Your Subsidiary FR', Address.YOUR_ADDRESS, SupportedCurrency.EUR, SupportedLanguage.FR)
 

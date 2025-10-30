@@ -19,10 +19,10 @@ class DocumentAccess {
 
     @Override
     String toString() {
-        String internal = isInternal ? "intern " : ""
-        String restrictedToMyBusinessUnit = isRestrictedToMyBusinessUnit ? "BU Only " : ""
-        String restrictedToMySubsidiary = isRestrictedToMySubsidiary ? "SUB Only " : ""
-        String restrictedToMyManager = isRestrictedToMyManagers ? "Managers Only " : ""
+        String internal = isInternal ? 'intern ' : ''
+        String restrictedToMyBusinessUnit = isRestrictedToMyBusinessUnit ? 'BU Only ' : ''
+        String restrictedToMySubsidiary = isRestrictedToMySubsidiary ? 'SUB Only ' : ''
+        String restrictedToMyManager = isRestrictedToMyManagers ? 'Managers Only ' : ''
         return "Access: ${internal}${restrictedToMyBusinessUnit}${restrictedToMySubsidiary}${restrictedToMyManager}"
     }
 }

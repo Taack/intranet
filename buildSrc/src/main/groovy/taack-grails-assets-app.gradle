@@ -1,5 +1,0 @@
-plugins {
-    id 'taack-grails-assets-common'
-}
-
-assets.packagePlugin = false

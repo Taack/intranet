@@ -91,6 +91,11 @@ grails:
 ---
 server:
   port: 9442                                            # The port to listen on
+  tomcat:
+      max-part-header-size: 8192
+      max-part-count: 80
+  max-http-request-header-size: 32KB
+
 ---
 hibernate:
   cache:
@@ -98,6 +103,7 @@ hibernate:
     use_second_level_cache: false
     use_query_cache: false
 dataSource:
+  dbCreate: update
   pooled: true
   jmxExport: true
   driverClassName: org.h2.Driver
@@ -107,11 +113,10 @@ dataSource:
 environments:
   development:
     dataSource:
-      dbCreate: update
       url: jdbc:h2:./intranetDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
   test:
     dataSource:
-      dbCreate: update
+      dbCreate: create-drop
       url: jdbc:h2:mem:testDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
   production:
     dataSource:
@@ -179,10 +184,21 @@ stp:
   offscreen: true
   useWeston: true
 ---
-
 client.js.path: ''
 bootstrap.js.tag: '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" async crossorigin="anonymous"></script>'
 bootstrap.css.tag: '<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">'
 #client.js.path: 'http://localhost:8080/client.js'
 
 collabora.url: http://localhost:9980/
+
+---
+spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+      - org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration

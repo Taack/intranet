@@ -4,23 +4,22 @@ plugins {
 
 repositories {
     mavenLocal()
-    maven { url "https://repo.grails.org/grails/core/" }
-    maven { url 'https://central.sonatype.com/' }
+    mavenCentral()
     gradlePluginPortal() // so that external plugins can be resolved in dependencies section
+    maven { url "https://repo.grails.org/grails/restricted" }
 }
 
-Properties properties = new Properties()
-FileInputStream input = new FileInputStream(file('../gradle.properties'))
-properties.load(input)
-input.close()
-
-for (String key : properties.stringPropertyNames()) {
-    ext.set(key, properties.getProperty(key))
+def props = new Properties()
+file('../gradle.properties').withInputStream { props.load(it) }
+props.each { key, val ->
+    if (!project.hasProperty(key)) {
+        project.ext."$key" = val
+    }
 }
 
 dependencies {
-    implementation "org.grails:grails-gradle-plugin:${grailsGradlePluginVersion}"
-    implementation "com.bertramlabs.plugins:asset-pipeline-gradle:${assetPipeline}"
-    implementation 'org.openjdk.nashorn:nashorn-core:15.4'
-    implementation "org.grails.plugins:hibernate5:${grailsHibernate5}"
+    implementation platform("org.apache.grails:grails-bom:$grailsVersion")
+    implementation "org.apache.grails:grails-gradle-plugins"
+//    implementation "org.apache.grails:grails-data-hibernate5"
+    implementation "cloud.wondrify:asset-pipeline-gradle"
 }

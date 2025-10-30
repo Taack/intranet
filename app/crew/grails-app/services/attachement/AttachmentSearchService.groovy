@@ -3,6 +3,7 @@ package attachement
 import attachment.config.AttachmentContentTypeCategory
 import crew.AttachmentController
 import grails.compiler.GrailsCompileStatic
+import jakarta.annotation.PostConstruct
 import org.codehaus.groovy.runtime.MethodClosure
 import org.grails.datastore.gorm.GormEntity
 import attachment.Attachment
@@ -12,7 +13,6 @@ import taack.solr.SolrFieldType
 import taack.solr.SolrSpecifier
 import taack.ui.dsl.UiBlockSpecifier
 
-import javax.annotation.PostConstruct
 
 @GrailsCompileStatic
 class AttachmentSearchService implements TaackSearchService.IIndexService {
@@ -24,15 +24,16 @@ class AttachmentSearchService implements TaackSearchService.IIndexService {
 
     @PostConstruct
     private void init() {
-        taackSearchService.registerSolrSpecifier(this, new SolrSpecifier(Attachment, AttachmentController.&showAttachment as MethodClosure, this.&labeling as MethodClosure, { Attachment a ->
+        taackSearchService.registerSolrSpecifier(this, new SolrSpecifier(Attachment, { Attachment a ->
             a ?= new Attachment()
             String content = taackAttachmentService.attachmentContent(a)
             indexField SolrFieldType.TXT_GENERAL, a.originalName_
             if (content || !a.id)
-                indexField SolrFieldType.TXT_GENERAL, "fileContent", content
-            indexField SolrFieldType.POINT_STRING, "contentTypeCategoryEnum", true, a.contentTypeCategoryEnum?.toString()
+                indexField SolrFieldType.TXT_GENERAL, 'fileContent', content
+            if (a.documentCategory) indexField SolrFieldType.TXT_GENERAL, 'fileTags', a.documentCategory.tags*.name.join(',')
+            indexField SolrFieldType.POINT_STRING, 'contentTypeCategoryEnum', true, a.contentTypeCategoryEnum?.toString()
             indexField SolrFieldType.DATE, 0.5f, true, a.dateCreated_
-            indexField SolrFieldType.POINT_STRING, "userCreated", 0.5f, true, a.userCreated?.username
+            indexField SolrFieldType.POINT_STRING, 'userCreated', 0.5f, true, a.userCreated?.username
         }))
     }
 

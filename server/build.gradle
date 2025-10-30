@@ -1,55 +1,79 @@
 plugins {
     id 'taack-grails-webapp'
-//    id "com.github.erdi.webdriver-binaries" version "3.2"
-
 }
 
-application {
-    mainClass.set("taack.website.Application")
+
+dependencies {
+    implementation("org.apache.tomcat:tomcat-jdbc")
 }
+//application {
+//    mainClass.set("taack.website.Application")
+//}
 
 bootRun {
     ignoreExitValue true
     jvmArgs(
             '-Dspring.output.ansi.enabled=always',
-            '-noverify',
             '-XX:TieredStopAtLevel=1',
-            '-Xmx1024m',
-            '-Xss8m'
+            '--enable-native-access=ALL-UNNAMED',
+            '-Xss4m'
+            // '-Xss10m'
     )
-    sourceResources sourceSets.main
-    String springProfilesActive = 'spring.profiles.active'
-    systemProperty springProfilesActive, System.getProperty(springProfilesActive)
+//    sourceResources sourceSets.main
+//    String springProfilesActive = 'spring.profiles.active'
+//    systemProperty springProfilesActive, System.getProperty(springProfilesActive)
+//    systemProperty 'server.port', '8443'
+//    systemProperty 'server.ssl.enabled', 'true'
+//    systemProperty 'server.ssl.key-store', './localkeystore'
+//    systemProperty 'server.ssl.key-store-password', 'mysecret'
+//    systemProperty 'server.ssl.key-password', 'mysecret'
 }
 
 bootJar {
     enabled = true
-
+    requiresUnpack '**/asciidoctorj*.jar'
     manifest {
         attributes["Add-Opens"] = "java.base/java.io java.base/sun.nio.ch"
     }
+
 }
 
-tasks.register('generateTaackAppTask', generateTaackApp.GenerateTaackAppTask) {
-    group = 'help'
-    description = 'Create a Taack app module'
-    outputDirectory = file('../app')
-    appName = System.getProperty("modName")
-}
+//tasks.register('generateTaackAppTask', generateTaackApp.GenerateTaackAppTask) {
+//    group = 'help'
+//    description = 'Create a Taack app module'
+//    outputDirectory = file('../app')
+//    appName = System.getProperty("modName")
+//}
 
 grails {
     exploded = true
-    pathingJar = false
 
     plugins {
-        gradle.ext.taackPlugins.each {
-            implementation project(':' + it)
+        implementation 'org.taack:taack-ui'
+        implementation 'org.taack:taack-ui-pdf'
+        implementation 'org.taack:taack-ui-jdbc'
+
+        for (String p in gradle.ext.taackPlugins) {
+            implementation project(':' + p)
         }
     }
 }
 
-//webdriverBinaries {
-//    chromedriver '122.0.6260.0'
-//    geckodriver '0.33.0'
-//    edgedriver '110.0.1587.57'
-//}
+bootBuildImage {
+    builder = "paketobuildpacks/builder-noble-java-tiny:latest"
+    buildpacks.add("paketo-buildpacks/java-native-image@11.12.0")
+
+    environment = [
+            "BPL_SPRING_AOT_ENABLED"         : "true",
+            "BP_SPRING_AOT_ENABLED"          : "true",
+            "BP_JVM_VERSION"                 : "24",
+            "BP_NATIVE_IMAGE_BUILD_ARGUMENTS": """
+				-march=compatibility
+				--gc=serial
+				-R:MaxHeapSize=256m
+				-O3
+				-J-XX:MaxRAMPercentage=80.0
+			""",
+            "BP_HEALTH_CHECKER_ENABLED"      : "true"
+    ]
+}

@@ -17,8 +17,8 @@ class ActionDefaultLogInterceptor implements Interceptor {
     SpringSecurityService springSecurityService
 
     boolean before() {
-        final String c = params['controller']
-        final String a = params['action']
+        final String c = params.get('controller')
+        final String a = params.get('action')
         def request = WebUtils.retrieveGrailsWebRequest().getCurrentRequest()
         if (c && a) {
             try {

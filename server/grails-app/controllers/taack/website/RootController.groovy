@@ -18,7 +18,7 @@ TODO: Add an infrastructure to list new stuffs from a user and a timestamp
  */
 
 @GrailsCompileStatic
-@Secured(["isAuthenticated()"])
+@Secured(['isAuthenticated()'])
 class RootController {
     TaackUiService taackUiService
     RootSearchService rootSearchService
@@ -41,8 +41,8 @@ class RootController {
                         show(new UiShowSpecifier().ui {
                             inlineHtml(
                                     """\
-                                    <a href="${Parameter.urlMapped(a.entryPoint)}">
-                                        <div class="taack-app" style="width: 220px; padding: 35px; text-align: center;display: inline-grid;">${a.svg}<div><b>${a.label}</b><br>${a.desc}</div></div>
+                                    <a href="${new Parameter().urlMapped(a.entryPoint)}">
+                                        <div class='taack-app' style='width: 220px; padding: 35px; text-align: center;display: inline-grid;'>${a.svg}<div><b>${a.label}</b><br>${a.desc}</div></div>
                                     </a>
                                     """.stripIndent())
                         })
@@ -59,9 +59,9 @@ class RootController {
 
     def updates() {
         taackUiService.show(new UiBlockSpecifier().ui {
-            ajaxBlock "updates", {
+            ajaxBlock 'updates', {
                 show(new UiShowSpecifier().ui {
-                    inlineHtml("WiP", "")
+                    inlineHtml('WiP', '')
                 })
             }
         }, buildMenu())
@@ -69,15 +69,15 @@ class RootController {
 
     def todo() {
         taackUiService.show(new UiBlockSpecifier().ui {
-            ajaxBlock "todo", {
+            ajaxBlock 'todo', {
                 show(new UiShowSpecifier().ui {
-                    inlineHtml("WiP", "")
+                    inlineHtml('WiP', '')
                 })
             }
         }, buildMenu())
     }
 
-    @Secured(["ROLE_ADMIN"])
+    @Secured(['ROLE_ADMIN'])
     def solrIndexAll() {
         rootSearchService.taackSearchService.indexAll()
         render 'Done !'

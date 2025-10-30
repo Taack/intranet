@@ -13,13 +13,15 @@ import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.annotation.Secured
 import org.codehaus.groovy.runtime.MethodClosure as MC
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.web.multipart.MultipartFile
+import org.springframework.web.multipart.MultipartHttpServletRequest
 import org.taack.IAttachmentEditorIFrame
 import org.taack.IAttachmentShowIFrame
 import taack.domain.TaackAttachmentService
 import taack.domain.TaackFilter
 import taack.domain.TaackFilterService
 import taack.domain.TaackMetaModelService
-import taack.domain.TaackSaveService
+import taack.render.TaackSaveService
 import taack.render.TaackUiService
 import taack.ui.dsl.*
 import taack.ui.dsl.block.BlockSpec
@@ -73,7 +75,7 @@ class AttachmentController {
     def preview(Attachment attachment, String format) {
         TaackAttachmentService.PreviewFormat f = format as TaackAttachmentService.PreviewFormat ?: TaackAttachmentService.PreviewFormat.DEFAULT
         response.setContentType('image/webp')
-        response.setHeader('Content-disposition', "filename=" + "${URLEncoder.encode((attachment?.getName() ?: 'noPreview.webp'), 'UTF-8')}")
+        response.setHeader('Content-disposition', 'filename=' + "${URLEncoder.encode((attachment?.getName() ?: 'noPreview.webp'), 'UTF-8')}")
         if (!attachment?.getName()) response.setHeader('Cache-Control', 'max-age=604800')
         response.outputStream << (taackAttachmentService.attachmentPreview(attachment, f)).bytes
         return false
@@ -81,7 +83,7 @@ class AttachmentController {
 
     def previewFull(Attachment attachment) {
         response.setContentType('image/webp')
-        response.setHeader('Content-disposition', "filename=" + "${URLEncoder.encode((attachment?.getName() ?: 'noPreview.webp'), 'UTF-8')}")
+        response.setHeader('Content-disposition', 'filename=' + "${URLEncoder.encode((attachment?.getName() ?: 'noPreview.webp'), 'UTF-8')}")
         if (!attachment?.getName()) response.setHeader('Cache-Control', 'max-age=604800')
         response.outputStream << (taackAttachmentService.attachmentPreview(attachment, TaackAttachmentService.PreviewFormat.PREVIEW_LARGE)).bytes
         return false
@@ -94,7 +96,7 @@ class AttachmentController {
             modal {
                 show this.attachmentUiService.buildShowAttachment(attachment), {
                     if (iEditor) {
-                        menu "EDIT", AttachmentController.&inlineEdition as MC, attachment.id
+                        menu 'EDIT', AttachmentController.&inlineEdition as MC, attachment.id
                     }
                     for (def ext in TaackAttachmentService.converterExtensions(attachment)) {
                         menu "Download ${ext}", AttachmentController.&downloadBinExtensionForAttachment as MC, [extension: ext, id: attachment.id]
@@ -116,10 +118,10 @@ class AttachmentController {
                 List<Attachment> attachmentHistory = attachment.history
                 table new UiTableSpecifier().ui({
                     header {
-                        label tr("default.preview.label")
+                        label tr('default.preview.label')
                         column {
                             label attachment.originalName_
-                            label "Version"
+                            label 'Version'
                         }
                         column {
                             label attachment.userCreated_
@@ -142,7 +144,7 @@ class AttachmentController {
                         }
                     }
                 }), {
-                    label tr("history.label")
+                    label tr('history.label')
                 }
             }
         })
@@ -226,13 +228,13 @@ class AttachmentController {
 
     def editAttachment(Attachment attachment) {
         taackUiService.show(new UiBlockSpecifier().ui {
-            String selectActionUrl = params["selectActionUrl"]
+            String selectActionUrl = params.get('selectActionUrl')
             if (!selectActionUrl) {
                 modal {
                     form attachmentUiService.buildAttachmentForm(attachment ?: new Attachment()), TaackAttachmentService.additionalCreate?.closure
                 }
             } else {
-                ajaxBlock "selectingAttachmentBlock", {
+                ajaxBlock 'selectingAttachmentBlock', {
                     form attachmentUiService.buildAttachmentForm(new Attachment(), selectActionUrl), TaackAttachmentService.additionalCreate?.closure
                 }
             }
@@ -244,9 +246,9 @@ class AttachmentController {
     def saveAttachment() {
         Attachment a = taackSaveService.save(Attachment)
         if (a.validate()) {
-            String selectActionUrl = params["selectActionUrl"]
+            String selectActionUrl = params.get('selectActionUrl')
             if (selectActionUrl) {
-                redirect url: selectActionUrl.replace("&#61;", "=") + "&id=${a.id}&isAjax=true"
+                redirect url: selectActionUrl.replace('&#61;', '=') + "&id=${a.id}&isAjax=true"
             } else {
                 taackUiService.ajaxReload()
             }
@@ -297,11 +299,11 @@ class AttachmentController {
     }
 
     def downloadBinExtensionForAttachment(Attachment attachment) {
-        String ext = (params['extension'] as String)?.toLowerCase()
+        String ext = (params.get('extension') as String)?.toLowerCase()
         def f = TaackAttachmentService.convertExtension(attachment, ext)
         if (f?.exists()) {
             response.setContentType("application/${ext}")
-            response.setHeader('Content-disposition', "filename=" + "${URLEncoder.encode("${attachment.originalName}.${ext}", 'UTF-8')}")
+            response.setHeader('Content-disposition', 'filename=' + "${URLEncoder.encode("${attachment.originalName}.${ext}", 'UTF-8')}")
             response.outputStream << f.bytes
         } else return null
     }
@@ -349,7 +351,7 @@ class AttachmentController {
                         show new UiShowSpecifier().ui({
                             field Markdown.getContentHtml('## Click on a tag ..')
                         }), {
-                            label "Files"
+                            label 'Files'
                         }
                     }
                 }
@@ -378,7 +380,7 @@ class AttachmentController {
                     filterField a.contentTypeCategoryEnum_
                     filterField tr('default.userCreated.label'), a.userCreated_, a.userCreated.username_
                     filterField a.userCreated_, a.userCreated.subsidiary_
-                    filterFieldExpressionBool tr("default.active.label"), new FilterExpression(true, Operator.EQ, a.active_)
+                    filterFieldExpressionBool tr('default.active.label'), new FilterExpression(true, Operator.EQ, a.active_)
                 }
                 section tr('default.documentCategory.label'), {
                     filterField a.documentCategory_, a.documentCategory.category_
@@ -387,7 +389,7 @@ class AttachmentController {
             }), new UiTableSpecifier().ui {
                 header {
                     column {
-                        label tr("default.preview.label")
+                        label tr('default.preview.label')
                     }
                     column {
                         sortableFieldHeader a.originalName_
@@ -397,7 +399,7 @@ class AttachmentController {
                         sortableFieldHeader a.contentTypeEnum_
                     }
                     column {
-                        sortableFieldHeader tr("default.userCreated.label"), a.userCreated_, a.userCreated.username_
+                        sortableFieldHeader tr('default.userCreated.label'), a.userCreated_, a.userCreated.username_
                         sortableFieldHeader a.userCreated_, a.userCreated.subsidiary_
                     }
                 }
@@ -490,5 +492,14 @@ class AttachmentController {
             }
         }
         taackUiService.show(b)
+    }
+
+    @Transactional
+    def onDrop() {
+        final List<MultipartFile> mfl = (request as MultipartHttpServletRequest).getFiles('filePath')
+        mfl.each {
+            taackAttachmentService.createAttachment(it)
+        }
+        taackUiService.ajaxReload()
     }
 }

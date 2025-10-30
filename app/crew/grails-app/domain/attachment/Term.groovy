@@ -37,7 +37,7 @@ class Term {
 
     static constraints = {
         name nullable: false, unique: 'termGroupConfig', validator: { String val, Term obj ->
-            !val.matches(".*\\s+.*")
+            !val.matches('.*\\s+.*')
         }
         translations nullable: true
         parent nullable: true, validator: { Term val, Term obj ->
@@ -70,6 +70,6 @@ class Term {
         return (Integer.toHexString(((hashCode>>16)&0xFF))+
                 Integer.toHexString(((hashCode>>8)&0xFF))+
                 Integer.toHexString((hashCode&0xFF))+
-                "00").take(6)
+                '00').take(6)
     }
 }
