@@ -27,6 +27,7 @@ class Attachment extends TaackDocument implements IDomainHistory<Attachment> {
     static constraints = {
         userUpdated nullable: true
         documentAccess nullable: true
+        contentType nullable: true
         contentTypeEnum nullable: true
         contentTypeCategoryEnum nullable: true
         filePath widget: 'filePath'

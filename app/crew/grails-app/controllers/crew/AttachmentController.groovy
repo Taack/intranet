@@ -12,7 +12,6 @@ import grails.compiler.GrailsCompileStatic
 import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.annotation.Secured
 import org.codehaus.groovy.runtime.MethodClosure as MC
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.multipart.MultipartHttpServletRequest
 import org.taack.IAttachmentEditorIFrame
@@ -44,9 +43,6 @@ class AttachmentController {
     AttachmentSearchService attachmentSearchService
     TaackSaveService taackSaveService
     TaackFilterService taackFilterService
-
-    @Value('${intranet.root}')
-    String rootPath
 
     static private UiMenuSpecifier buildMenu(String q = null) {
         new UiMenuSpecifier().ui {
