@@ -89,7 +89,7 @@ abstract class GenerateTaackAppTask extends DefaultTask {
         import taack.app.TaackApp
         import taack.app.TaackAppRegisterService
 
-        import javax.annotation.PostConstruct
+        import jakarta.annotation.PostConstruct
  
         @GrailsCompileStatic
         class ${appName.capitalize()}UiService implements WebAttributes {
@@ -267,8 +267,6 @@ abstract class GenerateTaackAppTask extends DefaultTask {
         }
 
         grails {
-            // should use gradle -Dgrails.run.active=true bootRun
-            exploded = true
             plugins {
                 implementation project(':crew')
             }
