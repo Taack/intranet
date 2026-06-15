@@ -7,8 +7,8 @@ plugins {
 
 dependencies {
     profile "org.apache.grails.profiles:web"
-    developmentOnly("org.springframework.boot:spring-boot-devtools")
-    console "org.apache.grails:grails-console"
+//    developmentOnly("org.springframework.boot:spring-boot-devtools")
+//    console "org.apache.grails:grails-console"
 
     implementation("org.apache.grails:grails-web-boot")
     implementation("org.apache.grails:grails-gsp")
