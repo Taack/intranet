@@ -29,6 +29,8 @@ class TaackDocument {
     static constraints = {
         userUpdated nullable: true
         writeAccess nullable: true
+        documentAccess nullable: true
+        documentCategory nullable: true
     }
 
     static mapping = {
