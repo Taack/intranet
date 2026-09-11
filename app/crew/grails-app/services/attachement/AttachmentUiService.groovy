@@ -83,6 +83,9 @@ final class AttachmentUiService implements WebAttributes {
         if (!id) return '<span/>'
         """<div style="text-align: center;"><img style="max-height: 420px" src="${applicationTagLib.createLink(controller: 'attachment', action: 'previewFull', id: id)}${p ? "?$p" : ""}"></div>"""
     }
+    UiTableSpecifier buildAttachmentsTable(Long... ids) {
+        buildAttachmentsTable (null, null, null, ids)
+    }
 
     UiTableSpecifier buildAttachmentsTable(final UiFilterSpecifier f, final MC selectMC = null, final Long objectId = null, Long... ids) {
         Attachment a = new Attachment(active: true, userCreated: new User())
