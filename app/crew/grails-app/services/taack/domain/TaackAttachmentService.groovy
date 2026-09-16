@@ -304,9 +304,9 @@ class TaackAttachmentService implements WebAttributes, DataBinder, ServletAttrib
                         return preview
                     }
                 } else if (ce && ce.convertMode == ConvertMode.UNO_CONVERTER) {
-                    log.info """AUO TaackSimpleAttachmentService executing unoconv -f pdf -e PageRange=1-1 --stdout ${attachmentPath(attachment)}".execute() | "convert -resize ${previewFormat.pixelWidth + 'x' + previewFormat.pixelHeight} - ${preview.path}"""
+                    log.info """AUO TaackSimpleAttachmentService executing unoconvert ${attachmentPath(attachment)} --filter-options PixelWidth=${previewFormat.pixelWidth} --filter-options PixelHeight=${previewFormat.pixelHeight} ${preview.path}"""
                     synchronized (imageConverter) {
-                        def p = "unoconv -f pdf -e PageRange=1-1 --stdout ${attachmentPath(attachment)}".execute() | "convert -resize ${previewFormat.pixelWidth + 'x' + previewFormat.pixelHeight} - ${preview.path}".execute()
+                        def p = "unoconvert ${attachmentPath(attachment)} --filter-options PixelWidth=${previewFormat.pixelWidth} --filter-options PixelHeight=${previewFormat.pixelHeight} ${preview.path}".execute()
                         p.waitForOrKill(30 * 1000)
                     }
                     if (preview.exists()) {
