@@ -124,7 +124,6 @@ final class AttachmentUiService implements WebAttributes {
                     } else {
                         rowAction ActionIcon.DOWNLOAD * IconStyle.SCALE_DOWN, AttachmentController.&downloadBinAttachment as MC, att.id
                     }
-                    rowAction tr('default.preview.label'), ActionIcon.SHOW * IconStyle.SCALE_DOWN, AttachmentController.&showAttachmentIFrame as MC, att.id
                     rowAction(att.originalName, AttachmentController.&showAttachment as MC, att.id)
                     rowField att.dateCreated_
                 }

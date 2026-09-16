@@ -137,7 +137,7 @@ grails:
             jwt:
               secret: 'ChangeThisIfUsingSecurityRestGrailsPLugin'
 ---
-intranet.noSsh: false
+intranet.noSsh: true
 intranet.root: ${HOME}/intranetFilesGH
 ---
 taack-ui:
@@ -189,7 +189,7 @@ bootstrap.js.tag: '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dis
 bootstrap.css.tag: '<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">'
 #client.js.path: 'http://localhost:8080/client.js'
 
-collabora.url: http://localhost:9980/
+collabora.url: http://127.0.0.1:9980/
 
 ---
 spring:
@@ -202,3 +202,64 @@ spring:
       - org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientAutoConfiguration
       - org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration
       - org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
+---
+grails:
+  plugin:
+    springsecurity:
+      logout:
+        postOnly: false
+      rememberMe:
+        persistent: true
+        persistentToken:
+          domainClassName: 'crew.PersistentLogin'
+        parameter: 'rememberMe'
+      rest:
+        token:
+          storage:
+            jwt:
+              secret: 'HanceItIS the secretHereRABhrtyh25234vdgDFGhdfgSVSCHYSDVCHJUESHYIHDFESXTYFSesdfqsdrerR462FGsddss'
+      userLookup:
+        userDomainClassName: 'crew.User'
+        authorityJoinClassName: 'crew.UserRole'
+      useSwitchUserFilter: true
+      authority:
+        className: 'crew.Role'
+      filterChain:
+        chainMap:
+          - pattern: /assets/**
+            filters: none
+          - pattern: /noFilter/**
+            filters: none
+          - pattern: /**/js/**
+            filters: none
+          - pattern: /**/css/**
+            filters: none
+          - # Traditional Chain
+            pattern: /**
+            filters: JOINED_FILTERS
+      controllerAnnotations.staticRules:
+        - pattern: /logout
+          access:
+            - permitAll
+        - pattern: /
+          access:
+            - permitAll
+        - pattern: /error
+          access:
+            - permitAll
+        - pattern: /assets/**
+          access:
+            - permitAll
+        - pattern: /**/js/**
+          access:
+            - permitAll
+        - pattern: /**/css/**
+          access:
+            - permitAll
+        #-
+        #  pattern: /**/images/**
+        #   access:
+        #      - permitAll
+        - pattern: /**/favicon.ico
+          access:
+            - permitAll
