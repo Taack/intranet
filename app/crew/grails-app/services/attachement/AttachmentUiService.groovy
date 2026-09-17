@@ -84,13 +84,18 @@ final class AttachmentUiService implements WebAttributes {
         """<div style="text-align: center;"><img style="max-height: 420px" src="${applicationTagLib.createLink(controller: 'attachment', action: 'previewFull', id: id)}${p ? "?$p" : ""}"></div>"""
     }
     UiTableSpecifier buildAttachmentsTable(Long... ids) {
-        buildAttachmentsTable (null, null, null, ids)
+        buildAttachmentsTable (null, null, null, null, ids)
     }
 
-    UiTableSpecifier buildAttachmentsTable(final UiFilterSpecifier f, final MC selectMC = null, final Long objectId = null, Long... ids) {
+    UiTableSpecifier buildAttachmentsTable(final MC onDropMC, final Long objectId, Long... ids) {
+        buildAttachmentsTable (null, onDropMC, null, objectId, ids)
+    }
+
+    UiTableSpecifier buildAttachmentsTable(final UiFilterSpecifier f, MC onDropMC, final MC selectMC = null, final Long objectId = null, Long... ids) {
         Attachment a = new Attachment(active: true, userCreated: new User())
+        onDropMC ?= AttachmentController.&onDrop as MC
         UiTableSpecifier t = new UiTableSpecifier()
-        t.ui(new TableOption.TableOptionBuilder().onDropAction(AttachmentController.&onDrop as MC).build()) {
+        t.ui(new TableOption.TableOptionBuilder().onDropAction(onDropMC, objectId ? [id: objectId] : null).build()) {
             header {
                 column {
                     label tr('default.preview.label')
@@ -156,7 +161,7 @@ final class AttachmentUiService implements WebAttributes {
             }
         }
 
-        UiTableSpecifier t = buildAttachmentsTable(f, selectMC, objectId)
+        UiTableSpecifier t = buildAttachmentsTable(f, null, selectMC, objectId)
 
         BlockSpec.buildBlockSpec {
             if (selectMC) {
