@@ -84,18 +84,12 @@ final class AttachmentUiService implements WebAttributes {
         """<div style="text-align: center;"><img style="max-height: 420px" src="${applicationTagLib.createLink(controller: 'attachment', action: 'previewFull', id: id)}${p ? "?$p" : ""}"></div>"""
     }
     UiTableSpecifier buildAttachmentsTable(Long... ids) {
-        buildAttachmentsTable (null, null, null, null, ids)
+        buildAttachmentsTable(null, null, null, ids)
     }
 
-    UiTableSpecifier buildAttachmentsTable(final MC onDropMC, final Long objectId, Long... ids) {
-        buildAttachmentsTable (null, onDropMC, null, objectId, ids)
-    }
-
-    UiTableSpecifier buildAttachmentsTable(final UiFilterSpecifier f, MC onDropMC, final MC selectMC = null, final Long objectId = null, Long... ids) {
+    UiTableSpecifier buildAttachmentsTable(final UiFilterSpecifier f, final MC selectMC = null, final Long objectId = null, Long... ids) {
         Attachment a = new Attachment(active: true, userCreated: new User())
-        onDropMC ?= AttachmentController.&onDrop as MC
-        UiTableSpecifier t = new UiTableSpecifier()
-        t.ui(new TableOption.TableOptionBuilder().onDropAction(onDropMC, objectId ? [id: objectId] : null).build()) {
+        new UiTableSpecifier().ui {
             header {
                 column {
                     label tr('default.preview.label')
@@ -161,7 +155,7 @@ final class AttachmentUiService implements WebAttributes {
             }
         }
 
-        UiTableSpecifier t = buildAttachmentsTable(f, null, selectMC, objectId)
+        UiTableSpecifier t = buildAttachmentsTable(f, selectMC, objectId)
 
         BlockSpec.buildBlockSpec {
             if (selectMC) {
@@ -323,9 +317,20 @@ final class AttachmentUiService implements WebAttributes {
         buildObjectAttachmentsTable([(linkedObject): new Triple(attachments*.id, null, disassociateMC)])
     }
 
-    UiTableSpecifier buildObjectAttachmentsTable(Map<GormEntity, Triple<List<Long>, MethodClosure, MethodClosure>> objectAttachmentsMap) { // [linkedObject1: (attachmentIds, addFileMC, disassociateMC), linkedObject2: (...), ...]
+    UiTableSpecifier buildObjectAttachmentsTable(Map<GormEntity, Triple<List<Long>, MethodClosure, MethodClosure>> objectAttachmentsMap) {
+        // [linkedObject1: (attachmentIds, addFileMC, disassociateMC), linkedObject2: (...), ...]
+        objectAttachmentsTable(null, objectAttachmentsMap)
+    }
+
+    UiTableSpecifier buildObjectAttachmentsDropTable(final GormEntity owner, final Collection<Attachment> attachments, final MethodClosure onDropMC, MethodClosure disassociateMC = null) {
+        TableOption dropOption = TableOption.builder.onDropAction(onDropMC, [id: owner.ident()]).build()
+        objectAttachmentsTable(dropOption, [(owner): new Triple(attachments*.id, null, disassociateMC)])
+    }
+
+    private UiTableSpecifier objectAttachmentsTable(final TableOption tableOption, Map<GormEntity, Triple<List<Long>, MethodClosure, MethodClosure>> objectAttachmentsMap) {
         Attachment a = new Attachment(userCreated: new User())
-        new UiTableSpecifier().ui {
+        boolean isDropTarget = tableOption?.uploadFileAction != null
+        new UiTableSpecifier().ui(tableOption) {
             header {
                 column {
                     label tr('default.preview.label')
@@ -360,16 +365,16 @@ final class AttachmentUiService implements WebAttributes {
                             rowField linkedObject.toString() + ' :', Style.BOLD + Style.BLUE
                         }
                     }
-                    if (attachments.size() == 0) {
-                        row {
-                            rowColumn {
-                                rowField tr('attachment.no.label'), Style.TAG + Style.GREY_TAG
-                            }
-                            rowColumn {}
-                            rowColumn {}
-                            rowColumn {}
-                            rowColumn {}
+                }
+                if (attachments.size() == 0 && (objectAttachmentsMap.size() > 1 || isDropTarget)) {
+                    row {
+                        rowColumn {
+                            rowField tr('attachment.no.label'), Style.TAG + Style.GREY_TAG
                         }
+                        rowColumn {}
+                        rowColumn {}
+                        rowColumn {}
+                        rowColumn {}
                     }
                 }
                 for (Attachment att in attachments) {

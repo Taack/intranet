@@ -160,15 +160,14 @@ intercom:
   vegaPath: ${HOME}/dev/yarn/vega/packages/vega-cli/bin/
 ---
 exe:
-  dot.path: /usr/bin/dot # Used by Taack-ui to display some graphs
-  convertPath: /usr/bin/convert
-  unzipPath: /usr/bin/unzip
+  dot.path: ${EXE_DOT_PATH:dot} # Used by Taack-ui to display some graphs
+  convertPath: ${EXE_CONVERT_PATH:convert}
+  unzipPath: ${EXE_UNZIP_PATH:unzip}
+  westonPath: ${EXE_WESTON_PATH:weston}
 plm:
-  freecadPath: ${HOME}/freecad-app-link
+  freecadPath: ${PLM_FREECAD_PATH:${HOME}/freecad-app-link}
   singleInstance: true
-  offscreen: false
-  xvfbRun: false
-  useWeston: true
+  # headless: true # Use weston to give FreeCAD a display. Default true on Linux / false if not
 edges:
   storePassword: ChangeIt
 
