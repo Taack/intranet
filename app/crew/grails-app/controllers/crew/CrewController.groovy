@@ -209,6 +209,10 @@ class CrewController implements WebAttributes {
     @Secured('ROLE_ADMIN')
     @Transactional
     def saveUser() {
+        User u = User.get(params.long('id'))
+        if (!u || u.password != params.password) {
+            params.password = springSecurityService.encodePassword(params.password as String)
+        }
         taackSaveService.saveThenReloadOrRenderErrors(User)
     }
 
