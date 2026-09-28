@@ -3,12 +3,8 @@ package taack.website
 import crew.User
 import grails.artefact.Interceptor
 import grails.compiler.GrailsCompileStatic
-import grails.core.GrailsApplication
 import grails.plugin.springsecurity.SpringSecurityService
 import org.grails.web.util.WebUtils
-import org.springframework.boot.jdbc.DataSourceUnwrapper
-
-import javax.sql.DataSource
 
 @GrailsCompileStatic
 class ActionDefaultLogInterceptor implements Interceptor {
