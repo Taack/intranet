@@ -174,8 +174,11 @@ class TaackAttachmentService implements WebAttributes, DataBinder, ServletAttrib
         final boolean changeExtension
 
         static ConvertExtensions fileConvertExtensions(Attachment a) {
-            if (a.originalName.lastIndexOf('.') == -1) return null
-            final String fileExtension = a.originalName.substring(a.originalName.lastIndexOf('.'))
+            fileConvertExtensions(a.originalName)
+        }
+        static ConvertExtensions fileConvertExtensions(String originalName) {
+            if (originalName.lastIndexOf('.') == -1) return null
+            final String fileExtension = originalName.substring(originalName.lastIndexOf('.'))
             values().find { it.extension == fileExtension?.toLowerCase() }
         }
     }
@@ -324,6 +327,40 @@ class TaackAttachmentService implements WebAttributes, DataBinder, ServletAttrib
                 }
             } catch (IOException eio) {
                 log.error "attachmentPreview killed before finishing for ${attachment.name} ${eio}"
+            }
+        }
+        return new File("${taackUiConfiguration.resources}/noPreview.${previewFormat.previewExtension}")
+    }
+
+    File attachmentPreview(File toConvert, File preview, PreviewFormat previewFormat = PreviewFormat.DEFAULT) {
+        if (preview.exists()) {
+            return preview
+        } else {
+            final ConvertExtensions ce = ConvertExtensions.fileConvertExtensions(preview.name)
+            try {
+                if (ce && ce.convertMode == ConvertMode.DIRECT_CONVERT) {
+                    synchronized (imageConverter) {
+                        String cmd = "convert ${toConvert.path}[0] -resize ${previewFormat.pixelWidth + 'x' + previewFormat.pixelHeight} ${preview.path}"
+                        log.info "AUO TaackSimpleAttachmentService executing $cmd"
+                        Process p = cmd.execute()
+                        p.consumeProcessOutput()
+                        p.waitForOrKill(30 * 1000)
+                    }
+                    if (preview.exists()) {
+                        return preview
+                    }
+                } else if (ce && ce.convertMode == ConvertMode.UNO_CONVERTER) {
+                    log.info """AUO TaackSimpleAttachmentService executing unoconvert ${toConvert.path} --filter-options PixelWidth=${previewFormat.pixelWidth} --filter-options PixelHeight=${previewFormat.pixelHeight} ${preview.path}"""
+                    synchronized (imageConverter) {
+                        def p = "unoconvert ${toConvert.path} --filter-options PixelWidth=${previewFormat.pixelWidth} --filter-options PixelHeight=${previewFormat.pixelHeight} ${preview.path}".execute()
+                        p.waitForOrKill(30 * 1000)
+                    }
+                    if (preview.exists()) {
+                        return preview
+                    }
+                }
+            } catch (IOException eio) {
+                log.error "attachmentPreview killed before finishing for ${toConvert.name} ${eio}"
             }
         }
         return new File("${taackUiConfiguration.resources}/noPreview.${previewFormat.previewExtension}")
