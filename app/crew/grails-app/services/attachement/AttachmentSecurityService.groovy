@@ -72,7 +72,7 @@ class AttachmentSecurityService {
         if (user == attachment.userCreated) return true
         if (!attachment.documentAccess) return true
         if (attachment.documentAccess.isRestrictedToMyBusinessUnit && !attachment.documentAccess.isRestrictedToMySubsidiary && attachment.userCreated.businessUnit == user.businessUnit) return true
-        if (attachment.documentAccess.isRestrictedToMySubsidiary && !attachment.documentAccess.isRestrictedToMySubsidiary && attachment.userCreated.subsidiary == user.subsidiary) return true
+        if (attachment.documentAccess.isRestrictedToMySubsidiary && !attachment.documentAccess.isRestrictedToMyBusinessUnit && attachment.userCreated.subsidiary == user.subsidiary) return true
         if (attachment.documentAccess.isRestrictedToMySubsidiary && attachment.documentAccess.isRestrictedToMyBusinessUnit && attachment.userCreated.businessUnit == user.businessUnit && attachment.userCreated.subsidiary == user.subsidiary) return true
         if (attachment.documentAccess.isRestrictedToMyManagers && user.managedUsers.contains(attachment.userCreated)) return true
         return !attachment.documentAccess.isRestrictedToMyBusinessUnit && !attachment.documentAccess.isRestrictedToMySubsidiary && !attachment.documentAccess.isRestrictedToMyManagers
