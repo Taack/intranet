@@ -36,6 +36,10 @@ class AttachmentSecurityService {
     void init() {
         TaackUiEnablerService.securityClosure(
                 this.&securityCanDownloadClosure,
+                AttachmentController.&preview as MC,
+                AttachmentController.&previewFull as MC)
+        TaackUiEnablerService.securityClosure(
+                this.&securityCanDownloadClosure,
                 AttachmentController.&downloadBinAttachment as MC,
                 AttachmentController.&showAttachmentIFrame as MC,
                 AttachmentController.&downloadBinExtensionForAttachment as MC)
