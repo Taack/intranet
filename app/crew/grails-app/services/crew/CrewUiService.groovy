@@ -106,7 +106,7 @@ class CrewUiService implements WebAttributes {
 
     }
 
-        UiTableSpecifier buildUserTable(final UiFilterSpecifier f, final boolean hasSelect = false) {
+        UiTableSpecifier buildUserTable(final UiFilterSpecifier f, final boolean hasSelect = false, List<User> users = null) {
 
         new UiTableSpecifier().ui {
             User u = new User(manager: new User(), enabled: true)
@@ -134,11 +134,13 @@ class CrewUiService implements WebAttributes {
             }
             boolean canSwitchUser = crewSecurityService.canSwitchUser()
 
-            TaackFilter tf = taackFilterService.getBuilder(User)
+            TaackFilter.FilterBuilder tf = taackFilterService.getBuilder(User)
                     .setSortOrder(TaackFilter.Order.DESC, u.dateCreated_)
-                    .setMaxNumberOfLine(6).addFilter(f).build()
-
-            iterate tf, { User ru ->
+                    .setMaxNumberOfLine(100).addFilter(f)
+            if (users) {
+                tf.addRestrictedIds(users*.id as Long[])
+            }
+            iterate tf.build(), { User ru ->
                 boolean hasActions = this.crewSecurityService.canEdit(ru)
                 if (!hasSelect) {
                     rowColumn {

@@ -21,6 +21,8 @@ import taack.ui.dsl.*
 import taack.ui.dsl.common.ActionIcon
 import taack.ui.dsl.common.IconStyle
 
+import java.text.SimpleDateFormat
+
 @GrailsCompileStatic
 @Secured(['isAuthenticated()'])
 class CrewController implements WebAttributes {
@@ -40,8 +42,8 @@ class CrewController implements WebAttributes {
             menu CrewController.&listRoles as MC
             menu CrewController.&hierarchy as MC
             menuIcon ActionIcon.CONFIG_USER, this.&editUser as MC
-            menuIcon ActionIcon.EXPORT_CSV, this.&downloadBinPdf as MC
-            menuIcon ActionIcon.EXPORT_PDF, this.&downloadBinPdf2 as MC
+            menuIcon ActionIcon.EXPORT_CSV, this.&downloadBinCsv as MC
+            menuIcon ActionIcon.EXPORT_PDF, this.&downloadBinPdf as MC
             menuSearch this.&search as MethodClosure, q
             menuOptions(SupportedLanguage.fromContext())
         }
@@ -389,17 +391,20 @@ class CrewController implements WebAttributes {
         render 'Done'
     }
 
-    @Secured('ROLE_ADMIN')
+    @Secured(['ROLE_ADMIN', 'ROLE_CREW_ADMIN'])
     @Transactional
     def saveRole() {
         taackSaveService.saveThenRedirectOrRenderErrors(Role, this.&listRoles as MC)
     }
 
     def downloadBinPdf() {
-        taackUiPdfService.downloadPdf(crewPdfService.buildPdfHierarchy(), 'UserHierarchy', true)
+        taackUiPdfService.downloadPdf(crewPdfService.buildPdfHierarchy(), 'UserHierarchy', false)
     }
 
-    def downloadBinPdf2() {
-        taackUiPdfService.downloadPdf(crewPdfService.buildPdfHierarchy(), 'UserHierarchy', false)
+    @Secured(['ROLE_ADMIN', 'ROLE_CREW_ADMIN'])
+    def downloadBinCsv() {
+        response.setContentType('text/csv')
+        response.setHeader('Content-disposition', "filename=${URLEncoder.encode("users-${new SimpleDateFormat("yyyy-MM-dd-s").format(new Date())}.csv", "UTF-8")}")
+        response.outputStream << taackUiService.visitTable(crewUiService.buildUserTable(null, false, User.findAllByEnabled(true)))
     }
 }
