@@ -70,6 +70,7 @@ class AttachmentSecurityService {
     boolean canDownloadFile(Attachment attachment, User user) {
         if (attachment.nextVersion) attachment = attachment.nextVersion
         if (user == attachment.userCreated) return true
+        if (!attachment.documentAccess) return true
         if (attachment.documentAccess.isRestrictedToMyBusinessUnit && !attachment.documentAccess.isRestrictedToMySubsidiary && attachment.userCreated.businessUnit == user.businessUnit) return true
         if (attachment.documentAccess.isRestrictedToMySubsidiary && !attachment.documentAccess.isRestrictedToMySubsidiary && attachment.userCreated.subsidiary == user.subsidiary) return true
         if (attachment.documentAccess.isRestrictedToMySubsidiary && attachment.documentAccess.isRestrictedToMyBusinessUnit && attachment.userCreated.businessUnit == user.businessUnit && attachment.userCreated.subsidiary == user.subsidiary) return true
