@@ -38,6 +38,7 @@ import static taack.render.TaackUiService.tr
 final class AttachmentUiService implements WebAttributes {
 
     TaackAttachmentService taackAttachmentService
+    AttachmentSecurityService attachmentSecurityService
     TaackFilterService taackFilterService
 
     static lazyInit = false
@@ -54,33 +55,34 @@ final class AttachmentUiService implements WebAttributes {
 
 
     String preview(final Long id) {
-        if (!id) return '<span/>'
+        if (!id || !attachmentSecurityService.canDownloadFile(Attachment.read(id))) return '<span/>'
         if (params.boolean('isPdf')) """<img style="max-height: 64px; max-width: 64px;" src="file://${taackAttachmentService.attachmentPreview(Attachment.read(id)).path}">"""
         else """<div style="text-align: center;"><img class="preview-img" style="max-height: 64px; max-width: 64px;" src="${applicationTagLib.createLink(controller: 'attachment', action: 'preview', id: id)}"></div>"""
     }
 
     String previewInline(Long id, boolean isInline) {
         Attachment a = Attachment.read(id)
-        if (a && isInline) {
-            if (a.contentType.contains('svg')) {
-                """<img class='preview-img' style="max-height: 64px; max-width: 64px;" src="data:image/webp;base64, ${Base64.getEncoder().encodeToString(taackAttachmentService.attachmentPreview(a).bytes)}">"""
-            } else {
-                """<img class='preview-img' style="max-height: 64px; max-width: 64px;" src="data:${a.contentType};base64, ${Base64.getEncoder().encodeToString(taackAttachmentService.attachmentPreview(a).bytes)}">"""
-            }
-        } else if (a && !isInline)
-            """<img class='preview-img' style="max-height: 64px; max-width: 64px;" src="/attachment/preview/${id}"/> """
-        else
+        if (a && attachmentSecurityService.canDownloadFile(a)) {
+            if (isInline) {
+                if (a.contentType.contains('svg')) {
+                    """<img class='preview-img' style="max-height: 64px; max-width: 64px;" src="data:image/webp;base64, ${Base64.getEncoder().encodeToString(taackAttachmentService.attachmentPreview(a).bytes)}">"""
+                } else {
+                    """<img class='preview-img' style="max-height: 64px; max-width: 64px;" src="data:${a.contentType};base64, ${Base64.getEncoder().encodeToString(taackAttachmentService.attachmentPreview(a).bytes)}">"""
+                }
+            } else if (!isInline)
+                """<img class='preview-img' style="max-height: 64px; max-width: 64px;" src="/attachment/preview/${id}"/> """
+        } else
             ''
     }
 
     String preview(final Long id, TaackAttachmentService.PreviewFormat format) {
-        if (!id) return '<span/>'
+        if (!id || !attachmentSecurityService.canDownloadFile(Attachment.read(id))) return '<span/>'
         if (format.isPdf) """<div style="text-align: center;"><img style="max-height: 64px; max-width: 64px;" src="file://${taackAttachmentService.attachmentPreview(Attachment.get(id), format).path}"></div>"""
         else """<div style="text-align: center;"><img style="max-height: ${format.previewPixelHeight}px; max-width: ${format.previewPixelWidth}px;" src="${applicationTagLib.createLink(controller: 'attachment', action: 'preview', id: id, params: [format: format.toString()])}"></div>"""
     }
 
     String previewFull(Long id, String p = null) {
-        if (!id) return '<span/>'
+        if (!id || !attachmentSecurityService.canDownloadFile(Attachment.read(id))) return '<span/>'
         """<div style="text-align: center;"><img style="max-height: 420px" src="${applicationTagLib.createLink(controller: 'attachment', action: 'previewFull', id: id)}${p ? "?$p" : ""}"></div>"""
     }
     UiTableSpecifier buildAttachmentsTable(Long... ids) {
