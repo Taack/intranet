@@ -91,6 +91,8 @@ class AttachmentController {
         taackUiService.show(new UiBlockSpecifier().ui {
             modal {
                 show this.attachmentUiService.buildShowAttachment(attachment), {
+                    menu tr('default.relatedData.label'), AttachmentController.&showLinkedData as MC, attachment.id
+
                     if (iEditor) {
                         menu 'EDIT', AttachmentController.&inlineEdition as MC, attachment.id
                     }

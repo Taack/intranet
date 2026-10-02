@@ -193,7 +193,6 @@ final class AttachmentUiService implements WebAttributes {
                 fieldLabeled attachment.documentCategory_, attachment.documentCategory?.tags_
                 fieldLabeled attachment.documentAccess_
             }
-            showAction tr('default.relatedData.label'), AttachmentController.&showLinkedData as MC, attachment.id
         }
     }
 
