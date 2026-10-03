@@ -1,5 +1,6 @@
 package attachement
 
+import attachment.DocumentAccess
 import attachment.WriteAccess
 import crew.AttachmentController
 import grails.compiler.GrailsCompileStatic
@@ -75,10 +76,15 @@ class AttachmentSecurityService {
         if (attachment.nextVersion) attachment = attachment.nextVersion
         if (user == attachment.userCreated) return true
         if (!attachment.documentAccess) return true
-        if (attachment.documentAccess.isRestrictedToMyBusinessUnit && !attachment.documentAccess.isRestrictedToMySubsidiary && attachment.userCreated.businessUnit == user.businessUnit) return true
-        if (attachment.documentAccess.isRestrictedToMySubsidiary && !attachment.documentAccess.isRestrictedToMyBusinessUnit && attachment.userCreated.subsidiary == user.subsidiary) return true
-        if (attachment.documentAccess.isRestrictedToMySubsidiary && attachment.documentAccess.isRestrictedToMyBusinessUnit && attachment.userCreated.businessUnit == user.businessUnit && attachment.userCreated.subsidiary == user.subsidiary) return true
-        if (attachment.documentAccess.isRestrictedToMyManagers && user.managedUsers.contains(attachment.userCreated)) return true
-        return !attachment.documentAccess.isRestrictedToMyBusinessUnit && !attachment.documentAccess.isRestrictedToMySubsidiary && !attachment.documentAccess.isRestrictedToMyManagers
+        return canDownloadFile(attachment.documentAccess, attachment.userCreated, user)
+    }
+
+    static boolean canDownloadFile(DocumentAccess documentAccess, User userCreated, User user) {
+        if (documentAccess.isRestrictedToMyBusinessUnit && !documentAccess.isRestrictedToMySubsidiary && userCreated.businessUnit == user.businessUnit) return true
+        if (documentAccess.isRestrictedToMySubsidiary && !documentAccess.isRestrictedToMyBusinessUnit && userCreated.subsidiary == user.subsidiary) return true
+        if (documentAccess.isRestrictedToMySubsidiary && documentAccess.isRestrictedToMyBusinessUnit && userCreated.businessUnit == user.businessUnit && userCreated.subsidiary == user.subsidiary) return true
+        if (documentAccess.isRestrictedToMyManagers && user.managedUsers.contains(userCreated)) return true
+        return !documentAccess.isRestrictedToMyBusinessUnit && !documentAccess.isRestrictedToMySubsidiary && !documentAccess.isRestrictedToMyManagers
+
     }
 }
