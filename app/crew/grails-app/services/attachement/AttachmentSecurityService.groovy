@@ -80,6 +80,7 @@ class AttachmentSecurityService {
     }
 
     static boolean canDownloadFile(DocumentAccess documentAccess, User userCreated, User user) {
+        if (user == userCreated) return true
         if (documentAccess.isRestrictedToMyBusinessUnit && !documentAccess.isRestrictedToMySubsidiary && userCreated.businessUnit == user.businessUnit) return true
         if (documentAccess.isRestrictedToMySubsidiary && !documentAccess.isRestrictedToMyBusinessUnit && userCreated.subsidiary == user.subsidiary) return true
         if (documentAccess.isRestrictedToMySubsidiary && documentAccess.isRestrictedToMyBusinessUnit && userCreated.businessUnit == user.businessUnit && userCreated.subsidiary == user.subsidiary) return true
