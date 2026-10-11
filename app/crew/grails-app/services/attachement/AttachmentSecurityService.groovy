@@ -1,6 +1,7 @@
 package attachement
 
 import attachment.DocumentAccess
+import attachment.TaackDocument
 import attachment.WriteAccess
 import crew.AttachmentController
 import grails.compiler.GrailsCompileStatic
@@ -54,18 +55,22 @@ class AttachmentSecurityService {
     }
 
     boolean canEditFile(Attachment attachment, User user) {
-        switch (attachment.writeAccess) {
+        canEditFile(attachment as TaackDocument, user)
+    }
+
+    static boolean canEditFile(TaackDocument documentAccess, User user) {
+        switch (documentAccess.writeAccess) {
             case WriteAccess.OWNERS:
-                return attachment.userCreated.id == user.id || attachment.userCreated.allManagers*.id.contains(user.id)
+                return documentAccess.userCreated.id == user.id || documentAccess.userCreated.allManagers*.id.contains(user.id)
                 break
             case WriteAccess.READ_ONLY:
                 return false
                 break
             case WriteAccess.READERS:
-                return canDownloadFile(attachment, user)
+                return canDownloadFile(documentAccess.documentAccess, documentAccess.userCreated, user)
                 break
         }
-        return attachment.userCreated.id == user.id
+        return documentAccess.userCreated.id == user.id
     }
 
     boolean canDownloadFile(Attachment attachment) {
