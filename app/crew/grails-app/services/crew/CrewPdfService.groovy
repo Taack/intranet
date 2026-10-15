@@ -1,6 +1,6 @@
 package crew
 
-import attachement.AttachmentUiService
+import attachment.AttachmentUiService
 import crew.config.Subsidiary
 import grails.compiler.GrailsCompileStatic
 import grails.plugin.springsecurity.SpringSecurityService

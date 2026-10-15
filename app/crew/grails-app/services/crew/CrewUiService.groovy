@@ -1,6 +1,6 @@
 package crew
 
-import attachement.AttachmentUiService
+import attachment.AttachmentUiService
 import grails.compiler.GrailsCompileStatic
 import grails.web.api.WebAttributes
 import org.codehaus.groovy.runtime.MethodClosure as MC

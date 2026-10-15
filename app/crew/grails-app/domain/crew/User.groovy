@@ -1,6 +1,6 @@
 package crew
 
-import attachement.AttachmentUiService
+import attachment.AttachmentUiService
 import attachment.Attachment
 import crew.config.BusinessUnit
 import crew.config.Subsidiary
@@ -8,7 +8,6 @@ import crew.config.SupportedLanguage
 import grails.compiler.GrailsCompileStatic
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
-import org.grails.datastore.gorm.GormEntity
 import taack.ast.annotation.TaackFieldEnum
 import taack.user.TaackUser
 

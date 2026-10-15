@@ -1,9 +1,6 @@
-package attachement
+package attachment
 
-import attachment.Attachment
-import attachment.DocumentAccess
-import attachment.DocumentCategory
-import attachment.Term
+
 import crew.AttachmentController
 import crew.User
 import crew.config.SupportedLanguage

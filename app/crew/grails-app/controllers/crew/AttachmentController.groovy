@@ -1,7 +1,7 @@
 package crew
 
-import attachement.AttachmentSearchService
-import attachement.AttachmentUiService
+import attachment.AttachmentSearchService
+import attachment.AttachmentUiService
 import attachment.Attachment
 import attachment.DocumentAccess
 import attachment.DocumentCategory

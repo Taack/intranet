@@ -1,6 +1,6 @@
 package support
 
-import attachement.AttachmentUiService
+import attachment.AttachmentUiService
 import attachment.Attachment
 import grails.compiler.GrailsCompileStatic
 import grails.plugin.springsecurity.annotation.Secured
