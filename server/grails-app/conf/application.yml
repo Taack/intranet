@@ -127,8 +127,8 @@ taack.admin.password: ChangeIt
 grails:
   controllers:
     upload:
-      maxFileSize: 536870912
-      maxRequestSize: 536870912
+      maxFileSize: 1_000_000_000
+      maxRequestSize: 1_000_000_000
   plugin:
     springsecurity:
       rest:
