@@ -191,11 +191,9 @@ class AttachmentController {
     @Transactional
     def saveDocAccess(DocumentAccess ad) {
         DocumentAccess ad2 = DocumentAccess.findWhere(
-                isInternal: ad.isInternal,
                 isRestrictedToMyBusinessUnit: ad.isRestrictedToMyBusinessUnit,
                 isRestrictedToMySubsidiary: ad.isRestrictedToMySubsidiary,
                 isRestrictedToMyManagers: ad.isRestrictedToMyManagers,
-                isRestrictedToEmbeddingObjects: ad.isRestrictedToEmbeddingObjects,
         )
         if (ad2) {
             ad = ad2

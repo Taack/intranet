@@ -196,10 +196,8 @@ final class AttachmentUiService implements WebAttributes {
     UiFormSpecifier buildDocumentAccessForm(DocumentAccess docAccess) {
         new UiFormSpecifier().ui new DocumentAccess(), {
             section tr('default.documentAccess.label'), {
-                field docAccess.isInternal_
                 field docAccess.isRestrictedToMyBusinessUnit_
                 field docAccess.isRestrictedToMyManagers_
-                field docAccess.isRestrictedToEmbeddingObjects_
                 field docAccess.isRestrictedToMySubsidiary_
             }
             formAction AttachmentController.&saveDocAccess as MC
