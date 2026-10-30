@@ -119,10 +119,10 @@ This task:
   }
   ```
 
-## 8. Internationalization (`grails-app/i18n/messages*.properties`)
-- Supported languages in `SupportedLanguage`: `messages.properties` / `messages_en.properties`, `messages_fr.properties`, `messages_de.properties`, `messages_zh.properties` / `messages_zh_CN.properties`, etc.
+## 8. Internationalization (`grails-app/i18n/messages<App>*.properties`)
+- **Plugin bundle naming (Critical)**: Because `server` uses `grails { exploded = true }` and has its own `server/grails-app/i18n/messages_*.properties`, any plugin file named `messages_<lang>.properties` will be shadowed on the classpath by `server`'s bundle. Always name plugin i18n bundles with a module-specific prefix such as `messages<App>.properties`, `messages<App>_en.properties`, `messages<App>_fr.properties`, `messages<App>_de.properties`, `messages<App>_zh.properties`, `messages<App>_zh_CN.properties` (like `crew` uses `messagesDomain*.properties` and `messagesAction*.properties`).
 - **Key resolution conventions** (`Parameter.trField` & `TaackUiService.tr`):
-  - **Domain fields**: `<uncapitalizedDomain>.<fieldName>.label` (e.g., `cmsPage.title.label`), falling back to `default.<fieldName>.label`. Nested fields check `<domain>.<assoc>.<field>.label`, `default.<assoc>.<field>.label`, `<assocDomain>.<field>.label`, `default.<field>.label`.
+  - **Domain fields**: `<uncapitalizedDomain>.<fieldName>.label` (e.g., `cmsPage.title.label`), falling back to `default.<fieldName>.label`. Nested fields check `<domain>.<assoc>.<field>.label`, `default.<assoc>.<field>.label`, `<assocDomain>.<field>.label`, `default.<field>.label`. Provide both `<domain>.<field>.label` and `default.<field>.label` so every fallback candidate is covered.
   - **Controller actions / menus / form buttons**: `<controller>.<action>.label` (e.g., `cms.pages.label`, `cms.saveCmsPage.label`), falling back to `default.<action>.label` or `default.<verb>.label` (`create`, `edit`, `delete`, `save`, etc.).
 - **Inspecting i18n keys (`lang=test`)**:
   - Append `?lang=test` (or `&lang=test`) to any URL to activate Taack's i18n inspection mode (`Parameter.testI18n` / `LocaleContextHolder.locale.language == 'test'`).
